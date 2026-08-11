@@ -29,9 +29,12 @@ src/
     app.js                 shared state + late-bound actions
     data.js                loads the corpus, builds the indexes
     router.js              view switching
+  lib/
+    cascade.js             the unit-conversion chain and its arithmetic
   views/
     descent.js             the cross-section: hero, rail, strata sections
     web.js                 the dependency graph
+    cascade.js             sand to sentence, quantified
     sheet.js               station dossiers
     table.js               the searchable index
     tour.js                the guided descent
@@ -40,9 +43,12 @@ data/static/
   strata.json              27 layers
   stations.json            131 stations
   edges.json               the dependency graph
+  cascade.json             conversion parameters, ranges and sources
 scripts/
   dev.mjs                  zero-dependency dev server
   check-data.mjs           corpus integrity check (runs in CI)
+  smoke.mjs                boots the app headlessly and asserts the DOM
+  parity.mjs               diffs two builds' DOM output
 ```
 
 Views never import each other. Each registers the actions others need on `app`, which keeps the module graph acyclic and makes any single view removable without touching the rest.
@@ -77,6 +83,23 @@ Views never import each other. Each registers the actions others need on `app`, 
 **Edges** — `edges.json` maps each station id to the ids it directly depends on. Upstream and downstream cones are derived at load time; unresolvable references are dropped rather than thrown.
 
 `npm run check` enforces all of the above and runs in CI before every deploy.
+
+---
+
+## The Cascade
+
+One answer, followed backwards through the whole stack until it arrives at rock.
+
+Every conversion parameter lives in `data/static/cascade.json` with a **range**, a **derivation written out in full**, and a **source**. The chain that consumes them lives in `src/lib/cascade.js`, written as plain arithmetic so it can be read and argued with.
+
+Two properties are enforced by tests rather than by care:
+
+- **The operator shown is the operator applied.** The engine reports the factor it used at each step; the interface displays that value rather than re-deriving one. They cannot disagree.
+- **The arithmetic reconciles.** `reconcile()` applies each reported factor to the quantity it claims to act on and checks the result matches the value shown — across all 108 combinations of the four assumptions, on every test run.
+
+The headline result, at central assumptions: **1,000 output tokens cost about 0.72 Wh of electricity, 780 µL of cooling water, 229 ng of silicon and 1 µg of rock.** The electricity to serve an answer is roughly **500×** the fab electricity embodied in the silicon serving it. The sand was never the constraint.
+
+The largest single uncertainty by far is energy per output token, which spans two orders of magnitude between a distilled model answering directly and a frontier model reasoning at length. Nothing else in the chain is close.
 
 ---
 

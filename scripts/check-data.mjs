@@ -63,6 +63,39 @@ const orgs = new Set();
 S.forEach(s => s.co.forEach(c => { if (c[0] !== "—") orgs.add(c[0]); }));
 ok.push(`${orgs.size} organisations`);
 
+/* ---- cascade ---- */
+const K = read("cascade.json");
+const stationIds = ids;
+["meta","assumptions","constants","chain","branches","stepSources"].forEach(k => {
+  if (!K[k]) problems.push(`cascade.json is missing "${k}"`);
+});
+K.assumptions.forEach(a => {
+  if (!Array.isArray(a.options) || a.options.length < 2) problems.push(`cascade assumption ${a.id} needs options`);
+  if (a.default == null || !a.options[a.default]) problems.push(`cascade assumption ${a.id} has a bad default`);
+  if (!a.help) problems.push(`cascade assumption ${a.id} has no help text`);
+});
+Object.entries(K.constants).forEach(([k, c]) => {
+  if (typeof c.value !== "number") problems.push(`cascade constant ${k} has no value`);
+  if (c.lo != null && c.hi != null && !(c.lo <= c.value && c.value <= c.hi))
+    problems.push(`cascade constant ${k}: value ${c.value} is outside [${c.lo}, ${c.hi}]`);
+  if (!c.derivation) problems.push(`cascade constant ${k} has no derivation`);
+  if (!c.source || !c.source.who) problems.push(`cascade constant ${k} has no source`);
+});
+[...K.chain, ...K.branches].forEach(s => {
+  if (s.station && !stationIds.has(s.station)) problems.push(`cascade step ${s.id} points at unknown station "${s.station}"`);
+  if (s.via && !K.constants[s.via]) problems.push(`cascade step ${s.id} references unknown constant "${s.via}"`);
+});
+const chainIds = new Set(K.chain.map(s => s.id));
+K.branches.forEach(b => {
+  if (!chainIds.has(b.from) && !K.branches.some(x => x.id === b.from))
+    problems.push(`cascade branch ${b.id} hangs off unknown step "${b.from}"`);
+});
+Object.entries(K.stepSources).forEach(([step, cid]) => {
+  if (!chainIds.has(step)) problems.push(`stepSources names unknown step "${step}"`);
+  if (!K.constants[cid]) problems.push(`stepSources points at unknown constant "${cid}"`);
+});
+ok.push(`${K.chain.length}-step cascade`);
+
 /* ---- report ---- */
 if (problems.length) {
   console.error(`\n  ✗ ${problems.length} problem${problems.length > 1 ? "s" : ""}\n`);

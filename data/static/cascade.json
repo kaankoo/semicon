@@ -1,0 +1,157 @@
+{
+  "meta": {
+    "unit": "1,000 output tokens",
+    "updated": "2026-08-11",
+    "note": "Every parameter below carries a source and a plausible range. The chain that consumes them lives in src/lib/cascade.js. Where a figure is derived from first principles rather than cited, the derivation is written out in full."
+  },
+
+  "assumptions": [
+    {
+      "id": "model",
+      "label": "Model class",
+      "help": "Energy per output token varies by two orders of magnitude across model classes. This is the single largest source of uncertainty in the whole chain.",
+      "unit": "Wh / output token",
+      "default": 2,
+      "options": [
+        { "label": "Small / distilled", "value": 0.0001, "note": "8B-class, quantised, heavily batched" },
+        { "label": "Mid-size", "value": 0.0002, "note": "the efficient end of production serving" },
+        { "label": "Frontier, direct answer", "value": 0.0003, "note": "GPT-4o-class, no extended reasoning" },
+        { "label": "Frontier, reasoning", "value": 0.0033, "note": "long chain-of-thought; o3-high-class" }
+      ]
+    },
+    {
+      "id": "life",
+      "label": "Accelerator service life",
+      "help": "Microsoft, Google and CoreWeave depreciate over six years; Meta over five and a half. Critics argue the real economic life is closer to three.",
+      "unit": "years",
+      "default": 1,
+      "options": [
+        { "label": "3 years", "value": 3, "note": "the bear case — obsolescence, not failure" },
+        { "label": "5 years", "value": 5, "note": "a middle estimate" },
+        { "label": "6 years", "value": 6, "note": "the hyperscaler depreciation schedule" }
+      ]
+    },
+    {
+      "id": "util",
+      "label": "Fleet utilisation",
+      "help": "The fraction of its life the part spends doing useful work. Amortised capital cost, water and embodied energy all scale inversely with this.",
+      "unit": "fraction",
+      "default": 1,
+      "options": [
+        { "label": "60%", "value": 0.6, "note": "bursty, latency-sensitive serving" },
+        { "label": "80%", "value": 0.8, "note": "a well-run inference fleet" },
+        { "label": "95%", "value": 0.95, "note": "saturated training or batch inference" }
+      ]
+    },
+    {
+      "id": "grid",
+      "label": "Grid carbon intensity",
+      "help": "Where the electrons come from. This changes the emissions answer by two orders of magnitude and nothing else in the chain.",
+      "unit": "gCO₂e / kWh",
+      "default": 1,
+      "options": [
+        { "label": "50 — nuclear / hydro", "value": 50, "note": "Québec, France, Sweden" },
+        { "label": "450 — world average", "value": 450, "note": "the global grid mix" },
+        { "label": "700 — coal-heavy", "value": 700, "note": "parts of Asia and the US Midwest" }
+      ]
+    }
+  ],
+
+  "constants": {
+    "overheadMultiplier": {
+      "value": 2.4, "lo": 1.8, "hi": 3.0, "unit": "×",
+      "label": "Host, idle and datacentre overhead",
+      "derivation": "Google reports 0.24 Wh per median Gemini text prompt on a comprehensive basis versus 0.10 Wh counting active accelerators only — a 2.4× multiplier. The breakdown is 58% accelerator, 25% host CPU and memory, 10% idle capacity, 8% datacentre overhead.",
+      "source": { "who": "Google Cloud", "what": "Measuring the environmental impact of AI inference", "when": "Aug 2025", "url": "https://cloud.google.com/blog/products/infrastructure/measuring-the-environmental-impact-of-ai-inference" }
+    },
+    "acceleratorPowerW": {
+      "value": 1000, "lo": 700, "hi": 1400, "unit": "W",
+      "label": "Accelerator board power",
+      "derivation": "H100 SXM is 700 W; Blackwell-class parts run at roughly 1 kW and above. Used to convert energy back into occupancy time.",
+      "source": { "who": "NVIDIA", "what": "Blackwell architecture", "when": "2024–26", "url": "https://www.nvidia.com/en-us/data-center/technologies/blackwell-architecture/" }
+    },
+    "waferEqPerGpu": {
+      "value": 0.21, "lo": 0.14, "hi": 0.30, "unit": "wafers",
+      "label": "Wafer-equivalents per accelerator",
+      "derivation": "A Blackwell-class part is two reticle-limited logic dies (~1,600 mm²), eight HBM stacks (~6,000 mm² of DRAM across 64 thinned dies), and a CoWoS interposer spanning more than three reticles (~3,000 mm²) — roughly 10,600 mm² of silicon in total against a 70,686 mm² wafer, before yield and edge exclusion. Most of the silicon in an AI accelerator is memory, not compute.",
+      "source": { "who": "NVIDIA", "what": "Blackwell: 208 bn transistors across two reticle-limited dies", "when": "2024", "url": "https://www.nvidia.com/en-us/data-center/technologies/blackwell-architecture/" }
+    },
+    "waferMassG": {
+      "value": 127.6, "lo": 120, "hi": 135, "unit": "g",
+      "label": "Mass of one 300 mm wafer",
+      "derivation": "π × (150 mm)² = 70,686 mm² = 706.9 cm². At 775 µm thickness that is 54.8 cm³, and silicon is 2.329 g/cm³ — so 127.6 g. Derived, not cited.",
+      "source": { "who": "First principles", "what": "geometry × density of crystalline silicon", "when": "—", "url": null }
+    },
+    "polyPerWafer": {
+      "value": 197, "lo": 170, "hi": 230, "unit": "g",
+      "label": "Polysilicon consumed per finished wafer",
+      "derivation": "Slicing loses kerf: an as-cut wafer of ~850 µm plus ~130 µm of diamond-wire kerf means 980 µm of ingot per 775 µm of finished wafer, a 1.26× penalty. Ingot crop, grinding and test slices take roughly a further 18%. 127.6 g × 1.26 ÷ 0.82 ≈ 197 g.",
+      "source": { "who": "Derived", "what": "kerf 60–150 µm for fixed-diamond wire; crop yield assumed", "when": "—", "url": null }
+    },
+    "quartzitePerWafer": {
+      "value": 569, "lo": 450, "hi": 750, "unit": "g",
+      "label": "Quartzite feedstock per wafer",
+      "derivation": "SiO₂ → Si is a 60.08 : 28.09 mass ratio, so 2.14 g of silica per gram of silicon at best. Carbothermic reduction runs ~87% and the Siemens route ~85% on silicon utilisation. 197 g × 2.14 ÷ (0.87 × 0.85) ≈ 569 g. This is ordinary quartzite for the smelter — not the high-purity quartz below.",
+      "source": { "who": "Derived", "what": "stoichiometry × assumed process yields", "when": "—", "url": null }
+    },
+    "cruciblePerWafer": {
+      "value": 14.8, "lo": 9, "hi": 25, "unit": "g",
+      "label": "High-purity crucible quartz per wafer",
+      "derivation": "A Czochralski crucible is a consumable — one per pull. Assuming ~15 kg of fused quartz per crucible and a ~200 kg ingot yielding ~1,000 wafers of polysilicon-equivalent, that is ~15 g per wafer. This is the material that comes from Spruce Pine.",
+      "source": { "who": "Derived", "what": "crucible mass and ingot yield assumed", "when": "—", "url": null }
+    },
+    "fabWaterPerWafer": {
+      "value": 4000, "lo": 3180, "hi": 5810, "unit": "L",
+      "label": "Ultra-pure water per wafer start",
+      "derivation": "Advanced fabs consume 4.5–7 L of UPW per cm² of processed wafer; the 2021 industry average was 8.22 L/cm². Across 706.9 cm² that is 3,180–5,810 L per 300 mm wafer.",
+      "source": { "who": "Journal of Cleaner Production", "what": "Environmental data and facts in semiconductor manufacturing", "when": "2023", "url": "https://www.sciencedirect.com/science/article/pii/S2666445323000041" }
+    },
+    "fabEnergyPerWafer": {
+      "value": 812, "lo": 600, "hi": 1000, "unit": "kWh",
+      "label": "Fab electricity per wafer start",
+      "derivation": "Industry average 1.15 kWh/cm² in 2021 × 706.9 cm² ≈ 812 kWh per 300 mm wafer, covering the full 1,000–1,500 step flow over three to four months.",
+      "source": { "who": "Journal of Cleaner Production", "what": "Environmental data and facts in semiconductor manufacturing", "when": "2023", "url": "https://www.sciencedirect.com/science/article/pii/S2666445323000041" }
+    },
+    "coolingWaterPerWh": {
+      "value": 1.083, "lo": 0.4, "hi": 2.0, "unit": "mL / Wh",
+      "label": "Datacentre cooling water",
+      "derivation": "Google reports 0.26 mL of water alongside 0.24 Wh for the median Gemini text prompt — 1.083 mL per Wh. Highly site-dependent: evaporative cooling trades water for electricity, closed-loop designs do the reverse.",
+      "source": { "who": "Google Cloud", "what": "Measuring the environmental impact of AI inference", "when": "Aug 2025", "url": "https://cloud.google.com/blog/products/infrastructure/measuring-the-environmental-impact-of-ai-inference" }
+    },
+    "tokenEnergyRange": {
+      "value": 0.0003, "lo": 0.0001, "hi": 0.0033, "unit": "Wh / token",
+      "label": "Energy per output token",
+      "derivation": "Epoch AI places inference at roughly 1×10⁻⁴ to 2×10⁻³ Wh per output token depending on model size, with GPT-4o-class serving near 3×10⁻⁴. Extended-reasoning models generating long chains of thought reach ~3.3×10⁻² Wh per prompt-token-equivalent — two orders of magnitude higher.",
+      "source": { "who": "Epoch AI", "what": "How much energy does ChatGPT use?", "when": "2025", "url": "https://epoch.ai/gradient-updates/how-much-energy-does-chatgpt-use" }
+    }
+  },
+
+  "chain": [
+    { "id": "tokens",  "station": null,   "label": "1,000 output tokens",         "sub": "roughly one substantial answer" },
+    { "id": "acc",     "station": "inf",  "label": "Accelerator energy",          "sub": "the arithmetic itself, nothing around it",  "why": "energy per output token" },
+    { "id": "gpusec",  "station": "gpu",  "label": "Accelerator-seconds",         "sub": "how long you occupied the part",            "why": "÷ board power" },
+    { "id": "gpufrac", "station": "gpu",  "label": "Fraction of one accelerator", "sub": "amortised across its whole service life",   "why": "÷ lifetime × utilisation" },
+    { "id": "wafer",   "station": "fdry", "label": "Wafer-equivalents",           "sub": "logic, memory and interposer together",     "why": "wafers per accelerator" },
+    { "id": "silicon", "station": "waf",  "label": "Electronic-grade silicon",    "sub": "the finished, polished wafer",              "why": "mass of a 300 mm wafer" },
+    { "id": "poly",    "station": "poly", "label": "Polysilicon",                 "sub": "eleven nines, before kerf and crop",        "why": "slicing and ingot losses" },
+    { "id": "quartz",  "station": "hpq",  "label": "Quartzite from the ground",   "sub": "where the chain finally touches rock",      "why": "stoichiometry and smelter yield" }
+  ],
+
+  "branches": [
+    { "id": "socket",   "from": "acc",    "station": "fac",   "label": "Energy at the socket",        "sub": "host, idle capacity and cooling included", "via": "overheadMultiplier" },
+    { "id": "coolwater","from": "socket", "station": "liq",   "label": "Datacentre cooling water",    "sub": "spent every single time",                  "via": "coolingWaterPerWh" },
+    { "id": "co2",      "from": "socket", "station": "prim",  "label": "Carbon dioxide",              "sub": "depends entirely on the grid",             "via": null },
+    { "id": "crucible", "from": "wafer",  "station": "hpq",   "label": "High-purity crucible quartz", "sub": "the Spruce Pine material",                 "via": "cruciblePerWafer" },
+    { "id": "fabwater", "from": "wafer",  "station": "h2o",   "label": "Ultra-pure fab water",        "sub": "spent once, at manufacture",               "via": "fabWaterPerWafer" },
+    { "id": "fabenergy","from": "wafer",  "station": "fabops","label": "Embodied fab electricity",    "sub": "1,000+ steps over three months",           "via": "fabEnergyPerWafer" }
+  ],
+
+  "stepSources": {
+    "acc": "tokenEnergyRange",
+    "gpusec": "acceleratorPowerW",
+    "wafer": "waferEqPerGpu",
+    "silicon": "waferMassG",
+    "poly": "polyPerWafer",
+    "quartz": "quartzitePerWafer"
+  }
+}

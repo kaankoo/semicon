@@ -138,6 +138,65 @@ is("tour advances", D.getElementById("tN").textContent, "Feedstock");
 app.tourStop();
 is("tour closes", D.getElementById("tour").classList.contains("on"), false);
 
+/* ---------- cascade ---------- */
+app.show("cas");
+is("cascade view active", D.getElementById("v-cas").classList.contains("on"), true);
+is("chain steps rendered", D.querySelectorAll("#casChain .cas__row").length, 8);
+is("branch cards rendered", D.querySelectorAll("#casBranch .cas__br").length, 6);
+atLeast("conversion operators shown", D.querySelectorAll("#casChain .cas__op").length, 7);
+is("findings rendered", D.querySelectorAll("#casFind .cas__fi").length, 3);
+is("assumption controls", D.querySelectorAll("#casCtl .cas__as").length, 4);
+atLeast("station links in cascade", D.querySelectorAll("#v-cas [data-station]").length, 10);
+atLeast("source panels available", D.querySelectorAll("#v-cas .cas__src").length, 10);
+
+/* every station a cascade step points at must exist */
+[...D.querySelectorAll("#v-cas [data-station]")].forEach(b => {
+  const id = b.dataset.station;
+  if (!app.byId[id]) checks.push({ label: `cascade station "${id}" resolves`, ok: false, actual: "missing", expected: "a station" });
+});
+checks.push({ label: "all cascade stations resolve", ok: [...D.querySelectorAll("#v-cas [data-station]")].every(b => !!app.byId[b.dataset.station]), actual: "yes", expected: "yes" });
+
+/* the headline must be populated, not empty */
+atLeast("headline populated", D.getElementById("casLead").textContent.trim().length, 40);
+
+/* changing an assumption must move the numbers */
+const before = D.getElementById("casLead").textContent;
+const seg = D.querySelector('#casCtl .cas__seg[data-as="model"]');
+seg.querySelectorAll("button")[3].dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+const after = D.getElementById("casLead").textContent;
+is("reasoning model changes the answer", before !== after, true);
+seg.querySelectorAll("button")[2].dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+is("switching back restores it", D.getElementById("casLead").textContent, before);
+
+/* a cascade station link must open the sheet */
+D.querySelector("#v-cas [data-station]").dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+is("cascade links open stations", D.getElementById("sheet").classList.contains("on"), true);
+app.closeSheet();
+
+
+/* the displayed arithmetic must reconcile at every assumption combination */
+{
+  const { compute, reconcile } = await import(pathToFileURL(path.join(ROOT, "src/lib/cascade.js")).href);
+  const K = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/cascade.json"), "utf8"));
+  let combos = 0, broken = [];
+  for (const m of K.assumptions[0].options)
+    for (const l of K.assumptions[1].options)
+      for (const u of K.assumptions[2].options)
+        for (const g of K.assumptions[3].options) {
+          combos++;
+          const bad = reconcile(K, { model: m.value, life: l.value, util: u.value, grid: g.value });
+          if (bad.length) broken.push(...bad);
+          const r = compute(K, { model: m.value, life: l.value, util: u.value, grid: g.value });
+          for (const [key, v] of Object.entries(r.mid))
+            if (!isFinite(v) || v < 0) broken.push(`${key} is ${v}`);
+          for (const key of Object.keys(r.mid))
+            if (r.lo[key] > r.mid[key] * 1.000001 || r.hi[key] < r.mid[key] * 0.999999)
+              broken.push(`${key}: central ${r.mid[key]} sits outside [${r.lo[key]}, ${r.hi[key]}]`);
+        }
+  checks.push({ label: `arithmetic reconciles (${combos} combinations)`, ok: broken.length === 0,
+                actual: broken.length ? broken[0] : "every step checks out", expected: "every step checks out" });
+}
+
 /* ---- report ---- */
 const failed = checks.filter(c => !c.ok);
 const pad = s => String(s).padEnd(34);
@@ -149,3 +208,4 @@ if (failed.length) {
   process.exit(1);
 }
 console.log(`  ✓ all ${checks.length} checks passed\n`);
+

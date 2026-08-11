@@ -20,6 +20,7 @@
   <div class="navs" role="tablist">
     <button role="tab" aria-selected="true" data-view="strata">Cross-section</button>
     <button role="tab" aria-selected="false" data-view="web">Web</button>
+    <button role="tab" aria-selected="false" data-view="cas">Cascade</button>
     <button role="tab" aria-selected="false" data-view="idx">Index</button>
   </div>
   <button class="iconb" id="btnTour" title="Guided descent">
@@ -78,6 +79,37 @@
         <button class="btn" id="webWide">Zoom in to read</button>
         <button class="btn" id="webClear">Clear trace</button>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ CASCADE ============ -->
+  <section class="view" id="v-cas">
+    <div class="cas">
+      <header class="cas__top">
+        <p class="eyebrow">Sand to sentence, actually quantified</p>
+        <h2 class="cas__h">What does one answer<br>really <em>cost?</em></h2>
+        <p class="cas__intro">Follow <b>1,000 output tokens</b> — roughly one substantial answer — backwards through the whole stack, converting units at every step, until it arrives at rock. Every factor below is sourced or derived in the open; press <b>how</b> on any step to see the working. Change the assumptions and the whole chain recomputes.</p>
+        <p class="cas__lead" id="casLead"></p>
+      </header>
+
+      <div class="cas__ctl" id="casCtl"></div>
+
+      <div class="cas__grid">
+        <div class="cas__chain" id="casChain"></div>
+        <aside class="cas__side">
+          <h3 class="cas__sh">And along the way</h3>
+          <p class="cas__sp">Quantities that branch off the chain rather than continue down it.</p>
+          <div id="casBranch"></div>
+        </aside>
+      </div>
+
+      <div class="cas__findings" id="casFind"></div>
+
+      <footer class="foot">
+        <h5>How to argue with this</h5>
+        <p>Each step is a single multiplication, and each multiplier is either cited or derived from first principles in the panel behind its <b>how</b> button. The ranges are not error bars in the statistical sense — they are the span between defensible low and high parameter choices, propagated through the chain. Where they are wide, the honest answer is wide.</p>
+        <p style="margin-top:14px">The largest single uncertainty by far is <b>energy per output token</b>, which varies by two orders of magnitude between a distilled model answering directly and a frontier model reasoning at length. Nothing else in the chain comes close. Figures last reviewed <b id="casUpd"></b>.</p>
+      </footer>
     </div>
   </section>
 
