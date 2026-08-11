@@ -1,0 +1,606 @@
+{
+ "hpq": [],
+ "ore": [],
+ "ree": [],
+ "gas": [
+  "prim"
+ ],
+ "h2o": [],
+ "prim": [],
+ "poly": [
+  "hpq",
+  "prim",
+  "chem"
+ ],
+ "chem": [
+  "ore",
+  "gas"
+ ],
+ "prec": [
+  "ree",
+  "chem",
+  "gas"
+ ],
+ "tgt": [
+  "ore",
+  "ree"
+ ],
+ "cz": [
+  "poly",
+  "hpq",
+  "gas"
+ ],
+ "waf": [
+  "cz",
+  "chem",
+  "tgt"
+ ],
+ "comp": [
+  "ree",
+  "cz",
+  "prec"
+ ],
+ "isa": [],
+ "eda": [],
+ "ver": [
+  "eda"
+ ],
+ "pdk": [
+  "eda",
+  "gaa"
+ ],
+ "chip": [
+  "eda",
+  "isa"
+ ],
+ "mdp": [
+  "eda",
+  "pdk"
+ ],
+ "mask": [
+  "mdp",
+  "chem",
+  "waf"
+ ],
+ "src": [
+  "gas",
+  "prim"
+ ],
+ "opt": [
+  "hpq",
+  "tgt"
+ ],
+ "scan": [
+  "src",
+  "opt",
+  "mask"
+ ],
+ "res": [
+  "chem",
+  "prec"
+ ],
+ "metr": [
+  "opt",
+  "eda"
+ ],
+ "dep": [
+  "prec",
+  "tgt",
+  "gas"
+ ],
+ "etch": [
+  "prec",
+  "gas"
+ ],
+ "cmp": [
+  "chem",
+  "tgt",
+  "h2o"
+ ],
+ "imp": [
+  "gas",
+  "prec"
+ ],
+ "fabops": [
+  "h2o",
+  "prim",
+  "gas"
+ ],
+ "gaa": [
+  "scan",
+  "dep",
+  "etch",
+  "res",
+  "metr",
+  "waf",
+  "imp"
+ ],
+ "bspd": [
+  "gaa",
+  "dep",
+  "cmp"
+ ],
+ "beol": [
+  "dep",
+  "cmp",
+  "etch",
+  "ore"
+ ],
+ "yield": [
+  "metr",
+  "fabops",
+  "gaa"
+ ],
+ "fdry": [
+  "gaa",
+  "bspd",
+  "beol",
+  "yield",
+  "fabops",
+  "scan",
+  "pdk"
+ ],
+ "dram": [
+  "scan",
+  "etch",
+  "dep",
+  "waf",
+  "yield"
+ ],
+ "hbm": [
+  "dram",
+  "3d",
+  "cowos",
+  "fdry"
+ ],
+ "nand": [
+  "etch",
+  "dep",
+  "waf"
+ ],
+ "other": [
+  "dram",
+  "fdry"
+ ],
+ "cowos": [
+  "fdry",
+  "subs",
+  "waf",
+  "dep"
+ ],
+ "3d": [
+  "cmp",
+  "dep",
+  "metr",
+  "fdry"
+ ],
+ "subs": [
+  "chem",
+  "ore"
+ ],
+ "test": [
+  "metr",
+  "cowos",
+  "3d"
+ ],
+ "gpu": [
+  "fdry",
+  "cowos",
+  "hbm",
+  "chip",
+  "eda",
+  "test"
+ ],
+ "num": [
+  "gpu",
+  "cuda"
+ ],
+ "asic": [
+  "fdry",
+  "cowos",
+  "hbm",
+  "chip",
+  "eda"
+ ],
+ "alt": [
+  "fdry",
+  "cowos",
+  "eda",
+  "chip"
+ ],
+ "host": [
+  "fdry",
+  "isa",
+  "cowos",
+  "other"
+ ],
+ "edge": [
+  "fdry",
+  "isa",
+  "other"
+ ],
+ "cnchip": [
+  "dram",
+  "eda",
+  "chip"
+ ],
+ "scaleup": [
+  "gpu",
+  "serdes",
+  "chip",
+  "fdry"
+ ],
+ "scaleout": [
+  "fdry",
+  "serdes",
+  "optics"
+ ],
+ "optics": [
+  "comp",
+  "fdry",
+  "subs"
+ ],
+ "cpo": [
+  "optics",
+  "cowos",
+  "fdry",
+  "comp"
+ ],
+ "serdes": [
+  "fdry",
+  "chip",
+  "ore"
+ ],
+ "dci": [
+  "optics",
+  "comp"
+ ],
+ "rack": [
+  "gpu",
+  "scaleup",
+  "liq",
+  "conv",
+  "subs"
+ ],
+ "odm": [
+  "rack",
+  "subs",
+  "test",
+  "liq"
+ ],
+ "firm": [
+  "rack",
+  "odm"
+ ],
+ "grid": [
+  "prim"
+ ],
+ "gear": [
+  "ore",
+  "grid"
+ ],
+ "ups": [
+  "gear",
+  "ore"
+ ],
+ "conv": [
+  "comp",
+  "gear",
+  "fdry"
+ ],
+ "gen": [
+  "prim",
+  "grid",
+  "gear"
+ ],
+ "liq": [
+  "ore",
+  "fac",
+  "chem"
+ ],
+ "imm": [
+  "chem",
+  "liq"
+ ],
+ "fac": [
+  "h2o",
+  "prim"
+ ],
+ "shell": [
+  "ore",
+  "gear"
+ ],
+ "colo": [
+  "shell",
+  "gear",
+  "ups",
+  "fac",
+  "grid"
+ ],
+ "hyper": [
+  "colo",
+  "gen",
+  "grid",
+  "odm"
+ ],
+ "neo": [
+  "odm",
+  "colo",
+  "capex",
+  "gpu"
+ ],
+ "sov": [
+  "capex",
+  "export",
+  "hyper"
+ ],
+ "sched": [
+  "hyper",
+  "neo",
+  "firm"
+ ],
+ "stor": [
+  "nand",
+  "sched",
+  "scaleout"
+ ],
+ "rel": [
+  "firm",
+  "sched",
+  "scaleout"
+ ],
+ "cuda": [
+  "gpu"
+ ],
+ "kern": [
+  "cuda",
+  "gpu"
+ ],
+ "para": [
+  "cuda",
+  "coll",
+  "scaleup",
+  "kern"
+ ],
+ "coll": [
+  "scaleup",
+  "scaleout",
+  "cuda"
+ ],
+ "web": [],
+ "lic": [
+  "ip"
+ ],
+ "lab": [
+  "talent"
+ ],
+ "syn": [
+  "pre",
+  "inf"
+ ],
+ "prov": [
+  "lic"
+ ],
+ "arch": [],
+ "moe": [
+  "arch",
+  "hbm",
+  "coll"
+ ],
+ "pre": [
+  "para",
+  "coll",
+  "sched",
+  "stor",
+  "web",
+  "lic",
+  "syn",
+  "rel",
+  "arch",
+  "moe",
+  "kern"
+ ],
+ "post": [
+  "pre",
+  "lab",
+  "syn",
+  "eval"
+ ],
+ "reason": [
+  "post",
+  "inf",
+  "syn"
+ ],
+ "multi": [
+  "pre",
+  "post",
+  "hbm"
+ ],
+ "open": [
+  "pre",
+  "post"
+ ],
+ "eval": [
+  "lab",
+  "post"
+ ],
+ "safe": [
+  "eval",
+  "interp",
+  "post"
+ ],
+ "interp": [
+  "pre",
+  "eval"
+ ],
+ "sec": [
+  "safe",
+  "agent"
+ ],
+ "inf": [
+  "gpu",
+  "hbm",
+  "cuda",
+  "post",
+  "reason"
+ ],
+ "quant": [
+  "inf",
+  "num"
+ ],
+ "route": [
+  "inf",
+  "tok"
+ ],
+ "tok": [
+  "inf",
+  "route",
+  "neo",
+  "hyper"
+ ],
+ "tool": [
+  "post",
+  "agent"
+ ],
+ "rag": [
+  "inf",
+  "stor",
+  "lic"
+ ],
+ "mem": [
+  "rag",
+  "inf"
+ ],
+ "agent": [
+  "tool",
+  "reason",
+  "inf",
+  "sec"
+ ],
+ "obs": [
+  "agent",
+  "eval"
+ ],
+ "code": [
+  "agent",
+  "tok",
+  "obs"
+ ],
+ "work": [
+  "rag",
+  "tok",
+  "tool"
+ ],
+ "cs": [
+  "agent",
+  "tok",
+  "multi"
+ ],
+ "prof": [
+  "rag",
+  "tok",
+  "safe"
+ ],
+ "health": [
+  "rag",
+  "multi",
+  "safe"
+ ],
+ "sci": [
+  "reason",
+  "multi",
+  "tok"
+ ],
+ "media": [
+  "multi",
+  "tok"
+ ],
+ "search": [
+  "rag",
+  "tok",
+  "multi"
+ ],
+ "vert": [
+  "tok",
+  "vla",
+  "obs"
+ ],
+ "def": [
+  "agent",
+  "safe",
+  "tok"
+ ],
+ "vla": [
+  "multi",
+  "pre",
+  "sim"
+ ],
+ "robot": [
+  "vla",
+  "ree",
+  "sens"
+ ],
+ "av": [
+  "vla",
+  "sens",
+  "sim"
+ ],
+ "sens": [
+  "comp",
+  "edge",
+  "fdry"
+ ],
+ "sim": [
+  "gpu",
+  "multi"
+ ],
+ "ui": [
+  "tok",
+  "agent",
+  "mem"
+ ],
+ "dev": [
+  "edge",
+  "quant",
+  "ui"
+ ],
+ "dist": [
+  "ui",
+  "dev",
+  "tok"
+ ],
+ "capex": [],
+ "export": [],
+ "reg": [],
+ "ip": [],
+ "talent": [],
+ "value": [
+  "code",
+  "work",
+  "cs",
+  "prof",
+  "health",
+  "sci",
+  "media",
+  "search",
+  "vert",
+  "dist",
+  "robot",
+  "av",
+  "def"
+ ],
+ "labour": [
+  "value",
+  "lab"
+ ],
+ "energy": [
+  "gen",
+  "fac",
+  "hyper"
+ ],
+ "waste": [
+  "odm",
+  "neo",
+  "ore"
+ ]
+}

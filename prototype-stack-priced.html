@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Stack, Priced — design prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300..600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sub:#06080F; --sub2:#04060B; --ox:#0C1020; --ox2:#121A2E; --ox3:#18213A;
+  --line:#1D2742; --line2:#2A3757; --ash:#7C88A5; --ash2:#A7B2CA; --qz:#EAEFF9;
+  --ind:#4256D6; --pls:#3FDCD2; --brs:#E3A83E; --mag:#D2508F; --cu:#B4652E; --ok:#3FCB8E;
+  --iri:linear-gradient(90deg,#4256D6 0%,#3FDCD2 34%,#E3A83E 67%,#D2508F 100%);
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --disp:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"Newsreader",Georgia,"Times New Roman",serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--sub);color:var(--qz);font-family:var(--body);font-size:16px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;font-optical-sizing:auto;overflow-x:hidden;
+  background-image:radial-gradient(1100px 620px at 78% -8%,rgba(66,86,214,.16),transparent 62%),
+                   radial-gradient(900px 520px at 4% 6%,rgba(63,220,210,.075),transparent 60%);
+  background-attachment:fixed}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.scribe{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:linear-gradient(rgba(120,150,220,.045) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(120,150,220,.045) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(circle at 50% 24%,#000 0%,transparent 78%);
+  -webkit-mask-image:radial-gradient(circle at 50% 24%,#000 0%,transparent 78%)}
+
+/* proto banner */
+.proto{position:fixed;top:0;left:0;right:0;z-index:90;height:26px;display:flex;align-items:center;
+  justify-content:center;gap:10px;background:rgba(227,168,62,.1);border-bottom:1px solid rgba(227,168,62,.3);
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--brs)}
+
+.bar{position:fixed;top:26px;left:0;right:0;height:56px;z-index:60;display:flex;align-items:center;gap:14px;
+  padding:0 20px;background:rgba(6,8,15,.8);backdrop-filter:blur(14px) saturate(1.3);border-bottom:1px solid var(--line)}
+.bar__mark{width:15px;height:15px;border-radius:50%;flex:none;position:relative;
+  background:conic-gradient(from 210deg,#4256D6,#3FDCD2,#E3A83E,#D2508F,#4256D6)}
+.bar__mark::after{content:"";position:absolute;left:50%;top:-1px;transform:translateX(-50%);width:5px;height:5px;background:var(--sub);border-radius:1px}
+.bar__t{font-family:var(--disp);font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-variation-settings:'wdth' 112}
+.bar__t span{color:var(--ash);font-weight:500}
+.bar__sp{flex:1}
+.pulse{display:flex;align-items:center;gap:16px;font-family:var(--mono);font-size:10.5px;letter-spacing:.06em}
+.pulse i{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;
+  box-shadow:0 0 0 0 rgba(63,203,142,.6);animation:pp 2.4s infinite}
+@keyframes pp{0%{box-shadow:0 0 0 0 rgba(63,203,142,.5)}70%{box-shadow:0 0 0 7px rgba(63,203,142,0)}100%{box-shadow:0 0 0 0 rgba(63,203,142,0)}}
+.pulse b{color:var(--qz);font-weight:500}
+.pulse .lbl{color:#4C5A7C;text-transform:uppercase;letter-spacing:.14em;font-size:9px}
+
+.wrap{position:relative;z-index:1;padding:110px 5vw 90px;max-width:1560px;margin:0 auto}
+
+/* ---- head ---- */
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--pls);
+  margin:0 0 18px;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--pls)}
+h1{font-family:var(--disp);font-weight:900;font-variation-settings:'wdth' 88;font-size:clamp(34px,4.6vw,60px);
+  line-height:.95;letter-spacing:-.028em;margin:0}
+h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;background-clip:text;color:transparent;font-variation-settings:'wdth' 118}
+.sub{font-size:17px;color:var(--ash2);max-width:60ch;margin:18px 0 0;font-weight:300;line-height:1.6}
+.sub b{color:var(--qz);font-weight:500}
+
+/* ---- controls ---- */
+.ctl{display:flex;align-items:center;gap:8px;margin:34px 0 8px;flex-wrap:wrap}
+.seg{display:flex;gap:2px;background:var(--ox);border:1px solid var(--line);border-radius:8px;padding:3px}
+.seg button{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:7px 13px;border-radius:5px;color:var(--ash);transition:.18s var(--ease)}
+.seg button:hover{color:var(--qz);background:var(--ox2)}
+.seg button[aria-pressed=true]{background:var(--ox3);color:var(--qz);box-shadow:inset 0 0 0 1px rgba(63,220,210,.34)}
+.ctl__sp{flex:1}
+.ctl__note{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:#4C5A7C}
+
+/* ---- the value column ---- */
+.col{margin-top:16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0}
+.row{display:grid;grid-template-columns:34px 148px 1fr 92px 74px 58px;gap:14px;align-items:center;
+  padding:3px 0;cursor:pointer;position:relative;transition:.16s var(--ease)}
+.row:hover{background:rgba(255,255,255,.028)}
+.row.dim{opacity:.32}
+.row__n{font-family:var(--mono);font-size:10px;color:#4C5A7C;text-align:right;font-variant-numeric:tabular-nums}
+.row:hover .row__n{color:var(--c)}
+.row__t{font-family:var(--disp);font-weight:600;font-size:12.5px;letter-spacing:.005em;font-variation-settings:'wdth' 100;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ash2)}
+.row:hover .row__t{color:var(--qz)}
+.row__track{position:relative;height:15px;display:flex;align-items:center}
+.row__bar{height:11px;border-radius:1.5px;background:var(--c);transform-origin:left center;transform:scaleX(0);
+  animation:dep .7s var(--ease) forwards;animation-delay:var(--d);position:relative}
+@keyframes dep{to{transform:scaleX(1)}}
+.row__bar::after{content:"";position:absolute;right:-1px;top:-2px;bottom:-2px;width:2px;background:var(--dc);opacity:0;
+  animation:fin .5s ease forwards;animation-delay:calc(var(--d) + .5s);border-radius:1px}
+@keyframes fin{to{opacity:1}}
+.row__mc{font-family:var(--mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums;color:var(--qz);font-weight:500}
+.row__d{font-family:var(--mono);font-size:11px;text-align:right;font-variant-numeric:tabular-nums;color:var(--dc)}
+.row__h{position:relative;height:13px}
+.row__h i{position:absolute;left:0;top:0;bottom:0;background:var(--c);border-radius:1px;opacity:.75}
+.row__h span{position:absolute;right:0;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:8.5px;color:#5D6B8C}
+
+/* head labels */
+.colhead{display:grid;grid-template-columns:34px 148px 1fr 92px 74px 58px;gap:14px;
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.15em;text-transform:uppercase;color:#42506F;padding-bottom:9px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.colhead .r{text-align:right}
+
+/* ---- waist callout ---- */
+.waist{position:relative;margin-top:26px;padding:18px 22px;border:1px solid var(--line);border-left:2px solid var(--brs);
+  border-radius:0 10px 10px 0;background:linear-gradient(90deg,rgba(227,168,62,.055),transparent 62%);max-width:76ch}
+.waist h4{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--brs);margin:0 0 8px}
+.waist p{margin:0;font-size:15.5px;color:var(--ash2);font-weight:300;line-height:1.6}
+.waist p b{color:var(--qz);font-weight:500}
+
+/* ---- lower panels ---- */
+.panels{display:grid;grid-template-columns:1.25fr .75fr;gap:16px;margin-top:44px}
+.pan{border:1px solid var(--line);border-radius:12px;background:var(--ox);padding:18px 20px 16px;position:relative;overflow:hidden}
+.pan h3{font-family:var(--disp);font-weight:700;font-size:15px;letter-spacing:-.01em;margin:0 0 3px;font-variation-settings:'wdth' 98}
+.pan .k{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--pls);margin:0 0 10px}
+.pan p{font-size:13.5px;color:var(--ash);margin:0;font-weight:300;line-height:1.55}
+svg{display:block;overflow:visible}
+.ax{stroke:var(--line);stroke-width:1;fill:none}
+.axl{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;fill:#4C5A7C}
+.dot{cursor:pointer;transition:.2s}
+.dot:hover{stroke:#fff;stroke-width:1.2}
+.fit{fill:none;stroke:var(--pls);stroke-width:1.4;stroke-dasharray:3 3;opacity:.7}
+
+.tt{position:fixed;pointer-events:none;background:var(--ox2);border:1px solid var(--line2);border-radius:7px;
+  padding:8px 11px;font-family:var(--mono);font-size:10.5px;color:var(--qz);z-index:80;opacity:0;transition:opacity .12s;
+  box-shadow:0 12px 34px -12px rgba(0,0,0,.8);white-space:nowrap;line-height:1.55}
+.tt b{color:var(--pls);font-weight:500}
+.tt s{color:var(--ash);text-decoration:none}
+
+.foot{margin-top:52px;padding-top:20px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ash);max-width:80ch;font-weight:300}
+.foot b{color:var(--ash2);font-weight:500}
+@media(max-width:1080px){.panels{grid-template-columns:1fr}
+  .row,.colhead{grid-template-columns:28px 110px 1fr 78px 60px}
+  .row__h,.colhead .h5{display:none}}
+</style>
+</head>
+<body>
+<div class="scribe"></div>
+<div class="proto">Design prototype · the MONEY tab · layer aggregates are illustrative, not live</div>
+
+<header class="bar">
+  <div class="bar__mark"></div>
+  <div class="bar__t">Sand to Sentence <span>— the stack, priced</span></div>
+  <div class="bar__sp"></div>
+  <div class="pulse">
+    <span class="lbl">stack</span><b class="num">$24.9T</b><span class="num" style="color:var(--ok)">+0.84%</span>
+    <span style="color:var(--line2)">│</span>
+    <span class="lbl">chokepoints</span><b class="num">14</b>
+    <span style="color:var(--line2)">│</span>
+    <i></i><span style="color:var(--ash)">11 Aug · close</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="eyebrow">Aggregate market value by position in the production chain</p>
+  <h1>Where the money in AI<br><em>actually sits.</em></h1>
+  <p class="sub">Not by sector — by <b>depth in the physical stack</b>. Each band is one of 27 strata, sized by the market capitalisation of the companies that operate in it, with cross-layer businesses attributed by revenue segment. <b>Concentration</b> is the Herfindahl index of revenue share inside the layer.</p>
+
+  <div class="ctl">
+    <div class="seg" id="axis">
+      <button aria-pressed="true" data-k="mc">Market cap</button>
+      <button aria-pressed="false" data-k="rev">Revenue</button>
+      <button aria-pressed="false" data-k="capex">Capex</button>
+      <button aria-pressed="false" data-k="gm">Gross margin</button>
+    </div>
+    <div class="seg" id="hl">
+      <button aria-pressed="false" data-k="choke">Isolate chokepoints</button>
+    </div>
+    <div class="ctl__sp"></div>
+    <div class="ctl__note">log scale · hover a layer</div>
+  </div>
+
+  <div class="colhead">
+    <span class="r">№</span><span>Stratum</span><span id="axName">Market capitalisation</span>
+    <span class="r">USD</span><span class="r">1D</span><span class="r h5">HHI</span>
+  </div>
+  <div class="col" id="col"></div>
+
+  <div class="waist">
+    <h4>The narrow waist</h4>
+    <p>Layers <b>05–09</b> — patterning, process, node, memory, package — hold <b>11%</b> of the stack's market value and <b>every</b> level-3 chokepoint above the earth layers. Roughly <b>$25 trillion</b> of value above them is produced through a waist of fewer than thirty companies.</p>
+  </div>
+
+  <div class="panels">
+    <div class="pan">
+      <p class="k">Signature chart</p>
+      <h3>The Depth Curve</h3>
+      <p style="margin-bottom:14px">EV/Sales against position in the stack. Where is the market paying its premium — proximity to the token, or proximity to the physics?</p>
+      <svg id="depth" viewBox="0 0 620 260" width="100%"></svg>
+    </div>
+    <div class="pan">
+      <p class="k">Concentration</p>
+      <h3>Most monopolised layers</h3>
+      <p style="margin-bottom:14px">Herfindahl index on revenue share within each stratum. Above 2,500 is a monopoly by any regulator's definition.</p>
+      <svg id="hhi" viewBox="0 0 300 260" width="100%"></svg>
+    </div>
+  </div>
+
+  <p class="foot">This is a <b>design prototype</b> for the landing view of the new <b>MONEY</b> tab — not a replacement for the homepage, which stays exactly as it is. The shape of the column, the interaction model, the chart language and the type system are the proposal. The figures are illustrative placeholders standing in for the daily ingest described in <b>PLAN.md</b> — in the built version every number carries a source and a vintage, and cross-layer attribution weights are published rather than assumed.</p>
+</div>
+
+<div class="tt" id="tt"></div>
+
+<script>
+/* Illustrative layer aggregates. Structure mirrors the real data/derived.json.
+   mc  = attributed market cap, $bn      rev = attributed revenue, $bn
+   cx  = attributed capex, $bn           gm  = weighted gross margin, %
+   d   = 1d change, %                    hhi = revenue Herfindahl, 0-10000
+   ch  = chokepoint level 0-3            n   = listed companies in layer      */
+const L=[
+{n:1,t:"Lithosphere",c:"#8A7C64",mc:340,rev:412,cx:44,gm:31,d:0.22,hhi:1180,ch:3,co:21},
+{n:2,t:"Feedstock",c:"#A08D6E",mc:96,rev:58,cx:7.1,gm:34,d:-0.41,hhi:2240,ch:2,co:14},
+{n:3,t:"Substrate",c:"#B9A57F",mc:61,rev:26,cx:4.8,gm:29,d:0.65,hhi:2960,ch:2,co:9},
+{n:4,t:"Design",c:"#4C63D8",mc:424,rev:41,cx:1.2,gm:81,d:1.14,hhi:3010,ch:3,co:11},
+{n:5,t:"Patterning",c:"#4479DE",mc:782,rev:71,cx:6.4,gm:52,d:1.86,hhi:6420,ch:3,co:8},
+{n:6,t:"Process",c:"#3E9CDD",mc:694,rev:98,cx:5.9,gm:47,d:1.42,hhi:2180,ch:2,co:17},
+{n:7,t:"Node",c:"#3FBBD4",mc:214,rev:34,cx:11.0,gm:44,d:0.94,hhi:4110,ch:3,co:6},
+{n:8,t:"Memory",c:"#3FDCC8",mc:912,rev:224,cx:78,gm:53,d:2.31,hhi:3340,ch:3,co:7},
+{n:9,t:"Package",c:"#45D9A2",mc:258,rev:62,cx:21,gm:33,d:1.55,hhi:4880,ch:3,co:12},
+{n:10,t:"Silicon",c:"#5FD584",mc:5940,rev:498,cx:19,gm:68,d:1.02,hhi:5760,ch:3,co:19},
+{n:11,t:"Fabric",c:"#8CCF63",mc:902,rev:141,cx:6.2,gm:56,d:0.78,hhi:2410,ch:2,co:24},
+{n:12,t:"System",c:"#BCC94F",mc:318,rev:412,cx:9.4,gm:12,d:0.31,hhi:1120,ch:1,co:22},
+{n:13,t:"Power",c:"#E3B23E",mc:784,rev:298,cx:24,gm:36,d:-0.18,hhi:1340,ch:2,co:28},
+{n:14,t:"Thermal",c:"#E39644",mc:188,rev:44,cx:2.8,gm:34,d:0.51,hhi:1810,ch:2,co:15},
+{n:15,t:"Site",c:"#E07A4A",mc:624,rev:112,cx:96,gm:44,d:-0.62,hhi:960,ch:1,co:26},
+{n:16,t:"Cluster",c:"#DC6154",mc:208,rev:38,cx:31,gm:28,d:-1.04,hhi:1420,ch:1,co:13},
+{n:17,t:"Kernel",c:"#D4506C",mc:382,rev:24,cx:1.1,gm:74,d:0.88,hhi:6890,ch:3,co:7},
+{n:18,t:"Corpus",c:"#D2508F",mc:88,rev:12,cx:0.4,gm:61,d:0.14,hhi:1240,ch:1,co:11},
+{n:19,t:"Model",c:"#B457B8",mc:1410,rev:96,cx:112,gm:42,d:1.28,hhi:2870,ch:2,co:9},
+{n:20,t:"Assay",c:"#9260D6",mc:58,rev:6.2,cx:0.2,gm:69,d:0.42,hhi:1080,ch:1,co:8},
+{n:21,t:"Serve",c:"#7A6CE0",mc:706,rev:88,cx:41,gm:38,d:0.66,hhi:1960,ch:2,co:18},
+{n:22,t:"Agency",c:"#6E86E8",mc:242,rev:19,cx:0.6,gm:64,d:1.71,hhi:1150,ch:1,co:14},
+{n:23,t:"Application",c:"#5FA3E8",mc:3120,rev:412,cx:18,gm:72,d:0.44,hhi:820,ch:0,co:52},
+{n:24,t:"Embodiment",c:"#57BFDA",mc:486,rev:78,cx:14,gm:26,d:-0.88,hhi:1490,ch:1,co:19},
+{n:25,t:"Surface",c:"#63CFC2",mc:4180,rev:684,cx:88,gm:58,d:0.36,hhi:3220,ch:2,co:12},
+{n:26,t:"Capital & control",c:"#9FB2C9",mc:1120,rev:184,cx:3.1,gm:51,d:0.19,hhi:640,ch:1,co:31},
+{n:27,t:"Return & residue",c:"#C9D2E6",mc:118,rev:41,cx:2.2,gm:22,d:-0.27,hhi:710,ch:0,co:14}
+];
+
+const KEY={mc:"mc",rev:"rev",capex:"cx",gm:"gm"};
+const NAME={mc:"Market capitalisation",rev:"Attributed revenue (TTM)",capex:"Attributed capex (TTM)",gm:"Weighted gross margin"};
+const UNIT={mc:v=>v>=1000?"$"+(v/1000).toFixed(2)+"T":"$"+v.toFixed(0)+"B",
+            rev:v=>v>=1000?"$"+(v/1000).toFixed(2)+"T":"$"+v.toFixed(0)+"B",
+            capex:v=>"$"+v.toFixed(1)+"B", gm:v=>v.toFixed(0)+"%"};
+let axis="mc", isoChoke=false;
+const col=document.getElementById("col"), tt=document.getElementById("tt");
+
+function scale(v,k){
+  const vals=L.map(l=>l[KEY[k]]), mx=Math.max(...vals), mn=Math.min(...vals);
+  if(k==="gm") return (v-15)/(85-15);                       // linear for %
+  return (Math.log(v)-Math.log(mn*0.72))/(Math.log(mx)-Math.log(mn*0.72));  // log for $
+}
+
+function render(){
+  document.getElementById("axName").textContent=NAME[axis];
+  col.innerHTML="";
+  L.slice().reverse().forEach((l,i)=>{
+    const v=l[KEY[axis]], w=Math.max(.012,scale(v,axis));
+    const up=l.d>=0, dc=up?"var(--ok)":"var(--mag)";
+    const sat=.42+.58*Math.min(1,l.hhi/6500);              // colour saturation = concentration
+    const r=document.createElement("div");
+    r.className="row"+(isoChoke&&l.ch<3?" dim":"");
+    r.style.setProperty("--c",l.c); r.style.setProperty("--dc",dc);
+    r.innerHTML=`
+      <span class="row__n">${String(l.n).padStart(2,"0")}</span>
+      <span class="row__t">${l.t}</span>
+      <span class="row__track"><span class="row__bar" style="width:${(w*100).toFixed(2)}%;opacity:${sat.toFixed(2)};--d:${(0.05+i*0.026).toFixed(3)}s"></span></span>
+      <span class="row__mc num">${UNIT[axis](v)}</span>
+      <span class="row__d num">${up?"+":""}${l.d.toFixed(2)}%</span>
+      <span class="row__h"><i style="width:${(l.hhi/10000*100).toFixed(1)}%"></i><span>${l.hhi}</span></span>`;
+    r.addEventListener("mousemove",e=>{
+      tt.style.opacity=1;
+      tt.style.left=Math.min(e.clientX+16,innerWidth-260)+"px";
+      tt.style.top=(e.clientY+16)+"px";
+      tt.innerHTML=`<b>${String(l.n).padStart(2,"0")} · ${l.t}</b><br>
+        <s>market cap</s> ${UNIT.mc(l.mc)}<br>
+        <s>revenue</s> ${UNIT.rev(l.rev)} &nbsp; <s>gm</s> ${l.gm}%<br>
+        <s>listed cos</s> ${l.co} &nbsp; <s>hhi</s> ${l.hhi}<br>
+        <s>chokepoint</s> ${"●".repeat(l.ch)||"—"}`;
+    });
+    r.addEventListener("mouseleave",()=>tt.style.opacity=0);
+    col.appendChild(r);
+  });
+}
+document.getElementById("axis").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  axis=b.dataset.k;
+  [...e.currentTarget.children].forEach(x=>x.setAttribute("aria-pressed",x===b));
+  render();
+});
+document.getElementById("hl").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b)return;
+  isoChoke=!isoChoke; b.setAttribute("aria-pressed",isoChoke); render();
+});
+render();
+
+/* ---------- depth curve ---------- */
+(function(){
+  const s=document.getElementById("depth"),NS="http://www.w3.org/2000/svg";
+  const W=620,H=260,PL=40,PR=8,PT=10,PB=30;
+  // illustrative: [layer, EV/Sales, mcap $bn, label]
+  const P=[[1,2.1,340,"Materials"],[2,4.2,96,"Feedstock"],[3,3.4,61,"Wafers"],[4,17.5,424,"EDA / IP"],
+    [5,12.8,782,"Litho"],[6,8.9,694,"Process tools"],[7,7.2,214,"Node"],[8,5.4,912,"Memory / HBM"],
+    [9,4.6,258,"Packaging"],[10,13.2,5940,"Accelerators"],[11,7.8,902,"Fabric"],[12,1.1,318,"ODM"],
+    [13,3.2,784,"Power gear"],[14,4.9,188,"Thermal"],[15,7.4,624,"Data centres"],[16,6.1,208,"Cluster"],
+    [17,19.4,382,"Kernel / CUDA"],[18,8.2,88,"Corpus"],[19,16.8,1410,"Model"],[20,11.2,58,"Assay"],
+    [21,9.1,706,"Serve"],[22,14.6,242,"Agency"],[23,10.4,3120,"Application"],[24,7.1,486,"Embodiment"],
+    [25,8.6,4180,"Surface"],[26,6.2,1120,"Capital"],[27,2.4,118,"Residue"]];
+  const x=v=>PL+(v-1)/26*(W-PL-PR), y=v=>H-PB-(v/21)*(H-PT-PB);
+  const g=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
+  s.appendChild(g("path",{class:"ax",d:`M${PL} ${PT} L${PL} ${H-PB} L${W-PR} ${H-PB}`}));
+  [5,10,15,20].forEach(v=>{
+    s.appendChild(g("line",{x1:PL,y1:y(v),x2:W-PR,y2:y(v),stroke:"#1D2742","stroke-dasharray":"2 4"}));
+    const t=g("text",{class:"axl",x:PL-7,y:y(v)+3,"text-anchor":"end"});t.textContent=v+"×";s.appendChild(t);
+  });
+  [[1,"01 sand"],[9,"09"],[18,"18"],[27,"27 sentence"]].forEach(([v,l])=>{
+    const t=g("text",{class:"axl",x:x(v),y:H-PB+15,"text-anchor":v===1?"start":v===27?"end":"middle"});t.textContent=l;s.appendChild(t);
+  });
+  // LOESS-ish fit
+  const fit=P.map(p=>p).sort((a,b)=>a[0]-b[0]);
+  let d="";
+  for(let i=1;i<=27;i++){
+    const win=fit.filter(p=>Math.abs(p[0]-i)<=4);
+    const avg=win.reduce((s,p)=>s+p[1]*Math.log(p[2]),0)/win.reduce((s,p)=>s+Math.log(p[2]),0);
+    d+=(i===1?"M":"L")+x(i)+" "+y(avg);
+  }
+  s.appendChild(g("path",{class:"fit",d}));
+  P.forEach(p=>{
+    const r=Math.max(3,Math.sqrt(p[2])/7.2);
+    const c=g("circle",{class:"dot",cx:x(p[0]),cy:y(p[1]),r,fill:L[p[0]-1].c,"fill-opacity":.62,stroke:L[p[0]-1].c,"stroke-opacity":.9});
+    c.addEventListener("mousemove",e=>{
+      tt.style.opacity=1;tt.style.left=Math.min(e.clientX+16,innerWidth-230)+"px";tt.style.top=(e.clientY+16)+"px";
+      tt.innerHTML=`<b>${p[3]}</b><br><s>depth</s> ${p[0]} of 27<br><s>ev/s</s> ${p[1].toFixed(1)}×<br><s>mcap</s> ${p[2]>=1000?"$"+(p[2]/1000).toFixed(2)+"T":"$"+p[2]+"B"}`;
+    });
+    c.addEventListener("mouseleave",()=>tt.style.opacity=0);
+    s.appendChild(c);
+  });
+  const lb=g("text",{class:"axl",x:W-PR,y:PT+8,"text-anchor":"end","fill":"#4C5A7C"});
+  lb.textContent="bubble = market cap · dashed = weighted fit";s.appendChild(lb);
+})();
+
+/* ---------- hhi bars ---------- */
+(function(){
+  const s=document.getElementById("hhi"),NS="http://www.w3.org/2000/svg";
+  const top=L.slice().sort((a,b)=>b.hhi-a.hhi).slice(0,9);
+  const W=300,PL=96,PR=34,BH=20,GAP=6.6;
+  const g=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
+  top.forEach((l,i)=>{
+    const yy=i*(BH+GAP)+6, w=(l.hhi/7200)*(W-PL-PR);
+    const t=g("text",{class:"axl",x:PL-9,y:yy+13,"text-anchor":"end",fill:"#A7B2CA"});
+    t.textContent=l.t.length>13?l.t.slice(0,12)+"…":l.t;s.appendChild(t);
+    s.appendChild(g("rect",{x:PL,y:yy+3,width:Math.max(2,w),height:BH-6,rx:1.5,fill:l.c,"fill-opacity":.82}));
+    const v=g("text",{class:"axl",x:PL+w+7,y:yy+13,fill:"#EAEFF9"});v.textContent=l.hhi;s.appendChild(v);
+  });
+  const yL=9*(BH+GAP)+6;
+  s.appendChild(g("line",{x1:PL+(2500/7200)*(W-PL-PR),y1:0,x2:PL+(2500/7200)*(W-PL-PR),y2:yL,stroke:"#E3A83E","stroke-dasharray":"3 3","stroke-opacity":.55}));
+  const m=g("text",{class:"axl",x:PL+(2500/7200)*(W-PL-PR)+5,y:yL+12,fill:"#E3A83E"});
+  m.textContent="2,500 — monopoly threshold";s.appendChild(m);
+})();
+</script>
+</body>
+</html>

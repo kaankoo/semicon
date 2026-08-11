@@ -1,0 +1,19 @@
+{
+  "name": "sand-to-sentence",
+  "version": "2.0.0",
+  "private": true,
+  "description": "An interactive cross-section of the AI economy — 27 strata, 131 stations, 533 organisations, from quartz sand to the last consumer of value.",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "check": "node scripts/check-data.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "test": "npm run check && npm run smoke"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

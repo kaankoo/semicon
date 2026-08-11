@@ -1,0 +1,164 @@
+[
+ {
+  "n": 1,
+  "t": "Lithosphere",
+  "c": "#8A7C64",
+  "a": "Before there is a chip there is a hole in the ground. The AI economy begins as quartz, ore, gas and water — a handful of which come from effectively one place on Earth."
+ },
+ {
+  "n": 2,
+  "t": "Feedstock",
+  "c": "#A08D6E",
+  "a": "Purification is the real magic trick. Ordinary sand becomes silicon with fewer than one foreign atom per billion, and the chemicals that touch a wafer are purer than anything else humans make."
+ },
+ {
+  "n": 3,
+  "t": "Substrate",
+  "c": "#B9A57F",
+  "a": "A single crystal is pulled from the melt as one continuous lattice, sliced into 300 mm mirrors, and handed to the fab as the flattest mass-produced object in existence."
+ },
+ {
+  "n": 4,
+  "t": "Design",
+  "c": "#4C63D8",
+  "a": "Nobody draws 200 billion transistors. They are compiled — from architecture and IP blocks, through synthesis and place-and-route, into a mask description that no human ever reads."
+ },
+ {
+  "n": 5,
+  "t": "Patterning",
+  "c": "#4479DE",
+  "a": "Light is the sculptor. A tin droplet blasted twice by a CO₂ laser makes 13.5 nm photons that bounce off the smoothest mirrors ever built, through a mask, onto resist. This is the industry's deepest moat."
+ },
+ {
+  "n": 6,
+  "t": "Process",
+  "c": "#3E9CDD",
+  "a": "A leading-edge wafer runs 1,000–1,500 process steps over three to four months: deposit an atomic layer, pattern it, etch it away, polish flat, repeat several hundred times."
+ },
+ {
+  "n": 7,
+  "t": "Node",
+  "c": "#3FBBD4",
+  "a": "The transistor itself — now a stack of gate-all-around nanosheets, soon with power delivered from the back of the wafer. Node names stopped being dimensions and became brands a decade ago."
+ },
+ {
+  "n": 8,
+  "t": "Memory",
+  "c": "#3FDCC8",
+  "a": "Compute is not the bottleneck; feeding it is. High-bandwidth memory — DRAM dies stacked twelve high over through-silicon vias — is the scarcest strategic component in AI hardware."
+ },
+ {
+  "n": 9,
+  "t": "Package",
+  "c": "#45D9A2",
+  "a": "When a single die can no longer hold the design, you stitch several together on a silicon interposer. Advanced packaging, not lithography, is the binding constraint on AI accelerator supply."
+ },
+ {
+  "n": 10,
+  "t": "Silicon",
+  "c": "#5FD584",
+  "a": "The accelerator: tens of thousands of tiny matrix engines, a memory hierarchy engineered around them, and a numeric format shrinking from 32 bits toward 4 to buy more arithmetic per joule."
+ },
+ {
+  "n": 11,
+  "t": "Fabric",
+  "c": "#8CCF63",
+  "a": "One chip is useless. The interesting object is 72 GPUs behaving as one, and then 100,000 of those behaving as one — which is a networking problem masquerading as a compute problem."
+ },
+ {
+  "n": 12,
+  "t": "System",
+  "c": "#BCC94F",
+  "a": "Racks are now the unit of sale. A modern AI rack is 1.5 tonnes of copper busbar, cold plate and midplane assembled by contract manufacturers you have probably never heard of."
+ },
+ {
+  "n": 13,
+  "t": "Power",
+  "c": "#E3B23E",
+  "a": "Electricity, not silicon, is the binding constraint on the build-out. Interconnection queues run five to seven years, so the industry is quietly building its own private grid."
+ },
+ {
+  "n": 14,
+  "t": "Thermal",
+  "c": "#E39644",
+  "a": "Two thousand watts through a package the size of a postcard cannot be air-cooled. The industry has reluctantly returned to plumbing after thirty years of fans."
+ },
+ {
+  "n": 15,
+  "t": "Site",
+  "c": "#E07A4A",
+  "a": "The data centre: land, power, water, fibre and politics, financed through structures that increasingly resemble project finance for a power plant rather than IT procurement."
+ },
+ {
+  "n": 16,
+  "t": "Cluster",
+  "c": "#DC6154",
+  "a": "Turning a warehouse of accelerators into a machine that can run for weeks without losing a training job — scheduling, storage, health checks and checkpoints."
+ },
+ {
+  "n": 17,
+  "t": "Kernel",
+  "c": "#D4506C",
+  "a": "The software that makes silicon fast: compilers, hand-tuned kernels, collective libraries and parallelism strategies. This layer is the most underrated moat in the entire stack."
+ },
+ {
+  "n": 18,
+  "t": "Corpus",
+  "c": "#D2508F",
+  "a": "Models are compressed experience. Where that experience comes from — crawled, licensed, generated or paid for by the hour — is now a contested market and a contested legal question."
+ },
+ {
+  "n": 19,
+  "t": "Model",
+  "c": "#B457B8",
+  "a": "Attention, mixtures of experts, and a training recipe: predict the next token at enormous scale, then spend months teaching the result to be useful, honest and safe."
+ },
+ {
+  "n": 20,
+  "t": "Assay",
+  "c": "#9260D6",
+  "a": "You cannot ship what you cannot measure. Evaluation, red-teaming, interpretability and security are the quality-control layer of an industry whose product is probabilistic."
+ },
+ {
+  "n": 21,
+  "t": "Serve",
+  "c": "#7A6CE0",
+  "a": "Training is a capital event; inference is the business. Serving economics — cache, batch, quantise, route — decide whether a product has gross margins."
+ },
+ {
+  "n": 22,
+  "t": "Agency",
+  "c": "#6E86E8",
+  "a": "A model that can call tools, read a repository, browse, remember and hand work to another model stops being a chatbot and becomes a coworker with a very short memory."
+ },
+ {
+  "n": 23,
+  "t": "Application",
+  "c": "#5FA3E8",
+  "a": "Where tokens meet a job to be done. The application layer is growing revenue faster than any software category in history — and burning through model providers' margins to do it."
+ },
+ {
+  "n": 24,
+  "t": "Embodiment",
+  "c": "#57BFDA",
+  "a": "Physical AI: the same architectures pointed at joints, wheels and grippers, where being wrong has consequences that no retry button can undo."
+ },
+ {
+  "n": 25,
+  "t": "Surface",
+  "c": "#63CFC2",
+  "a": "The last centimetre — chat windows, IDEs, browsers, phones and glasses. Distribution decides which model a billion people actually touch."
+ },
+ {
+  "n": 26,
+  "t": "Capital & control",
+  "c": "#9FB2C9",
+  "a": "The money and the rules. Roughly $700bn of capex in 2026, financed by everything from sovereign funds to asset-backed debt, inside an export-control regime that redraws itself every few months."
+ },
+ {
+  "n": 27,
+  "t": "Return & residue",
+  "c": "#C9D2E6",
+  "a": "The last consumer of value — and everything the chain leaves behind: depreciated silicon, warmed water, contested labour markets and 30 tonnes of gold a year in e-waste."
+ }
+]
