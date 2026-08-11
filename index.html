@@ -20,6 +20,7 @@
   <div class="navs" role="tablist">
     <button role="tab" aria-selected="true" data-view="strata">Cross-section</button>
     <button role="tab" aria-selected="false" data-view="web">Web</button>
+    <button role="tab" aria-selected="false" data-view="rul">Ruler</button>
     <button role="tab" aria-selected="false" data-view="cas">Cascade</button>
     <button role="tab" aria-selected="false" data-view="idx">Index</button>
   </div>
@@ -80,6 +81,35 @@
         <button class="btn" id="webWide">Zoom in to read</button>
         <button class="btn" id="webClear">Clear trace</button>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ RULER ============ -->
+  <section class="view" id="v-rul">
+    <div class="rul">
+      <div class="rul__hud">
+        <p class="eyebrow">Seventeen orders of magnitude, drawn to scale</p>
+        <h2 class="rul__h">Feel a <em>nanometre.</em></h2>
+        <p class="rul__i">Everything here is drawn at its true relative size. Scroll, drag or use ← → to travel from the silicon lattice to the Earth. Click anything to centre it.</p>
+      </div>
+
+      <div class="rul__stage">
+        <svg id="rulSvg" aria-label="A logarithmic scale from the silicon lattice to the Earth"></svg>
+        <div class="rul__read"><span>across the view</span><b id="rulScale"></b></div>
+      </div>
+
+      <div class="rul__ctl">
+        <input type="range" id="rulRange" aria-label="Scale">
+        <div class="rul__stops" id="rulStops"></div>
+      </div>
+
+      <aside class="rul__panel" id="rulPanel"></aside>
+
+      <footer class="foot">
+        <h5>How to read this</h5>
+        <p>The horizontal axis is logarithmic: every 300 pixels is one power of ten. Objects are drawn at <b>true relative size</b> — if something looks a hundred times bigger than its neighbour, it is a hundred times bigger. That is why most of the ruler looks empty. Seventeen orders of magnitude do not fit on a screen, and pretending otherwise is the usual lie in diagrams like this.</p>
+        <p style="margin-top:14px">Shapes are schematic; proportions are not. Each object carries a <b>precision</b> flag — <i>exact</i> for defined or measured quantities, <i>typical</i> for a representative production value that varies by vendor and node, <i>approx</i> for the right order of magnitude and not much more. Sources and reasoning are on the <b>Method</b> page.</p>
+      </footer>
     </div>
   </section>
 

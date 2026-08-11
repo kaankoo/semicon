@@ -90,6 +90,13 @@
       "vintage": "2024–26"
     },
     {
+      "class": "Scale-corpus sizes",
+      "kind": "curated",
+      "who": "Vendor documentation and technical literature",
+      "detail": "The 36 objects on the Ruler, from the silicon lattice to the Earth. Each carries its own precision flag — exact for defined or measured quantities, typical for a representative production value that varies by vendor and node, approx for the right order of magnitude. Proportions on the Ruler are true; only the shapes are schematic.",
+      "vintage": "mid-2026"
+    },
+    {
       "class": "Silicon geometry and stoichiometry",
       "kind": "derived",
       "who": "First principles",

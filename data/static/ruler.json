@@ -1,0 +1,155 @@
+{
+  "meta": {
+    "updated": "2026-08-11",
+    "span": [-10.4, 7.3],
+    "note": "Sizes in metres. Everything is drawn to true relative scale — if one object looks a hundred times bigger than another, it is. `precision` says how much to trust each figure: exact means defined or measured, typical means a representative production value that varies by vendor and node, approx means the right order of magnitude and not much more."
+  },
+
+  "objects": [
+    { "id": "ald", "m": 1.0e-10, "glyph": "layers", "label": "One ALD cycle", "sub": "less than a single lattice spacing",
+      "precision": "typical", "station": "prec",
+      "note": "Atomic layer deposition alternates two self-limiting reactions, so each cycle adds a fixed sub-ångström increment regardless of how long you wait. Film thickness is set by counting, not by timing — which is the only reason films this thin can be made uniformly across 300 mm." },
+
+    { "id": "si-lattice", "m": 5.431e-10, "glyph": "lattice", "label": "Silicon lattice constant", "sub": "the unit cell everything above is built on",
+      "precision": "exact", "station": "cz",
+      "note": "0.5431 nanometres, the edge of the cubic cell in which silicon atoms sit. Every dimension further up this ruler is ultimately quantised by it. A Czochralski ingot is a single unbroken instance of this lattice weighing two hundred kilograms." },
+
+    { "id": "overlay", "m": 1.0e-9, "glyph": "pitch", "label": "Overlay budget", "sub": "how precisely one layer must land on the last",
+      "precision": "approx", "station": "scan",
+      "note": "Leading-edge overlay is now under a nanometre — roughly two lattice constants. A wafer is patterned seventy or eighty times, and every layer must register against the ones beneath it to within about two atoms' width, at 300 mm, at hundreds of wafers an hour." },
+
+    { "id": "nanosheet", "m": 5.0e-9, "glyph": "layers", "label": "A gate-all-around channel", "sub": "roughly ten atoms thick",
+      "precision": "approx", "station": "gaa",
+      "note": "The current transistor is a stack of horizontal silicon nanosheets with gate material wrapped entirely around each one. The channel is thin enough to count the atoms across it. Below about this thickness, the electrons stop behaving classically and the device stops being a switch." },
+
+    { "id": "euv", "m": 1.35e-8, "glyph": "wave", "label": "EUV wavelength", "sub": "13.5 nm, made from tin plasma",
+      "precision": "exact", "station": "src",
+      "note": "A tin droplet is flattened by one laser pulse and vaporised by a second, and the resulting plasma emits at 13.5 nm. Nothing transmits at this wavelength — not glass, not air — so the entire optical path is mirrors, in vacuum. This is the deepest moat in the industry." },
+
+    { "id": "m0", "m": 2.2e-8, "glyph": "pitch", "label": "Metal-0 pitch", "sub": "the tightest wiring on the chip",
+      "precision": "approx", "station": "beol",
+      "note": "The first metal layer above the transistors. At this pitch copper's resistivity rises sharply because electrons scatter off the wire's own surfaces, which is why the industry is moving to ruthenium and other metals that behave better when confined." },
+
+    { "id": "defect", "m": 2.0e-8, "glyph": "dot", "label": "A defect that kills a die", "sub": "twenty nanometres of the wrong thing",
+      "precision": "approx", "station": "yield",
+      "note": "A single particle of this size, landing in the wrong place at the wrong step, can destroy a die worth thousands of dollars. Cleanroom air is filtered to a standard where such particles are counted per cubic metre, not per cubic centimetre." },
+
+    { "id": "cgp", "m": 4.5e-8, "glyph": "pitch", "label": "Contacted gate pitch", "sub": "the real dimension behind a node name",
+      "precision": "approx", "station": "gaa",
+      "note": "The distance from one transistor gate to the next. Node names — 3 nm, 2 nm — stopped corresponding to any physical dimension over a decade ago; this is one of the numbers that actually describes how dense a process is." },
+
+    { "id": "duv", "m": 1.93e-7, "glyph": "wave", "label": "DUV wavelength", "sub": "193 nm, still doing most of the work",
+      "precision": "exact", "station": "scan",
+      "note": "Argon fluoride at 193 nm, with water between the lens and the wafer to shorten it further. Fourteen times longer than EUV, and still responsible for the majority of layers on a leading-edge wafer — and for essentially every mature-node chip in the world." },
+
+    { "id": "visible", "m": 5.5e-7, "glyph": "wave", "label": "Visible light", "sub": "the shortest thing your eye can resolve",
+      "precision": "exact", "station": "opt",
+      "note": "Everything to the left of here is smaller than the wavelength of light you see with. No optical microscope will ever image a modern transistor; the industry inspects its own work with electrons and with scattered deep-ultraviolet light instead." },
+
+    { "id": "tsv", "m": 5.0e-6, "glyph": "via", "label": "A through-silicon via", "sub": "a hole drilled clean through a die",
+      "precision": "typical", "station": "3d",
+      "note": "HBM stacks twelve DRAM dies vertically, and signals get from bottom to top through copper-filled holes etched straight through the thinned silicon. Thousands of them per die, each one a via that must not crack when the stack heats and cools." },
+
+    { "id": "hybrid", "m": 9.0e-6, "glyph": "pitch", "label": "Hybrid bond pitch", "sub": "copper welded directly to copper",
+      "precision": "typical", "station": "3d",
+      "note": "Volume production sits at nine to ten micrometres, with five to seven in early production. Hybrid bonding replaces solder microbumps with a direct copper-to-copper metallic bond, which is what allows stacks to get taller without the thermal budget collapsing.",
+      "source": { "who": "SemiEngineering / industry reporting", "what": "hybrid bonding at 9–10 µm pitch in volume, 5–7 µm early", "url": "https://semiengineering.com/hbm4-sticks-with-microbumps-postponing-hybrid-bonding/" } },
+
+    { "id": "hbmdie", "m": 4.0e-5, "glyph": "layers", "label": "A thinned HBM die", "sub": "ground down so twelve will fit",
+      "precision": "typical", "station": "hbm",
+      "note": "DRAM dies destined for an HBM stack are thinned to a few tens of micrometres — thinner than kitchen foil, and flexible. Handling silicon this thin without cracking it is one of the genuinely hard problems in advanced packaging." },
+
+    { "id": "ubump", "m": 4.5e-5, "glyph": "pitch", "label": "Microbump pitch", "sub": "what hybrid bonding is replacing",
+      "precision": "typical", "station": "cowos",
+      "note": "Solder microbumps join dies to the interposer beneath them. They work, they are well understood, and they are five times coarser than a hybrid bond — which sets a floor on how much bandwidth you can get between two pieces of silicon." },
+
+    { "id": "hair", "m": 7.0e-5, "glyph": "strand", "label": "A human hair", "sub": "for calibration",
+      "precision": "typical", "station": null,
+      "note": "Everything to the left of this line is invisible to you. A hair is roughly five thousand times wider than a transistor gate, and about the same width as the solder bumps holding a GPU onto its interposer." },
+
+    { "id": "sand", "m": 5.0e-4, "glyph": "dot", "label": "A grain of sand", "sub": "where the whole chain starts",
+      "precision": "typical", "station": "hpq",
+      "note": "Medium sand, half a millimetre across. Around a thousand of these — as quartzite, not as beach sand — go into the silicon and the crucible for one wafer. It is the beginning of the chain and, measured against everything else on this ruler, it is very nearly free." },
+
+    { "id": "waferthick", "m": 7.75e-4, "glyph": "layers", "label": "Wafer thickness", "sub": "775 micrometres of substrate",
+      "precision": "exact", "station": "waf",
+      "note": "Almost all of it is mechanical support. The circuitry occupies perhaps the top one percent; the rest exists so the wafer can be handled without shattering. Backside power delivery is the industry finally deciding to use the other ninety-nine percent for something." },
+
+    { "id": "hbmstack", "m": 7.2e-4, "glyph": "stack", "label": "A twelve-high HBM stack", "sub": "twelve dies, thinner than a wafer",
+      "precision": "approx", "station": "hbm",
+      "note": "Twelve thinned DRAM dies plus a base logic die, bonded into something no taller than a single unthinned wafer. This object is the scarcest strategic component in AI hardware, and it is mostly empty space by mass." },
+
+    { "id": "hbmpkg", "m": 1.1e-2, "glyph": "rect", "label": "An HBM package", "sub": "11 × 11 millimetres",
+      "precision": "exact", "station": "hbm",
+      "note": "Eight of these surround a Blackwell-class accelerator. Together they account for several times more silicon area than the compute dies they serve — the fact most people get backwards about what an AI chip actually is.",
+      "source": { "who": "Micron", "what": "HBM3E — 24 Gb 1β die in an 11 × 11 mm package", "url": "https://www.micron.com/products/memory/hbm/hbm3e" } },
+
+    { "id": "die", "m": 3.13e-2, "glyph": "rect", "detail": "grid", "label": "A reticle-limited die", "sub": "814 mm², parked under the ceiling",
+      "precision": "typical", "station": "gpu",
+      "note": "The H100 is 814 mm² — deliberately just below the largest area a scanner can print. Every square millimetre is bought at the cost of yield, because defects are distributed across the wafer and a bigger die catches more of them." },
+
+    { "id": "reticle", "m": 3.3e-2, "glyph": "rect", "label": "The reticle field", "sub": "26 × 33 mm — the hard ceiling",
+      "precision": "exact", "station": "scan",
+      "note": "No lithography scanner can pattern more than about 858 mm² in one exposure. This rectangle is why chiplets exist, why advanced packaging became a bottleneck, and why a Blackwell part is two dies stitched together rather than one big one. It is the most consequential object on this ruler." },
+
+    { "id": "interposer", "m": 5.2e-2, "glyph": "rect", "detail": "grid", "label": "A CoWoS interposer", "sub": "more than three reticles across",
+      "precision": "approx", "station": "cowos",
+      "note": "Because the interposer is larger than a single exposure, it has to be stitched from multiple ones — an expensive, low-yielding process that only a handful of lines in the world can do. Packaging capacity, not wafer capacity, is what has been rationing accelerators." },
+
+    { "id": "module", "m": 1.0e-1, "glyph": "board", "label": "An accelerator module", "sub": "compute, memory and interposer together",
+      "precision": "approx", "station": "rack",
+      "note": "One package, roughly a kilowatt, and by this point in the chain a nine-thousand-dollar object made from about thirty grams of silicon. Everything below this line is measured in atoms; everything above it is measured in megawatts." },
+
+    { "id": "wafer300", "m": 3.0e-1, "glyph": "disc", "label": "A 300 mm wafer", "sub": "the flattest mass-produced object there is",
+      "precision": "exact", "station": "waf",
+      "note": "Roughly 70,700 mm² of surface, polished until variation across it is measured in nanometres. Scaled up to the size of a football pitch, the height difference between its highest and lowest point would be under a millimetre." },
+
+    { "id": "wafer450", "m": 4.5e-1, "glyph": "disc", "detail": "ghost", "label": "The 450 mm wafer", "sub": "abandoned, and never coming back",
+      "precision": "exact", "station": "cz",
+      "note": "Larger wafers mean more dies per pass, and the industry has moved to a bigger diameter roughly every decade for fifty years. That stopped. 450 mm was abandoned as uneconomic, so wafer area per tool has been frozen since — which is why adding capacity now means adding buildings, not bigger wafers." },
+
+    { "id": "person", "m": 1.7, "glyph": "figure", "label": "A person", "sub": "for calibration",
+      "precision": "typical", "station": null,
+      "note": "You are about three billion silicon lattice constants tall, and about one seven-millionth of the distance from here to the far end of this ruler." },
+
+    { "id": "rack", "m": 2.2, "glyph": "rack", "label": "An AI rack", "sub": "1.5 tonnes, mostly copper",
+      "precision": "approx", "station": "rack",
+      "note": "Seventy-two accelerators behaving as one machine, drawing over a hundred kilowatts through a copper busbar and rejecting the heat into water. The unit of sale is no longer the chip, or even the server — it is this." },
+
+    { "id": "scanner", "m": 4.0, "glyph": "machine", "label": "An EUV scanner", "sub": "$200m, delivered in 40 crates",
+      "precision": "approx", "station": "scan",
+      "note": "The most expensive mass-produced machine on Earth, containing the smoothest mirrors ever manufactured. Fewer than a few hundred exist. Every leading-edge chip in the world has passed through one." },
+
+    { "id": "aisle", "m": 4.0e1, "glyph": "plan", "label": "A rack row", "sub": "where the megawatts land",
+      "precision": "approx", "station": "fac",
+      "note": "A single row of high-density racks can draw more power than a small town. The engineering problem stops being electronics somewhere around here and becomes plumbing, airflow and switchgear." },
+
+    { "id": "hall", "m": 1.2e2, "glyph": "plan", "detail": "grid", "label": "A data hall", "sub": "tens of megawatts under one roof",
+      "precision": "approx", "station": "shell",
+      "note": "Built speculatively, ahead of any tenant, because the constraint is the grid connection rather than the building. A hall designed for one rack generation can be stranded by the next — a larger write-off risk than the chips inside it." },
+
+    { "id": "fab", "m": 3.0e2, "glyph": "plan", "detail": "grid", "label": "A leading-edge fab", "sub": "the cleanest place humans build",
+      "precision": "approx", "station": "fabops",
+      "note": "Twenty billion dollars, three years to build, and a cleanroom floor that must not vibrate. Inside it a wafer travels several kilometres over three months and a thousand process steps to become one of the objects near the middle of this ruler." },
+
+    { "id": "campus", "m": 1.5e3, "glyph": "plan", "label": "An AI campus", "sub": "a gigawatt, financed like a power plant",
+      "precision": "approx", "station": "colo",
+      "note": "Land, power, water, fibre and politics. At this scale the project is closer to building a refinery than to buying IT equipment, and it is increasingly financed the same way." },
+
+    { "id": "hsinchu", "m": 6.0e3, "glyph": "region", "label": "Hsinchu Science Park", "sub": "six kilometres of the world's logic",
+      "precision": "approx", "station": "fdry",
+      "note": "A science park you could walk across in an hour contains a decisive share of the planet's leading-edge logic capacity. Every argument about concentration risk eventually reduces to this distance." },
+
+    { "id": "sprucepine", "m": 3.0e4, "glyph": "region", "label": "The Spruce Pine district", "sub": "thirty kilometres of North Carolina",
+      "precision": "approx", "station": "hpq",
+      "note": "The quartz pure enough to make Czochralski crucibles comes, in practice, from one small district. A hurricane closed it briefly in 2024 and the entire industry noticed. Substitutes exist on paper; qualifying them takes years." },
+
+    { "id": "taiwan", "m": 3.94e5, "glyph": "region", "detail": "island", "label": "Taiwan", "sub": "394 km, north to south",
+      "precision": "exact", "station": "fdry",
+      "note": "Zoom out this far and the whole leading-edge industry has become a rounding error on one island. The distance from the smallest object on this ruler to this one is fifteen orders of magnitude, and the entire chain is contained within it." },
+
+    { "id": "earth", "m": 1.2742e7, "glyph": "globe", "label": "The Earth", "sub": "and everywhere the rest of it comes from",
+      "precision": "exact", "station": "ore",
+      "note": "Seventeen orders of magnitude from where this ruler started. The gallium is refined in one country, the quartz mined in one county, the lithography built in one town, the logic printed on one island — and the answers arrive everywhere at once." }
+  ]
+}

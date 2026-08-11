@@ -29,12 +29,17 @@ src/
     app.js                 shared state + late-bound actions
     data.js                loads the corpus, builds the indexes
     router.js              view switching
+  core/
+    notes.js               findings that cut against the grain
   lib/
     cascade.js             the unit-conversion chain and its arithmetic
+    glyphs.js              schematic shapes for the Ruler
   views/
     descent.js             the cross-section: hero, rail, strata sections
     web.js                 the dependency graph
+    ruler.js               seventeen orders of magnitude, to scale
     cascade.js             sand to sentence, quantified
+    method.js              sources, assumptions and limits
     sheet.js               station dossiers
     table.js               the searchable index
     tour.js                the guided descent
@@ -44,6 +49,9 @@ data/static/
   stations.json            131 stations
   edges.json               the dependency graph
   cascade.json             conversion parameters, ranges and sources
+  ruler.json               36 objects from the lattice to the Earth
+  notes.json               counterintuitive findings
+  method.json              provenance and known limits
 scripts/
   dev.mjs                  zero-dependency dev server
   check-data.mjs           corpus integrity check (runs in CI)
@@ -83,6 +91,18 @@ Views never import each other. Each registers the actions others need on `app`, 
 **Edges** — `edges.json` maps each station id to the ids it directly depends on. Upstream and downstream cones are derived at load time; unresolvable references are dropped rather than thrown.
 
 `npm run check` enforces all of the above and runs in CI before every deploy.
+
+---
+
+## The Ruler
+
+Seventeen orders of magnitude, from the silicon lattice constant to the Earth, **drawn at true relative size**.
+
+One camera value, `z = log₁₀(metres)`, drives everything. An object of size *d* sits `log₁₀d − z` decades from centre and is drawn `REF × 10^(log₁₀d − z)` pixels across — so something ten times bigger is drawn ten times bigger, with no fudging. A test asserts exactly that, because the temptation to cheat proportion for legibility is the standard lie in diagrams like this. Shapes are schematic; proportions are not.
+
+36 objects, each with a **precision flag** — *exact* for defined or measured quantities, *typical* for a representative production value, *approx* for the right order of magnitude. `npm run check` fails if a decade in the middle goes empty, and the smoke test walks the entire span confirming the stage never goes blank.
+
+Two moments do the teaching. Around 10⁻⁹ a gate-all-around channel sits beside the lattice it is built from — about ten atoms across. Around 10⁻² the **reticle field** appears at 26 × 33 mm, and you can hold it up to the screen: the hard optical ceiling that explains why chiplets exist and why packaging became a bottleneck.
 
 ---
 

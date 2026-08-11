@@ -137,6 +137,36 @@ if (!MT.corrections.repo) problems.push("method.json has no corrections repo");
 });
 ok.push(`${MT.provenance.length} provenance classes`);
 
+/* ---- ruler ---- */
+const R = read("ruler.json");
+const GLYPHS = new Set(["lattice","layers","wave","pitch","dot","via","strand","stack",
+                        "rect","disc","board","figure","rack","machine","plan","region","globe"]);
+const PREC = new Set(["exact","typical","approx"]);
+const rIds = new Set();
+let lastLg = -Infinity;
+R.objects.slice().sort((a,b) => a.m - b.m).forEach(o => {
+  if (rIds.has(o.id)) problems.push(`duplicate ruler object: ${o.id}`);
+  rIds.add(o.id);
+  if (!(o.m > 0)) problems.push(`ruler object ${o.id} has size ${o.m}`);
+  const lg = Math.log10(o.m);
+  if (lg < R.meta.span[0] || lg > R.meta.span[1])
+    problems.push(`ruler object ${o.id} at 10^${lg.toFixed(1)} falls outside the declared span`);
+  if (!GLYPHS.has(o.glyph)) problems.push(`ruler object ${o.id} uses unknown glyph "${o.glyph}"`);
+  if (!PREC.has(o.precision)) problems.push(`ruler object ${o.id} has precision "${o.precision}"`);
+  ["label","sub","note"].forEach(f => { if (!o[f]) problems.push(`ruler object ${o.id} is missing "${f}"`); });
+  if (o.station && !ids.has(o.station)) problems.push(`ruler object ${o.id} points at unknown station "${o.station}"`);
+  lastLg = lg;
+});
+/* no decade in the middle of the ruler may be empty, or the journey stalls */
+const decades = new Set(R.objects.map(o => Math.floor(Math.log10(o.m))));
+const lo = Math.min(...decades), hi = Math.max(...decades);
+let gap = 0, worst = 0, gapAt = null;
+for (let e = lo; e <= hi; e++) {
+  if (decades.has(e)) { gap = 0; } else { gap++; if (gap > worst) { worst = gap; gapAt = e; } }
+}
+if (worst > 2) problems.push(`ruler has a ${worst}-decade gap around 10^${gapAt} — the journey stalls there`);
+ok.push(`${R.objects.length} scale objects over ${(hi - lo + 1)} decades`);
+
 /* ---- report ---- */
 if (problems.length) {
   console.error(`\n  ✗ ${problems.length} problem${problems.length > 1 ? "s" : ""}\n`);

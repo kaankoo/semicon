@@ -11,6 +11,7 @@ function show(v) {
   document.querySelectorAll(".navs button").forEach(b => b.setAttribute("aria-selected", b.dataset.view === v));
   if (v === "idx") setTimeout(() => app.focusSearch(), 60);
   if (v === "web" && !webFitted) { webFitted = true; requestAnimationFrame(() => app.fitWeb()); }
+  if (v === "rul") requestAnimationFrame(() => app.rulerFit());
   if (v !== "strata") window.scrollTo(0, 0);
 }
 

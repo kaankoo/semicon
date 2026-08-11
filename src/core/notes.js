@@ -56,6 +56,7 @@ export function render(n, opts = {}) {
       <p class="grain__b">${n.body}</p>
       <p class="grain__s"><b>So what</b> ${n.soWhat}</p>
       ${cite ? `<p class="grain__c">${cite}</p>` : ""}
+      ${rulerLink(n)}
       ${opts.links !== false ? grainLinks(n) : ""}
     </div>`;
 }
@@ -66,6 +67,11 @@ export function renderInline(n) {
     <button class="grainline" data-noteopen="${n.id}" title="${n.title}">
       <i></i><b>${n.figure}</b><span>${n.title}</span>
     </button>`;
+}
+
+function rulerLink(n) {
+  if (!n.ruler) return "";
+  return `<button class="grain__r" data-ruler="${n.ruler}">See it at true scale →</button>`;
 }
 
 function grainLinks(n) {
@@ -83,6 +89,15 @@ export function wireNotes(root) {
     if (b.dataset.wired) return;
     b.dataset.wired = "1";
     b.addEventListener("click", () => app.openStation(b.dataset.station));
+  });
+  root.querySelectorAll("[data-ruler]").forEach(b => {
+    if (b.dataset.wired) return;
+    b.dataset.wired = "1";
+    b.addEventListener("click", () => {
+      app.closeSheet();
+      app.show("rul");
+      setTimeout(() => app.rulerGoTo(b.dataset.ruler), 60);
+    });
   });
   root.querySelectorAll("[data-noteopen]").forEach(b => {
     if (b.dataset.wired) return;

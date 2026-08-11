@@ -16,6 +16,7 @@
       "stations": ["gpu", "hbm", "dram", "cowos", "asic"],
       "strata": [8, 9, 10],
       "cascadeStep": "wafer",
+      "ruler": "hbmpkg",
       "basis": "derived",
       "source": { "who": "Micron", "what": "HBM3E — 8- and 12-high stacks of 24 Gb 1β die in an 11 × 11 mm package", "url": "https://www.micron.com/products/memory/hbm/hbm3e" }
     },
@@ -43,6 +44,7 @@
       "soWhat": "Chiplets and advanced packaging are not a design fashion; they are what happens when a physical constraint stops moving. It is also why stratum 09 became a bottleneck: once you cannot make the die bigger, the only way up is to attach more dies together.",
       "stations": ["scan", "mask", "cowos", "gpu", "3d"],
       "strata": [5, 9, 10],
+      "ruler": "reticle",
       "basis": "cited",
       "source": { "who": "NVIDIA", "what": "Blackwell — 208 bn transistors across two reticle-limited dies", "url": "https://www.nvidia.com/en-us/data-center/technologies/blackwell-architecture/" }
     },
@@ -71,6 +73,7 @@
       "stations": ["hpq", "cz", "poly"],
       "strata": [1, 2, 3],
       "cascadeStep": "crucible",
+      "ruler": "sand",
       "basis": "derived",
       "source": { "who": "This site", "what": "the Cascade — stoichiometry and crucible consumption", "url": null }
     },

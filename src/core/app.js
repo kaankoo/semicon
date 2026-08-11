@@ -35,5 +35,8 @@ export const app = {
   clearTrace: () => {},    // views/web
   fitWeb: () => {},        // views/web
   focusSearch: () => {},   // views/table
+  rulerFit: () => {},      // views/ruler
+  rulerGoTo: () => {},     // views/ruler
+  showNote: () => {},      // views/method
   tourStop: () => {}       // views/tour
 };

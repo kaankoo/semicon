@@ -15,6 +15,7 @@ import { initWeb } from "./views/web.js";
 import { initTable } from "./views/table.js";
 import { initTour } from "./views/tour.js";
 import { initCascade } from "./views/cascade.js";
+import { initRuler } from "./views/ruler.js";
 import { initMethod } from "./views/method.js";
 import { loadNotes } from "./core/notes.js";
 
@@ -39,6 +40,7 @@ async function boot() {
   initWeb();
   initTable();
   initTour();
+  await initRuler();
   await initCascade();
   await initMethod();
   initRouter();

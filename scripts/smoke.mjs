@@ -254,6 +254,88 @@ app.closeSheet();
      !!D.querySelector(`#mthGrain [data-note="${flag.dataset.noteopen}"]`), true);
 }
 
+
+/* ---------- ruler ---------- */
+{
+  const R = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/ruler.json"), "utf8"));
+  const { place } = await import(pathToFileURL(path.join(ROOT, "src/views/ruler.js")).href);
+
+  app.show("rul");
+  is("ruler view active", D.getElementById("v-rul").classList.contains("on"), true);
+  atLeast("objects drawn", D.querySelectorAll("#rulSvg .rul__o").length, 2);
+  atLeast("axis ticks drawn", D.querySelectorAll("#rulSvg text.rul__tick").length, 2);
+  atLeast("stops offered", D.querySelectorAll("#rulStops button").length, 8);
+  atLeast("panel populated", D.getElementById("rulPanel").textContent.trim().length, 80);
+  atLeast("scale readout", D.getElementById("rulScale").textContent.trim().length, 2);
+
+  /* the whole point: an object ten times bigger must be drawn ten times bigger */
+  const a = { lg: Math.log10(1e-9) }, b = { lg: Math.log10(1e-8) };
+  const z0 = -9;
+  const ratio = place(b, z0).px / place(a, z0).px;
+  checks.push({ label: "scale is true, not schematic", ok: Math.abs(ratio - 10) < 1e-6,
+                actual: ratio.toFixed(6) + "× for a 10× object", expected: "exactly 10×" });
+
+  /* centring an object must make it the reference size */
+  const c = place({ lg: -6 }, -6);
+  checks.push({ label: "a centred object is the reference size", ok: Math.abs(c.rel) < 1e-9,
+                actual: "rel " + c.rel, expected: "rel 0" });
+
+  /* things far off scale must not be drawn at all */
+  is("far-smaller objects drop out", place({ lg: -14 }, -6).visible, false);
+  is("far-larger objects drop out", place({ lg: 2 }, -6).visible, false);
+
+  /* every object must become visible somewhere along its own journey */
+  const never = R.objects.filter(o => !place({ lg: Math.log10(o.m) }, Math.log10(o.m)).visible);
+  checks.push({ label: "every object is reachable", ok: never.length === 0,
+                actual: never.length ? never.map(o => o.id).join(", ") : "all " + R.objects.length,
+                expected: "all reachable" });
+
+  /* travelling the full span must never leave the stage empty */
+  let emptyAt = null;
+  for (let zz = R.meta.span[0]; zz <= R.meta.span[1]; zz += 0.25) {
+    const n = R.objects.filter(o => place({ lg: Math.log10(o.m) }, zz).visible).length;
+    if (n === 0) { emptyAt = zz.toFixed(2); break; }
+  }
+  checks.push({ label: "the journey never goes blank", ok: emptyAt === null,
+                actual: emptyAt === null ? "populated throughout" : `empty at z=${emptyAt}`,
+                expected: "populated throughout" });
+
+  /* a station chip in the panel must open that station */
+  const chip = D.querySelector("#rulPanel [data-station]");
+  if (chip) {
+    chip.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    is("ruler panel opens stations", D.getElementById("sheet").classList.contains("on"), true);
+    app.closeSheet();
+  }
+
+  /* jumping to an object must centre it */
+  app.rulerGoTo("reticle");
+  await new Promise(r => setTimeout(r, 400));
+  const lgRet = Math.log10(R.objects.find(o => o.id === "reticle").m);
+  const shownNow = D.getElementById("rulScale").textContent;
+  checks.push({ label: "jumping centres the target", ok: shownNow.includes("33") || shownNow.includes("32"),
+                actual: shownNow, expected: "≈ 33 mm across the view" });
+}
+
+
+/* findings that point at the ruler must land on a real object */
+{
+  const R = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/ruler.json"), "utf8"));
+  const rIds = new Set(R.objects.map(o => o.id));
+  const bad = app.notes.all.filter(n => n.ruler && !rIds.has(n.ruler)).map(n => n.id);
+  checks.push({ label: "findings link to real ruler objects", ok: bad.length === 0,
+                actual: bad.length ? bad.join(", ") : "all resolve", expected: "all resolve" });
+
+  app.openStation("cowos");
+  const rb = D.querySelector("#shB [data-ruler]");
+  is("a finding offers the ruler", !!rb, true);
+  if (rb) {
+    rb.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise(r => setTimeout(r, 400));
+    is("it lands on the ruler", D.getElementById("v-rul").classList.contains("on"), true);
+  }
+}
+
 /* ---- report ---- */
 const failed = checks.filter(c => !c.ok);
 const pad = s => String(s).padEnd(34);
