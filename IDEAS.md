@@ -2,6 +2,14 @@
 
 *Learning-first expansion paths. Written as an alternative and a complement to PLAN.md.*
 
+> **Status — 11 Aug 2026.** This document is the thinking, not the plan of record. See **`ROADMAP.md`** for what shipped and what is next.
+>
+> **Built:** §1 The Cascade · §2 The Ruler · §8 the provenance layer (as the Method page)
+> **Next:** §4 The Atlas · §5 The Time Machine · §6 The Counterfactual Engine
+> **Not started:** §3 Process Theatre · §7 The Living Frontier · the remaining multipliers
+>
+> The structure proposed at the end was adopted with one change: the Cascade and Ruler became sibling tabs rather than living together inside one "Ruler" room, and Method sits outside the tab group because it is meta rather than content.
+
 ---
 
 ## The reframe
