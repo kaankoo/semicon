@@ -86,6 +86,26 @@ Views never import each other. Each registers the actions others need on `app`, 
 
 ---
 
+## Against the grain
+
+`data/static/notes.json` holds findings that contradict what most people assume — six of them so far. Each is load-bearing: it changes how the rest of the stack reads.
+
+They are first-class objects rather than prose, so one fact surfaces everywhere it applies: as a full callout near the top of every station sheet it touches, as a one-line flag at the relevant Cascade step, and collected on the Method page. Add a note, name the stations it belongs to, and it appears in all three places. `npm run check` fails if it names a station, stratum or cascade step that does not exist, or if it would surface nowhere.
+
+The heaviest one: **most of the silicon in an AI accelerator is memory, not compute** — roughly 1,600 mm² of logic against 6,000–7,500 mm² of HBM. It explains why the binding constraint sits in strata 08 and 09 rather than 10.
+
+---
+
+## Method
+
+Every claim on the site, grouped by how much you should trust it — **judgement**, **curated**, **cited**, **derived** — with judgement listed first because those are the calls that shape the site most and defend themselves least.
+
+The page is generated from the same JSON the site runs on. The assumption ledger comes straight out of `cascade.json`; the counts come from the live corpus. It cannot drift out of date relative to what you are reading, and the build fails if a parameter loses its source or falls outside its own declared range.
+
+It also says where the site is most likely wrong. That section is the point of the page.
+
+---
+
 ## The Cascade
 
 One answer, followed backwards through the whole stack until it arrives at rock.

@@ -23,6 +23,7 @@
     <button role="tab" aria-selected="false" data-view="cas">Cascade</button>
     <button role="tab" aria-selected="false" data-view="idx">Index</button>
   </div>
+  <button class="mthlink" data-view="mth" title="Sources, assumptions and limits">Method</button>
   <button class="iconb" id="btnTour" title="Guided descent">
     <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
   </button>
@@ -109,6 +110,67 @@
         <h5>How to argue with this</h5>
         <p>Each step is a single multiplication, and each multiplier is either cited or derived from first principles in the panel behind its <b>how</b> button. The ranges are not error bars in the statistical sense — they are the span between defensible low and high parameter choices, propagated through the chain. Where they are wide, the honest answer is wide.</p>
         <p style="margin-top:14px">The largest single uncertainty by far is <b>energy per output token</b>, which varies by two orders of magnitude between a distilled model answering directly and a frontier model reasoning at length. Nothing else in the chain comes close. Figures last reviewed <b id="casUpd"></b>.</p>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ============ METHOD ============ -->
+  <section class="view" id="v-mth">
+    <div class="mth">
+      <header class="mth__top">
+        <p class="eyebrow">Sources, assumptions and limits</p>
+        <h2 class="cas__h">How this site<br>knows what it <em>claims.</em></h2>
+        <p class="cas__intro" id="mthIntro"></p>
+        <div class="mth__counts" id="mthCount"></div>
+      </header>
+
+      <section class="mth__sec">
+        <h3 class="mth__h">What the words mean</h3>
+        <div class="mth__reads" id="mthRead"></div>
+      </section>
+
+      <section class="mth__sec">
+        <h3 class="mth__h">Where each kind of claim comes from</h3>
+        <p class="mth__lede">Grouped by how much you should trust it, weakest first. Judgement calls are listed before cited figures on purpose — they are the ones that shape the site most and defend themselves least.</p>
+        <div id="mthProv"></div>
+      </section>
+
+      <section class="mth__sec">
+        <h3 class="mth__h">Against the grain</h3>
+        <p class="mth__lede">Findings that contradict what most people assume, collected in one place. Each is load-bearing: it changes how the rest of the stack reads.</p>
+        <div class="mth__grains" id="mthGrain"></div>
+      </section>
+
+      <section class="mth__sec">
+        <h3 class="mth__h">The assumption ledger</h3>
+        <p class="mth__lede">Every parameter behind the Cascade, generated directly from <code>data/static/cascade.json</code> — the same file the calculation reads. If a number changes there, it changes here, and the build fails if it loses its source or falls outside its own range.</p>
+        <div class="mth__tw">
+          <table class="mth__tbl">
+            <thead><tr><th>Switchable assumption</th><th>Options</th><th colspan="3">What it means</th></tr></thead>
+            <tbody id="mthAssume"></tbody>
+          </table>
+        </div>
+        <div class="mth__tw" style="margin-top:16px">
+          <table class="mth__tbl">
+            <thead><tr><th>Parameter</th><th>Central</th><th>Range</th><th>Derivation</th><th>Source</th></tr></thead>
+            <tbody id="mthLedger"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="mth__sec">
+        <h3 class="mth__h">Where this is most likely wrong</h3>
+        <p class="mth__lede">Written by the person who built it, which makes it incomplete by construction. Additions welcome.</p>
+        <div class="mth__lims" id="mthLimits"></div>
+      </section>
+
+      <section class="mth__sec">
+        <h3 class="mth__h">Corrections</h3>
+        <div class="mth__corr" id="mthCorr"></div>
+      </section>
+
+      <footer class="foot">
+        <p>Figures reflect public reporting through <b id="mthVintage"></b> and move fast. Company lists are illustrative of who matters at each link, not exhaustive or ranked. Nothing here is investment advice. Built as a map for understanding, not a database of record. This page last reviewed <b id="mthUpd"></b>.</p>
       </footer>
     </div>
   </section>

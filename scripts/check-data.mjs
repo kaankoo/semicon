@@ -96,6 +96,47 @@ Object.entries(K.stepSources).forEach(([step, cid]) => {
 });
 ok.push(`${K.chain.length}-step cascade`);
 
+/* ---- notes ---- */
+const N = read("notes.json");
+const cascadeIds = new Set([...K.chain, ...K.branches].map(x => x.id));
+const noteIds = new Set();
+N.notes.forEach(n => {
+  if (noteIds.has(n.id)) problems.push(`duplicate note id: ${n.id}`);
+  noteIds.add(n.id);
+  ["title", "figure", "figureNote", "body", "soWhat", "basis"].forEach(f => {
+    if (!n[f]) problems.push(`note ${n.id} is missing "${f}"`);
+  });
+  if (!(n.weight >= 1 && n.weight <= 3)) problems.push(`note ${n.id} has weight ${n.weight}`);
+  if (!["derived", "cited"].includes(n.basis)) problems.push(`note ${n.id} has basis "${n.basis}"`);
+  if (!n.source || !n.source.who) problems.push(`note ${n.id} has no source`);
+  (n.stations || []).forEach(x => { if (!ids.has(x)) problems.push(`note ${n.id} points at unknown station "${x}"`); });
+  (n.strata || []).forEach(x => { if (!L.some(l => l.n === x)) problems.push(`note ${n.id} points at unknown stratum ${x}`); });
+  if (n.cascadeStep && !cascadeIds.has(n.cascadeStep)) problems.push(`note ${n.id} points at unknown cascade step "${n.cascadeStep}"`);
+  if (!(n.stations || []).length && !(n.strata || []).length) problems.push(`note ${n.id} surfaces nowhere`);
+});
+ok.push(`${N.notes.length} findings`);
+
+/* ---- method ---- */
+const MT = read("method.json");
+["intro", "reading", "provenance", "limits", "corrections"].forEach(f => {
+  if (!MT[f]) problems.push(`method.json is missing "${f}"`);
+});
+const KINDS = new Set(["judgement", "curated", "cited", "derived"]);
+MT.provenance.forEach(p => {
+  if (!KINDS.has(p.kind)) problems.push(`provenance "${p.class}" has kind "${p.kind}"`);
+  ["class", "who", "detail", "vintage"].forEach(f => {
+    if (!p[f]) problems.push(`provenance "${p.class}" is missing "${f}"`);
+  });
+});
+MT.limits.forEach(l => { if (!l.title || !l.body) problems.push("a limitation is incomplete"); });
+if (!MT.corrections.repo) problems.push("method.json has no corrections repo");
+/* every judgement-heavy data class the site actually ships must be declared */
+["strata", "station", "Criticality", "Dependency", "Company"].forEach(kw => {
+  if (!MT.provenance.some(p => p.class.toLowerCase().includes(kw.toLowerCase())))
+    problems.push(`provenance does not account for "${kw}"`);
+});
+ok.push(`${MT.provenance.length} provenance classes`);
+
 /* ---- report ---- */
 if (problems.length) {
   console.error(`\n  ✗ ${problems.length} problem${problems.length > 1 ? "s" : ""}\n`);

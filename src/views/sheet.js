@@ -3,6 +3,7 @@
    ============================================================ */
 
 import { app } from "../core/app.js";
+import { forStation, render as renderNote, wireNotes } from "../core/notes.js";
 
 const CRIT = ["Widely sourced", "Concentrated", "Highly concentrated", "Single point of failure"];
 
@@ -21,6 +22,14 @@ function openStation(id) {
   document.getElementById("shS").textContent = s.s;
 
   let h = `<div class="blk"><p>${s.w}</p></div>`;
+
+  /* anything here that cuts against the grain goes high, before the
+     mechanism — it is the part a reader is most likely to have wrong */
+  const notes = forStation(s.i);
+  if (notes.length) {
+    h += `<div class="blk">${notes.map(n => renderNote(n, { links: false })).join("")}</div>`;
+  }
+
   h += `<div class="blk"><h4 class="blk__h">How it actually works</h4>
       <ul class="mech">${s.h.map(x => `<li><span>${x}</span></li>`).join("")}</ul></div>`;
   h += `<div class="blk"><h4 class="blk__h">By the numbers</h4>
@@ -46,6 +55,7 @@ function openStation(id) {
   body.innerHTML = h;
   body.scrollTop = 0;
   body.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => openStation(b.dataset.go)));
+  wireNotes(body);
   const tb = document.getElementById("traceBtn");
   if (tb) tb.addEventListener("click", () => {
     closeSheet();

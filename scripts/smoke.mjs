@@ -197,6 +197,63 @@ app.closeSheet();
                 actual: broken.length ? broken[0] : "every step checks out", expected: "every step checks out" });
 }
 
+
+/* ---------- against the grain ---------- */
+{
+  const N = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/notes.json"), "utf8"));
+  is("notes loaded", app.notes.all.length, N.notes.length);
+
+  /* a station carrying a note must show it, high in the sheet */
+  app.openStation("hbm");
+  const g = D.querySelector("#shB .grain");
+  is("station sheet surfaces its finding", !!g, true);
+  is("finding sits above the mechanism",
+     !!(g && (g.compareDocumentPosition(D.querySelector("#shB .mech")) & 4)), true);
+  atLeast("finding shows a figure", D.querySelector("#shB .grain__fig b")?.textContent.trim().length || 0, 2);
+  is("finding shows a so-what", !!D.querySelector("#shB .grain__s"), true);
+
+  /* a station carrying none must show none */
+  app.openStation("h2o");
+  const waterNotes = N.notes.filter(n => (n.stations || []).includes("h2o")).length;
+  is("water station shows its findings", D.querySelectorAll("#shB .grain").length, waterNotes);
+  app.openStation("ver");
+  is("a station with no finding shows none", D.querySelectorAll("#shB .grain").length, 0);
+  app.closeSheet();
+
+  /* cascade shows inline flags at the steps that have them */
+  app.show("cas");
+  const stepped = N.notes.filter(n => n.cascadeStep).length;
+  is("cascade flags its findings", D.querySelectorAll("#v-cas .grainline").length, stepped);
+}
+
+/* ---------- method ---------- */
+{
+  const MT = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/method.json"), "utf8"));
+  const K = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/cascade.json"), "utf8"));
+  app.show("mth");
+  is("method view active", D.getElementById("v-mth").classList.contains("on"), true);
+  is("reading definitions", D.querySelectorAll("#mthRead .mth__rd").length, MT.reading.length);
+  is("provenance entries", D.querySelectorAll("#mthProv .mth__pv").length, MT.provenance.length);
+  is("limitations", D.querySelectorAll("#mthLimits .mth__lim").length, MT.limits.length);
+  is("every finding collected", D.querySelectorAll("#mthGrain .grain").length, app.notes.all.length);
+  is("assumption ledger", D.querySelectorAll("#mthAssume tr").length, K.assumptions.length);
+  is("parameter ledger", D.querySelectorAll("#mthLedger tr").length, Object.keys(K.constants).length);
+  atLeast("counts rendered", D.querySelectorAll("#mthCount .mth__ct").length, 6);
+
+  /* the ledger must reproduce the live values, not a transcription */
+  const first = Object.entries(K.constants)[0];
+  is("ledger reflects the live corpus",
+     D.querySelector("#mthLedger .mth__p b")?.textContent, first[1].label);
+
+  /* an inline flag must navigate here and find its target */
+  app.show("cas");
+  const flag = D.querySelector("#v-cas .grainline");
+  flag.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+  is("inline flag opens the method page", D.getElementById("v-mth").classList.contains("on"), true);
+  is("inline flag resolves its target",
+     !!D.querySelector(`#mthGrain [data-note="${flag.dataset.noteopen}"]`), true);
+}
+
 /* ---- report ---- */
 const failed = checks.filter(c => !c.ok);
 const pad = s => String(s).padEnd(34);

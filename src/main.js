@@ -15,6 +15,8 @@ import { initWeb } from "./views/web.js";
 import { initTable } from "./views/table.js";
 import { initTour } from "./views/tour.js";
 import { initCascade } from "./views/cascade.js";
+import { initMethod } from "./views/method.js";
+import { loadNotes } from "./core/notes.js";
 
 function fail(err) {
   console.error(err);
@@ -30,6 +32,7 @@ function fail(err) {
 
 async function boot() {
   await loadData();
+  await loadNotes();
 
   initDescent();
   initSheet();
@@ -37,6 +40,7 @@ async function boot() {
   initTable();
   initTour();
   await initCascade();
+  await initMethod();
   initRouter();
 
   document.documentElement.classList.add("ready");

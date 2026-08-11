@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "updated": "2026-08-11",
+    "vintage": "mid-2026"
+  },
+
+  "intro": "This site makes a lot of claims. This page says where each kind of claim comes from, which parts are measurement and which are judgement, and where it is most likely to be wrong. Nothing here is hidden behind a methodology PDF — the same JSON files that render the site render this page, so it cannot drift out of date relative to what you are reading.",
+
+  "reading": [
+    {
+      "term": "Stratum",
+      "def": "One layer of the stack. There are 27, ordered by physical depth — 01 is rock in the ground, 27 is everything the chain leaves behind. The ordering is a claim about dependency, not about importance."
+    },
+    {
+      "term": "Station",
+      "def": "A distinct technology, process or market inside a stratum, with its own physics and its own incumbents. There are 131. A station is drawn where an engineer would recognise a boundary, not where an analyst would."
+    },
+    {
+      "term": "Criticality",
+      "def": "The coloured pips on a card, 0–3. Three magenta pips means a genuine single point of failure for the whole industry. This is a hand-assigned judgement about concentration and substitutability — it is the most subjective number on the site and it is not derived from data."
+    },
+    {
+      "term": "Dependency edge",
+      "def": "A directed link meaning this station cannot function without that one. There are 356. They are written from physical and commercial necessity, not from filings or co-mention — which is why the graph knows things no filing-derived dataset does."
+    },
+    {
+      "term": "Organisation",
+      "def": "A company, institute or state body operating at a station. There are 533 across 40+ jurisdictions. Lists are illustrative of who matters at each link — they are not exhaustive, not ranked, and not a market-share estimate."
+    }
+  ],
+
+  "provenance": [
+    {
+      "class": "The 27 strata and 131 stations",
+      "kind": "judgement",
+      "who": "Hand-written for this site",
+      "detail": "Structure, ordering, prose and the choice of where one station ends and the next begins. Informed by public technical literature, earnings calls and vendor documentation, but the taxonomy itself is an editorial claim.",
+      "vintage": "mid-2026"
+    },
+    {
+      "class": "Criticality ratings",
+      "kind": "judgement",
+      "who": "Hand-assigned",
+      "detail": "A 0–3 read on how concentrated and how substitutable each link is. No formula. Where a computed concentration measure is later added, both will be shown side by side rather than one replacing the other.",
+      "vintage": "mid-2026"
+    },
+    {
+      "class": "Dependency graph",
+      "kind": "judgement",
+      "who": "Hand-written",
+      "detail": "356 edges asserting physical and commercial necessity. Validated for structural soundness on every build — no orphan references, no self-loops, every station reachable — but soundness is not correctness.",
+      "vintage": "mid-2026"
+    },
+    {
+      "class": "Company lists and roles",
+      "kind": "curated",
+      "who": "Public sources",
+      "detail": "Compiled from company disclosures, trade press and technical literature. Illustrative rather than exhaustive; inclusion is a claim that an organisation matters at that link, not that it leads it.",
+      "vintage": "mid-2026"
+    },
+    {
+      "class": "Key figures on station cards",
+      "kind": "cited",
+      "who": "Public reporting",
+      "detail": "Capacities, purities, shares and dates from public reporting through mid-2026. These move fast. Treat them as of that vintage, not as live data.",
+      "vintage": "mid-2026"
+    },
+    {
+      "class": "Inference energy and water",
+      "kind": "cited",
+      "who": "Google Cloud · Epoch AI",
+      "detail": "Google's 2025 disclosure gives 0.24 Wh and 0.26 mL for a median Gemini text prompt on a comprehensive basis, against 0.10 Wh counting active accelerators only. Epoch AI places per-output-token energy across roughly two orders of magnitude by model class.",
+      "url": "https://cloud.google.com/blog/products/infrastructure/measuring-the-environmental-impact-of-ai-inference",
+      "vintage": "2025"
+    },
+    {
+      "class": "Fab water and electricity",
+      "kind": "cited",
+      "who": "Journal of Cleaner Production",
+      "detail": "Per-cm² industry figures for ultra-pure water and electricity, scaled to a 300 mm wafer. Industry averages across nodes, not leading-edge specific — likely conservative for the most advanced fabs.",
+      "url": "https://www.sciencedirect.com/science/article/pii/S2666445323000041",
+      "vintage": "2023"
+    },
+    {
+      "class": "Accelerator geometry",
+      "kind": "cited",
+      "who": "NVIDIA · Micron",
+      "detail": "Die counts, reticle limits, transistor counts and HBM stack configurations from vendor documentation. Individual HBM die areas are bounded by the published 11 × 11 mm package rather than disclosed directly.",
+      "url": "https://www.nvidia.com/en-us/data-center/technologies/blackwell-architecture/",
+      "vintage": "2024–26"
+    },
+    {
+      "class": "Silicon geometry and stoichiometry",
+      "kind": "derived",
+      "who": "First principles",
+      "detail": "Wafer mass from area × thickness × density. Polysilicon consumption from kerf and ingot crop. Quartzite from the SiO₂ : Si mass ratio and assumed process yields. Every derivation is written out in full behind the relevant step in the Cascade.",
+      "vintage": "—"
+    }
+  ],
+
+  "limits": [
+    {
+      "title": "Criticality is a judgement, not a measurement",
+      "body": "The pips are the most influential and least defensible numbers on the site. They shape which stations look alarming and which look routine. They come from reading, not from data, and a well-informed reader will disagree with several of them."
+    },
+    {
+      "title": "Company lists are illustrative",
+      "body": "533 organisations sounds comprehensive and is not. Whole categories of supplier are represented by two or three names. Absence from a list means nothing; presence means only that the organisation is worth knowing about at that link."
+    },
+    {
+      "title": "The Cascade's central case is a configuration, not an average",
+      "body": "It describes one plausible way of serving one kind of request on one class of hardware. It is not an industry mean, and multiplying it by global token volume would be a mistake. The ranges shown are the span between defensible parameter choices, not statistical confidence intervals."
+    },
+    {
+      "title": "Fab figures are industry averages",
+      "body": "Water and electricity per wafer come from cross-industry data spanning many nodes. A leading-edge logic fab is plausibly worse than the average and a mature analog fab plausibly better. The chain treats them as one number because a better public one does not exist."
+    },
+    {
+      "title": "Everything is mid-2026 vintage",
+      "body": "Capacities, roadmap dates, ownership and export-control regimes in this field change on a scale of months. Nothing on this site is live. Where a figure has a date attached, believe the date."
+    },
+    {
+      "title": "This is not investment advice",
+      "body": "No recommendations, no price targets, no view on any security. The site is built as a map for understanding, not a database of record and not a basis for a trade."
+    }
+  ],
+
+  "corrections": {
+    "body": "The corpus is hand-curated and certainly contains errors. Corrections are the single most valuable contribution — a wrong figure, a missing organisation, a dependency that does not actually hold, a chokepoint that has quietly been resolved. Open an issue with a source and it will be fixed and credited.",
+    "repo": "https://github.com/kaankoo/semicon"
+  }
+}

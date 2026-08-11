@@ -4,6 +4,7 @@
 
 import { app } from "../core/app.js";
 import { compute, fmt, UNIT_OF } from "../lib/cascade.js";
+import { forStep, renderInline, wireNotes } from "../core/notes.js";
 
 let D = null;
 const picks = {};
@@ -71,6 +72,7 @@ function row(step, res, isFirst) {
           ${src ? `<button class="cas__how" data-src="${src}">how ▾</button>` : ""}
         </div>
         ${src ? sourceNote(src) : ""}
+        ${forStep(step.id).map(renderInline).join("")}
       </div>
     </div>`;
 }
@@ -91,6 +93,7 @@ function branchCard(b, res) {
         ${b.via && D.constants[b.via] ? `<button class="cas__how" data-src="${b.via}">how ▾</button>` : ""}
       </div>
       ${b.via && D.constants[b.via] ? sourceNote(b.via) : ""}
+      ${forStep(b.id).map(renderInline).join("")}
     </div>`;
 }
 
@@ -130,6 +133,7 @@ function render() {
 }
 
 function wire() {
+  wireNotes(document.getElementById("v-cas"));
   document.querySelectorAll("#v-cas [data-station]").forEach(b =>
     b.addEventListener("click", () => app.openStation(b.dataset.station)));
 
