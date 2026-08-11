@@ -29,7 +29,6 @@ src/
     app.js                 shared state + late-bound actions
     data.js                loads the corpus, builds the indexes
     router.js              view switching
-  core/
     notes.js               findings that cut against the grain
   lib/
     cascade.js             the unit-conversion chain and its arithmetic
