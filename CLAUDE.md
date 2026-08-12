@@ -1,12 +1,12 @@
 # Working on Sand to Sentence
 
-Read this file, then read **only what the routing table below tells you to**. The corpus is 430 KB; opening it whole burns the session for nothing.
+Read this file, then read **only what the routing table below tells you to**. The corpus is 445 KB; opening it whole burns the session for nothing.
 
 ---
 
 ## What this is
 
-A static, dependency-free site mapping the AI economy as 27 physical strata → 131 stations → 533 organisations, plus derived views (Ruler, Atlas, Lag, Cascade, Method). Hand-curated knowledge is the asset; the code is thin.
+A static, dependency-free site mapping the AI economy as 27 physical strata → 131 stations → 533 organisations, plus derived views (Ruler, Atlas, Lag, Faults, Cascade, Method). Hand-curated knowledge is the asset; the code is thin.
 
 **Live:** GitHub Pages from `main`, public repo `kaankoo/semicon`. Deploys on push, gated on `npm test`.
 
@@ -36,20 +36,21 @@ npm run peek -- --stratum 9  # a whole stratum
 ## Architecture
 
 ```
-index.html            markup shell only — 8 view sections, no logic
+index.html            markup shell only — 9 view sections, no logic
 src/main.js           boot: loadData → loadNotes → init each view → initRouter
 src/core/app.js       shared state + late-bound action registry   ← read this first
 src/core/data.js      loads strata/stations/edges, builds byId, byL, UP, DN
-src/core/router.js    view switching (#v-strata #v-web #v-rul #v-atl #v-tml #v-cas #v-mth #v-idx)
+src/core/router.js    view switching (#v-strata #v-web #v-rul #v-atl #v-tml #v-flt #v-cas #v-mth #v-idx)
 src/core/notes.js     "against the grain" findings, indexed by station/stratum/step
 src/lib/cascade.js    the unit-conversion arithmetic + fmt + reconcile
+src/lib/graph.js      cone / coneOfAll / hops over the dependency edges
 src/lib/glyphs.js     15 procedural SVG shapes for the Ruler
 src/lib/projection.js equirectangular projection, geodesic rings, graticule
-src/views/*.js        descent web ruler atlas timeline cascade method sheet table tour
+src/views/*.js        descent web ruler atlas timeline faults cascade method sheet table tour
 src/styles/app.css    one stylesheet, sectioned by banner comment
 ```
 
-Boot order matters only in that every view registers before `initRouter`. `initRuler`, `initAtlas`, `initTimeline`, `initCascade` and `initMethod` are `await`ed because they fetch their own data.
+Boot order matters only in that every view registers before `initRouter`. `initRuler`, `initAtlas`, `initTimeline`, `initFaults`, `initCascade` and `initMethod` are `await`ed because they fetch their own data.
 
 ---
 
@@ -68,6 +69,10 @@ Boot order matters only in that every view registers before `initRouter`. `initR
 | Bug in the Lag chart | `src/views/timeline.js`, `data/static/timeline.json` | stations.json |
 | A bar is the wrong length, or in the wrong place | `data/static/timeline.json` only — `invented`, `shipped` and `stratum` are the whole story | the JS |
 | A date is disputed | `data/static/timeline.json` — every event cites the paper or patent, and `confidence` says how firm it is | — |
+| Bug in the Faults page | `src/views/faults.js`, `data/static/counterfactuals.json` | stations.json |
+| A blast radius looks wrong | `data/static/edges.json` — reach is the graph, not the view. Check the edges before the JS | the JS |
+| A reroute or dead-end is disputed | `data/static/counterfactuals.json` — every one is individually argued and sourced | — |
+| Traversal problem in Web or Faults | `src/lib/graph.js` (40 lines, pure, no DOM) | — |
 | Bug in the dependency web | `src/views/web.js`, `data/static/edges.json` | stations.json |
 | Bug in the descent / cards / rail | `src/views/descent.js` | stations.json |
 | Bug in a station sheet | `src/views/sheet.js`, then `npm run peek -- <id>` | stations.json |
@@ -75,15 +80,16 @@ Boot order matters only in that every view registers before `initRouter`. `initR
 | Bug in the Method page | `src/views/method.js`, `data/static/method.json` | stations.json |
 | Wrong tab opens / nav broken | `src/core/router.js` (21 lines), nav block at `index.html:20-29` | — |
 | A finding shows in the wrong place | `src/core/notes.js`, `data/static/notes.json` | — |
+| A finding's cross-view button goes nowhere | `src/core/notes.js` `wireNotes()` — one block per target view | — |
 | Edit station prose or companies | `npm run peek -- <id>` then a targeted `Edit` on stations.json | the whole file |
 | Add a station | `data/static/stations.json` (append), `data/static/edges.json`, then `npm test` | — |
-| Styling | `src/styles/app.css` — grep the section banner, do not read 834 lines | — |
+| Styling | `src/styles/app.css` — grep the section banner, do not read 922 lines | — |
 | A test fails | `scripts/smoke.mjs` section markers below | — |
 | Adding a data file | `scripts/check-data.mjs` — validation is mandatory, not optional | — |
 
 ### Finding things inside the big files
 
-`src/styles/app.css` (834 lines) is sectioned. Grep for the banner, then read ±40 lines:
+`src/styles/app.css` (922 lines) is sectioned. Grep for the banner, then read ±40 lines:
 
 | Section | Banner to grep | ~line | Class prefixes |
 |---|---|---|---|
@@ -94,12 +100,13 @@ Boot order matters only in that every view registers before `initRouter`. `initR
 | Ruler | `   RULER` | 621 | `.rul` |
 | Atlas | `   ATLAS` | 692 | `.atl` |
 | Lag | `   LAG` | 767 | `.tml` |
+| Faults | `   FAULTS` | 837 | `.flt` |
 
-`scripts/smoke.mjs` sections: `---- behaviour ----` · `---------- cascade ----------` · `---------- against the grain ----------` · `---------- method ----------` · `---------- ruler ----------` · `---------- atlas ----------` · `---------- lag ----------` · `---- report ----`.
+`scripts/smoke.mjs` sections: `---- behaviour ----` · `---------- cascade ----------` · `---------- against the grain ----------` · `---------- method ----------` · `---------- ruler ----------` · `---------- atlas ----------` · `---------- lag ----------` · `---------- faults ----------` · `---- report ----`.
 
-`scripts/check-data.mjs` sections: `---- strata/stations/edges/organisations/cascade/notes/method/ruler/atlas/timeline ----`.
+`scripts/check-data.mjs` sections: `---- strata/stations/edges/organisations/cascade/notes/method/ruler/atlas/timeline/counterfactuals ----`.
 
-`index.html` (~300 lines) — grep `============ ` for the view sections. Safe to read whole.
+`index.html` (370 lines) — grep `============ ` for the view sections. Safe to read whole.
 
 ---
 
@@ -115,7 +122,8 @@ Boot order matters only in that every view registers before `initRouter`. `initR
 | `atlas.json` | 320 ln | 56 sites: `{id,lat,lon,label,place,kind,radiusKm,stations[],precision,regime,risk,note,source}` | atlas block |
 | `world.json` | **generated** | coastline + boundaries as two path strings in lon/lat, 56 KB | atlas block |
 | `timeline.json` | 379 ln | 70 capabilities: `{id,stratum,station,label,invented,shipped,waitedFor,confidence,note,source}` | timeline block |
-| `notes.json` | 133 ln | 8 findings, each naming stations/strata/cascadeStep/ruler/atlas/timeline | notes block |
+| `counterfactuals.json` | 178 ln | 8 scenarios: `{id,title,removes[],essay,leadTimeYears,precedent,reroutes[],deadEnds[]}` | counterfactuals block |
+| `notes.json` | 148 ln | 9 findings, each naming stations/strata/cascadeStep/ruler/atlas/timeline | notes block |
 | `method.json` | 139 ln | provenance by kind, reading definitions, known limits | method block |
 
 Station record shape — `i` id, `L` stratum, `n` name, `s` tagline, `w` what it is, `h[]` mechanism bullets, `k[][]` key figures, `c` criticality 0–3, `x` chokepoint prose, `co[][]` `[name, role, domain, jurisdiction]`.
@@ -170,4 +178,4 @@ Station record shape — `i` id, `L` stratum, `n` name, `s` tagline, `w` what it
 | Style leaks between views | a prefix collision — every view owns a prefix | `src/styles/app.css` |
 | CI red, local green | `npm ci` vs `npm install`, or a file not committed | `.github/workflows/deploy.yml` |
 
-**First move for any bug: `npm test`.** 153 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
+**First move for any bug: `npm test`.** 180 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.

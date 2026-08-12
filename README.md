@@ -32,6 +32,7 @@ src/
     notes.js               findings that cut against the grain
   lib/
     cascade.js             the unit-conversion chain and its arithmetic
+    graph.js               traversal over the dependency edges
     glyphs.js              schematic shapes for the Ruler
     projection.js          equirectangular projection, geodesics, graticule
   views/
@@ -40,6 +41,7 @@ src/
     ruler.js               seventeen orders of magnitude, to scale
     atlas.js               where the stack physically is
     timeline.js            how long each capability waited
+    faults.js              what breaks if a link is cut
     cascade.js             sand to sentence, quantified
     method.js              sources, assumptions and limits
     sheet.js               station dossiers
@@ -55,6 +57,7 @@ data/static/
   atlas.json               56 sites, each anchored to stations
   world.json               simplified coastline and boundaries, 56 KB
   timeline.json            70 capabilities, invented and shipped
+  counterfactuals.json     8 scenarios, reach against judgement
   notes.json               counterintuitive findings
   method.json              provenance and known limits
 scripts/
@@ -140,9 +143,23 @@ The finding it exists for is sharper than the gradient. Twelve capabilities wait
 
 ---
 
+## Faults
+
+Remove a station, walk the dependency graph downstream, and draw what is reachable. Eight scenarios: specialty gases, critical minerals, Spruce Pine, EUV, advanced packaging, HBM, CUDA, Taiwan.
+
+The view has two voices and never blends them. **Reach** is arithmetic — the set of stations that depend on the removed one, computed with the same `cone()` the Web lights its supply traces with, which is why that function now lives in `src/lib/graph.js` rather than inside a view. **Reroutes** and **dead-ends** are hand-written judgement laid on top, drawn in different colours and counted separately. The **unclassified remainder** is left visible, and on most scenarios it is the large majority of the blast radius; `npm test` fails if any scenario ever classifies its whole reach, because a map that claims to know everything is the easiest kind to make dishonest.
+
+The build also refuses to let the essays drift from the corpus: a declared reroute or dead-end must name a station the graph actually connects to the removal, no station may be classified twice, and every cited precedent must resolve to a real capability on the Lag chart.
+
+The headline is a comparison the graph computes: **the widest blast radius here reaches 101 of 131 stations and routes around itself in about two years** — it already did, in 2022, when Ukrainian neon stopped. The scenario that takes a decade reaches 70. `check-data.mjs` fails if those ever stop being different faults, or if the wider one stops being the faster one, because at that point the page's argument has evaporated.
+
+That argument is the ninth finding: ranking exposure by how much of a network a node touches — which is what a graph can compute, and therefore what most supply-chain maps do — puts the answer close to backwards.
+
+---
+
 ## Against the grain
 
-`data/static/notes.json` holds findings that contradict what most people assume — eight of them so far. Each is load-bearing: it changes how the rest of the stack reads.
+`data/static/notes.json` holds findings that contradict what most people assume — nine of them so far. Each is load-bearing: it changes how the rest of the stack reads.
 
 They are first-class objects rather than prose, so one fact surfaces everywhere it applies: as a full callout near the top of every station sheet it touches, as a one-line flag at the relevant Cascade step, and collected on the Method page — and, where it names one, a button through to the object on the Ruler or the site on the Atlas. Add a note, name the stations it belongs to, and it appears in all of them. `npm run check` fails if it names a station, stratum, cascade step, ruler object or atlas site that does not exist, or if it would surface nowhere.
 

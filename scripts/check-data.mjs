@@ -316,6 +316,114 @@ L.forEach(l => {
 }
 ok.push(`${TL.events.length} timeline events`);
 
+/* ---- counterfactuals ---- */
+const CF = read("counterfactuals.json");
+const TIERS = new Set((CF.meta.tiers || []).map(t => t.id));
+const tlIds = new Set(TL.events.map(e => e.id));
+const faultIds = new Set();
+
+["updated", "framing", "note", "tiers", "caveat", "leadTimes"].forEach(k => {
+  if (!CF.meta[k]) problems.push(`counterfactuals.json meta is missing "${k}"`);
+});
+["removed", "dead", "reroute", "reach", "clear"].forEach(t => {
+  if (!TIERS.has(t)) problems.push(`counterfactuals.json does not declare the "${t}" tier`);
+});
+
+/* the same downstream walk the view does, so validation and rendering
+   cannot disagree about what a fault reaches */
+const DNmap = {};
+S.forEach(s => { DNmap[s.i] = []; });
+Object.keys(E).forEach(k => {
+  if (!ids.has(k)) return;
+  E[k].forEach(u => { if (ids.has(u) && u !== k) DNmap[u].push(k); });
+});
+function downstream(seeds) {
+  const seed = new Set(seeds), out = new Set(), q = [...seeds];
+  while (q.length) {
+    const k = q.pop();
+    (DNmap[k] || []).forEach(x => { if (!out.has(x) && !seed.has(x)) { out.add(x); q.push(x); } });
+  }
+  return out;
+}
+
+CF.faults.forEach(f => {
+  if (faultIds.has(f.id)) problems.push(`duplicate fault: ${f.id}`);
+  faultIds.add(f.id);
+  ["title", "sub", "essay"].forEach(k => { if (!f[k]) problems.push(`fault ${f.id} is missing "${k}"`); });
+  if (!f.source || !f.source.who) problems.push(`fault ${f.id} has no source`);
+  if (!Array.isArray(f.removes) || !f.removes.length) problems.push(`fault ${f.id} removes nothing`);
+  if (!(f.leadTimeYears >= 0)) problems.push(`fault ${f.id} has lead time ${f.leadTimeYears}`);
+  if (f.precedent && !tlIds.has(f.precedent))
+    problems.push(`fault ${f.id} cites unknown precedent "${f.precedent}"`);
+  f.removes.forEach(x => { if (!ids.has(x)) problems.push(`fault ${f.id} removes unknown station "${x}"`); });
+
+  const reach = downstream(f.removes.filter(x => ids.has(x)));
+  if (!reach.size) problems.push(`fault ${f.id} reaches nothing — check its removals`);
+
+  /* the load-bearing check: you may not declare a consequence for a
+     station the graph does not actually connect to the removal. This is
+     what stops the essays drifting away from the corpus. */
+  const seen = new Set();
+  const claimAt = (kind, station, extra) => {
+    if (!ids.has(station)) { problems.push(`fault ${f.id} ${kind} names unknown station "${station}"`); return; }
+    if (!reach.has(station))
+      problems.push(`fault ${f.id} declares ${station} a ${kind}, but it is not downstream of ${f.removes.join("+")}`);
+    if (seen.has(station))
+      problems.push(`fault ${f.id} classifies ${station} twice`);
+    seen.add(station);
+    if (!extra) problems.push(`fault ${f.id} ${kind} for ${station} has no explanation`);
+  };
+  (f.reroutes || []).forEach(r => {
+    claimAt("reroute", r.station, r.how);
+    if (!(r.leadTimeYears >= 0)) problems.push(`fault ${f.id} reroute ${r.station} has lead time ${r.leadTimeYears}`);
+    if (r.timeline && !tlIds.has(r.timeline))
+      problems.push(`fault ${f.id} reroute ${r.station} cites unknown timeline event "${r.timeline}"`);
+  });
+  (f.deadEnds || []).forEach(d => claimAt("dead-end", d.station, d.why));
+
+  /* a scenario that claims to have classified everything is not being
+     honest about what a dependency graph can tell you */
+  if (seen.size >= reach.size)
+    problems.push(`fault ${f.id} classifies all ${reach.size} downstream stations — the unclassified remainder is the honest part`);
+});
+
+/* the page's headline compares the widest blast radius against the
+   slowest recovery. If those stop being different faults, the sentence
+   stops meaning anything. */
+{
+  const rows = CF.faults.map(f => ({ id: f.id, n: downstream(f.removes).size, lead: f.leadTimeYears }));
+  const widest = rows.reduce((a, b) => (b.n > a.n ? b : a));
+  const slowest = rows.reduce((a, b) => (b.lead > a.lead ? b : a));
+  if (widest.id === slowest.id)
+    problems.push(`the widest blast radius and the slowest recovery are both "${widest.id}", ` +
+                  `so the Faults headline no longer says anything — rewrite it`);
+  if (widest.lead >= slowest.lead)
+    problems.push(`the widest fault now takes as long to reroute as the slowest, ` +
+                  `which contradicts the claim the page makes`);
+}
+/* findings that point at a scenario must land on a real one */
+N.notes.forEach(n => {
+  if (n.faults && !faultIds.has(n.faults)) problems.push(`note ${n.id} points at unknown fault "${n.faults}"`);
+});
+
+/* the finding this page argues for names two numbers in prose, both of
+   them computed. Hold the sentence to the graph. */
+{
+  const note = N.notes.find(n => n.id === "reach-is-not-damage");
+  const reachOf = id => downstream(CF.faults.find(f => f.id === id).removes).size;
+  if (!note) problems.push('the "reach-is-not-damage" finding is missing, but the Faults page argues for it');
+  else {
+    const want = `${reachOf("gases")} vs ${reachOf("taiwan")}`;
+    if (note.figure !== want)
+      problems.push(`finding "reach-is-not-damage" reads "${note.figure}" but the graph now says ` +
+                    `"${want}" — update its figure and its body together`);
+    const dead = CF.faults.find(f => f.id === "taiwan").deadEnds.length;
+    if (!note.body.includes(`${dead === 5 ? "five" : dead} declared dead-end`))
+      problems.push(`finding "reach-is-not-damage" says a different number of Taiwan dead-ends than the ${dead} declared`);
+  }
+}
+ok.push(`${CF.faults.length} counterfactuals`);
+
 /* ---- report ---- */
 if (problems.length) {
   console.error(`\n  ✗ ${problems.length} problem${problems.length > 1 ? "s" : ""}\n`);

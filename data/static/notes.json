@@ -128,6 +128,21 @@
       "timeline": "microchannel",
       "basis": "derived",
       "source": { "who": "This site", "what": "the Lag chart — 68 capabilities, each with the reason it waited", "url": null }
+    },
+    {
+      "id": "reach-is-not-damage",
+      "weight": 3,
+      "title": "The widest blast radius in the stack is the one that already healed",
+      "figure": "101 vs 70",
+      "figureNote": "stations downstream of a gas shock, against a Taiwan interdiction",
+      "body": "Remove industrial and specialty gases from the dependency graph and the walk downstream reaches <b>101 of 131 stations</b> — the largest number this corpus can produce. Remove Taiwan's foundries, packaging and test and it reaches <b>70</b>. Then look at what happened. In 2022 roughly half the world's semiconductor-grade neon came from two Ukrainian producers and stopped; prices spiked, buyers qualified Korean and Chinese supply, and within about two years the market had reorganised around it. No fab closed. The Taiwan scenario has <b>five declared dead-ends</b> and a decade in front of it.",
+      "soWhat": "Supply-chain maps rank exposure by how much of the network a node touches, because reach is the number a graph can actually compute. On this corpus that ranking is close to backwards. What decides the damage is not how far it travels but whether there is a second supplier at the far end — and that is a fact about the world which no amount of graph traversal will give you. It is why the Faults page draws its arithmetic and its judgement in different colours and refuses to add them up.",
+      "stations": ["gas", "fdry", "cowos", "hbm"],
+      "strata": [1, 7, 9],
+      "faults": "taiwan",
+      "timeline": "neon",
+      "basis": "derived",
+      "source": { "who": "This site", "what": "the Faults page — graph reach against hand-declared reroutes and dead-ends", "url": null }
     }
   ]
 }

@@ -23,6 +23,7 @@
     <button role="tab" aria-selected="false" data-view="rul">Ruler</button>
     <button role="tab" aria-selected="false" data-view="atl">Atlas</button>
     <button role="tab" aria-selected="false" data-view="tml">Lag</button>
+    <button role="tab" aria-selected="false" data-view="flt">Faults</button>
     <button role="tab" aria-selected="false" data-view="cas">Cascade</button>
     <button role="tab" aria-selected="false" data-view="idx">Index</button>
   </div>
@@ -184,6 +185,39 @@
         <p style="margin-top:14px">While the scrubber is short of today, each bar is drawn twice: solid as far as the year you are standing in, and faint for the rest of the wait. The faint part is the answer — it is what the wait turned out to be, not what anyone knew at the time.</p>
         <p style="margin-top:14px">Four entries have <b>no right-hand end</b>. They work in a lab or in early production and have no volume date, and this view will not invent one — an arrow is not a forecast. A handful of bars run off the <b>left edge</b>: they were finished before 1947 and waited for an industry to exist. Their true year is in the panel.</p>
         <p style="margin-top:14px">The events are <b>chosen, not enumerated</b>. The medians in the headline are properties of this selection, not measurements of the industry — honest about a pattern, useless as a dataset. There is a survivorship problem built in, too: capabilities that never shipped at all mostly do not appear, because nobody writes their history. Said again, at more length, on <b>Method</b>.</p>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ============ FAULTS ============ -->
+  <section class="view" id="v-flt">
+    <div class="flt">
+      <div class="atl__hud">
+        <p class="eyebrow">Exposure mapping, not prediction</p>
+        <h2 class="rul__h">Cut one link. <em>Follow it up.</em></h2>
+        <p class="rul__i">Remove a station and the dependency graph says what sits downstream of it. That number is arithmetic and it is not damage — what actually reroutes, and what dead-ends, is a separate reading in a separate voice, and this page keeps them apart.</p>
+      </div>
+
+      <div class="flt__claim" id="fltClaim"></div>
+
+      <div class="flt__picks" id="fltPicks" role="group" aria-label="Scenarios"></div>
+
+      <div class="flt__bar">
+        <p class="flt__count" id="fltCount"></p>
+        <div class="atl__legend flt__legend" id="fltLegend"></div>
+      </div>
+
+      <div class="flt__stage">
+        <svg id="fltSvg" aria-label="The 27 strata, with each station shaded by whether it sits downstream of the removed link"></svg>
+      </div>
+
+      <aside class="atl__panel flt__panel" id="fltPanel"></aside>
+
+      <footer class="foot">
+        <h5>How to read this</h5>
+        <p>Each row is a stratum and each cell a station. A <b>white</b> cell is the link the scenario removes. Everything <b>faintly coloured</b> depends on it somewhere up its chain — that is the graph talking, and it makes no claim about whether anything breaks. <b>Amber</b> and <b>magenta</b> cells are a hand-written reading laid on top: amber where a substitute exists and the entry says what it is and roughly how long qualifying it takes, magenta where the reading is that nothing substitutes on a timescale anyone would call a response. The count beside each stratum is how many of its stations the shock reaches.</p>
+        <p style="margin-top:14px">The <b>unclassified remainder</b> is deliberately left visible. On most scenarios it is the large majority of the blast radius, and pretending otherwise would be the single easiest way to make this page dishonest. Lead times are years to a substitute carrying real volume — not first sample, not an announcement — and where a comparable substitution has already happened, the entry links to it on the <b>Lag</b> chart rather than asking you to take the number on trust.</p>
+        <p style="margin-top:14px">Three things this cannot do. It has <b>no per-edge coupling</b>: every dependency is present or absent, when some are fatal and some are an inconvenience. It has <b>no inventory</b>: a shock absorbed by six months of stock looks identical to one absorbed by nothing. And its unit is the station, which is sometimes coarser than the real event — where that matters, the scenario says so in its own words. Nothing here is a forecast, and nothing here is investment advice.</p>
       </footer>
     </div>
   </section>

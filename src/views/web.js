@@ -5,6 +5,7 @@
    ============================================================ */
 
 import { app } from "../core/app.js";
+import { cone } from "../lib/graph.js";
 
 const NS = "http://www.w3.org/2000/svg";
 const RW = 46, W = 1700, PADT = 40;
@@ -79,15 +80,9 @@ function build() {
   });
 }
 
-/* ---------- tracing ---------- */
-function cone(id, map) {
-  const seen = new Set(), q = [id];
-  while (q.length) {
-    const k = q.pop();
-    (map[k] || []).forEach(x => { if (!seen.has(x)) { seen.add(x); q.push(x); } });
-  }
-  return seen;
-}
+/* ---------- tracing ----------
+   `cone` now lives in src/lib/graph.js so the Faults view can walk the
+   graph with exactly this code rather than a copy of it. */
 
 function trace(id, soft) {
   const { UP, DN, byId, col } = app;

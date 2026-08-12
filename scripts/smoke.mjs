@@ -623,6 +623,133 @@ app.closeSheet();
   }
 }
 
+/* ---------- faults ---------- */
+{
+  const CF = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/counterfactuals.json"), "utf8"));
+  const { exposure, tierOf, stats } = await import(pathToFileURL(path.join(ROOT, "src/views/faults.js")).href);
+  const { cone, coneOfAll } = await import(pathToFileURL(path.join(ROOT, "src/lib/graph.js")).href);
+
+  app.show("flt");
+  is("faults view active", D.getElementById("v-flt").classList.contains("on"), true);
+  is("every station is a cell", D.querySelectorAll("#fltSvg .flt__c").length, app.S.length);
+  is("every stratum is a row", D.querySelectorAll("#fltSvg text.flt__l").length, app.L.length);
+  is("scenarios offered", D.querySelectorAll("#fltPicks button").length, CF.faults.length);
+  is("tiers explained", D.querySelectorAll("#fltLegend span").length, CF.meta.tiers.length);
+  atLeast("panel populated", D.getElementById("fltPanel").textContent.trim().length, 400);
+
+  /* the view and the Web must walk the same graph — that is the entire
+     reason cone() was moved into a lib */
+  {
+    const f = CF.faults.find(x => x.id === "euv");
+    const viaLib = coneOfAll(f.removes, app.DN);
+    const viaView = exposure(f).reach;
+    const same = viaLib.size === viaView.size && [...viaLib].every(x => viaView.has(x));
+    checks.push({ label: "faults and the web share one traversal", ok: same,
+                  actual: `${viaView.size} stations both ways`, expected: "identical sets" });
+    /* and a single-seed walk must agree with the multi-seed one */
+    const single = cone("hbm", app.DN), multi = coneOfAll(["hbm"], app.DN);
+    checks.push({ label: "one seed or many, the same walk",
+                  ok: single.size === multi.size && [...single].every(x => multi.has(x)),
+                  actual: `${single.size} stations`, expected: "identical" });
+  }
+
+  /* the rendered exposure must be the graph's number, not the essay's */
+  for (const f of CF.faults) {
+    app.faultsGoTo(f.id);
+    const ex = exposure(f);
+    const shown = D.getElementById("fltCount").textContent.replace(/\s+/g, " ");
+    const nums = (shown.match(/\d+/g) || []).map(Number);
+    const painted = [...D.querySelectorAll("#fltSvg .flt__c")]
+      .filter(c => /flt__c--(reach|dead|reroute)/.test(c.getAttribute("class"))).length;
+    const ok = nums.includes(ex.n) && nums.includes(ex.reroute.size) &&
+               nums.includes(ex.dead.size) && painted === ex.n;
+    checks.push({ label: `${f.id} counts what the graph reaches`, ok,
+                  actual: `renders ${nums.slice(0, 2).join("/")}, graph says ${ex.n}, paints ${painted}`,
+                  expected: `${ex.n} downstream` });
+  }
+
+  /* the tiers must never overlap, or the page is quietly promoting
+     judgement into arithmetic */
+  {
+    const bad = [];
+    for (const f of CF.faults) {
+      const ex = exposure(f);
+      for (const s of app.S) {
+        const t = tierOf(s.i, f, ex);
+        const inReach = ex.reach.has(s.i);
+        if ((t === "dead" || t === "reroute") && !inReach) bad.push(`${f.id}:${s.i}`);
+        if (t === "reach" && (ex.dead.has(s.i) || ex.reroute.has(s.i))) bad.push(`${f.id}:${s.i}`);
+        if (t === "clear" && inReach) bad.push(`${f.id}:${s.i}`);
+      }
+    }
+    checks.push({ label: "no station is in two tiers at once", ok: bad.length === 0,
+                  actual: bad.length ? bad.slice(0, 3).join(", ") : "all 8 scenarios clean",
+                  expected: "disjoint tiers" });
+  }
+
+  /* every scenario must leave something unclassified, or it is claiming
+     to know more than a dependency graph can support */
+  {
+    const over = CF.faults.filter(f => exposure(f).unclassified <= 0).map(f => f.id);
+    checks.push({ label: "nothing claims to have classified it all", ok: over.length === 0,
+                  actual: over.length ? over.join(", ") :
+                    `smallest remainder ${Math.min(...CF.faults.map(f => exposure(f).unclassified))} stations`,
+                  expected: "every scenario leaves a remainder" });
+  }
+
+  /* the headline is a comparison between two different faults */
+  {
+    const s = stats(CF);
+    const shown = D.getElementById("fltClaim").textContent.replace(/\s+/g, " ");
+    const nums = (shown.match(/\d+/g) || []).map(Number);
+    checks.push({ label: "the faults claim reconciles",
+                  ok: nums.includes(s.widest.n) && nums.includes(s.widest.lead) &&
+                      nums.includes(s.slowest.n) && nums.includes(s.slowest.lead),
+                  actual: `widest ${s.widest.id} ${s.widest.n}/${s.widest.lead}y · ` +
+                          `slowest ${s.slowest.id} ${s.slowest.n}/${s.slowest.lead}y`,
+                  expected: "all four numbers rendered" });
+    checks.push({ label: "…and reach still is not damage",
+                  ok: s.widest.id !== s.slowest.id && s.widest.n > s.slowest.n,
+                  actual: `${s.widest.id} reaches more than ${s.slowest.id} and reroutes faster`,
+                  expected: "the two are different faults" });
+  }
+
+  /* a cell opens its station; a precedent lands on the Lag chart */
+  {
+    app.faultsGoTo("taiwan");
+    D.querySelector("#fltSvg .flt__c").dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    is("a cell opens its station", D.getElementById("sheet").classList.contains("on"), true);
+    app.closeSheet();
+
+    const prec = D.querySelector("#fltPanel [data-lag]");
+    is("a scenario cites a precedent", !!prec, true);
+    if (prec) {
+      prec.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      await new Promise(r => setTimeout(r, 300));
+      is("the precedent lands on the Lag chart", D.getElementById("v-tml").classList.contains("on"), true);
+    }
+  }
+}
+
+/* findings that point at a scenario must land on a real one */
+{
+  const CF = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/counterfactuals.json"), "utf8"));
+  const fIds = new Set(CF.faults.map(f => f.id));
+  const bad = app.notes.all.filter(n => n.faults && !fIds.has(n.faults)).map(n => n.id);
+  checks.push({ label: "findings link to real scenarios", ok: bad.length === 0,
+                actual: bad.length ? bad.join(", ") : "all resolve", expected: "all resolve" });
+
+  app.openStation("gas");
+  const fb = D.querySelector("#shB [data-fault]");
+  is("a finding offers the scenario", !!fb, true);
+  if (fb) {
+    fb.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise(r => setTimeout(r, 300));
+    is("it lands on the faults page", D.getElementById("v-flt").classList.contains("on"), true);
+    is("…on the right scenario", D.querySelector("#fltPanel .atl__pn")?.textContent, "Taiwan is interdicted");
+  }
+}
+
 /* ---- report ---- */
 const failed = checks.filter(c => !c.ok);
 const pad = s => String(s).padEnd(34);

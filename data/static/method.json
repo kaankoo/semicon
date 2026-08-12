@@ -111,6 +111,20 @@
       "vintage": "mid-2026"
     },
     {
+      "class": "Blast radius on the Faults page",
+      "kind": "derived",
+      "who": "The dependency graph",
+      "detail": "Remove a station and walk every edge downstream. The result is reach: the set of stations that depend on the removed one somewhere up their chain. It is arithmetic over the same traversal the Web lights its supply cones with, and it is not a claim about damage — a link with enormous reach and three suppliers is a nuisance, and a link with modest reach and no substitute is a decade.",
+      "vintage": "—"
+    },
+    {
+      "class": "Reroutes and dead-ends",
+      "kind": "judgement",
+      "who": "Hand-written",
+      "detail": "For each scenario, a reading of which downstream links have a credible substitute and roughly how long qualifying it takes, and which have none on any timescale worth calling a response. Lead times are years to real volume, not to first sample. The build enforces that a declared consequence names a station the graph actually connects to the removal, and that no scenario classifies its entire blast radius — on most of them the large majority is left explicitly unclassified, which is the honest size of what this reading does not claim to know.",
+      "vintage": "mid-2026"
+    },
+    {
       "class": "Invention and shipping dates",
       "kind": "curated",
       "who": "Primary papers, patents and vendor announcements",
@@ -157,6 +171,10 @@
     {
       "title": "Fab figures are industry averages",
       "body": "Water and electricity per wafer come from cross-industry data spanning many nodes. A leading-edge logic fab is plausibly worse than the average and a mature analog fab plausibly better. The chain treats them as one number because a better public one does not exist."
+    },
+    {
+      "title": "The Faults page has no coupling and no inventory",
+      "body": "Every dependency in the corpus is present or absent. In reality some are fatal and some are an inconvenience, and nothing here distinguishes them — a station that would lose ten per cent of its output looks identical to one that would stop. There is no inventory either: a shock absorbed by six months of stock renders the same as one absorbed by nothing. And the unit is the station, which is sometimes coarser than the event — a neon interruption is not the loss of all industrial gases. Where that mismatch matters the scenario says so in its own words, but the picture on screen does not."
     },
     {
       "title": "The Lag chart is a sample, not a census",

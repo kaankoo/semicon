@@ -13,8 +13,8 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | Provenance | How do we know? | ✅ Method |
 | Space | Where on Earth does it happen? | ✅ Atlas |
 | Time | When did this become possible? | ✅ Lag |
-| **Counterfactual** | **What breaks if this breaks?** | **next** |
-| **Money** | What is it worth? | queued — see `PLAN.md` |
+| Counterfactual | What breaks if this breaks? | ✅ Faults |
+| **Money** | **What is it worth?** | **next — see `PLAN.md`** |
 
 ---
 
@@ -28,8 +28,9 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | 3 · Ruler | `a1c18f2` | 36 objects over 18 decades at true relative size. Scale-truth asserted by test. |
 | 4 · Atlas | — | 56 sites over 40 jurisdictions, every one anchored to a station. Circles are geodesic, not decorative, and the test proves it two ways. Hand-rolled equirectangular projection; Natural Earth at 56 KB. |
 | 5 · Lag | — | 70 capabilities with two dates each, laid out by stratum. A scrubber from 1947 fills bars as they land and lights the strata behind them. Nothing unfinished is given a date, and the build enforces it. |
+| 6 · Faults | — | 8 scenarios over the dependency graph. Reach is derived, reroutes and dead-ends are declared, and the two are never added together. `cone()` moved to `src/lib/graph.js` so the traversal is shared rather than copied. |
 
-**Current test surface:** 153 smoke assertions + corpus validation of 10 data files. `npm test`.
+**Current test surface:** 180 smoke assertions + corpus validation of 11 data files. `npm test`.
 
 ### What Phase 4 actually landed
 
@@ -84,27 +85,29 @@ The roadmap said the Ruler's camera pattern would transfer directly. It did not,
 
 ---
 
-## Phase 6 — Counterfactuals *(recommended next)*
+## Phase 6 — Faults *(shipped)*
 
-The *Faults* mechanic from `PLAN.md` with the money removed. Remove EUV, HBM, CUDA, Taiwan, attention — follow what reroutes and what dead-ends.
+Remove a link, walk the graph, and show what sits downstream. Eight scenarios: specialty gases, critical minerals, Spruce Pine, EUV, advanced packaging, HBM, CUDA, Taiwan.
 
-Reuses the Web's traversal (`cone()` in `src/views/web.js`), so it is mostly writing plus an animation.
+### What it actually landed
 
-Three views now hold data the counterfactuals should reach into rather than restate: the Atlas knows where each thing is and what regime it sits under, the Lag knows how long its replacement took to arrive last time, and `waitedFor` says what that replacement was waiting on. A qualification lead-time is not a guess if the corpus already contains the last one.
+Against the acceptance conditions it set itself:
 
-### Read to start
+- **Exposure mapping, not prediction** — enforced structurally rather than promised in prose. Reach is derived from the graph and drawn in the stratum's own colour; reroutes and dead-ends are hand-written and drawn in amber and magenta; the unclassified remainder is left visible and counted out loud. `npm test` fails if any scenario ever classifies its whole blast radius.
+- **Substitutes and lead-times in the same view as the damage** — every reroute carries a lead time as a bar, and where a comparable substitution has already happened it links to it on the Lag chart rather than asking for trust.
 
-`CLAUDE.md` · `src/views/web.js` · `data/static/edges.json` · `src/core/notes.js` · `data/static/timeline.json` for lead-times that are already sourced
+Three things beyond the brief:
 
-### Create
+- **`cone()` moved to `src/lib/graph.js`.** The roadmap said to reuse the Web's traversal; doing that from a view would have broken the no-view-imports-a-view rule, so it became a lib. The smoke test now asserts the two views produce identical sets, which is the whole basis of the page's claim to be reading the corpus rather than illustrating an opinion.
+- **The essays are held to the graph.** A declared reroute or dead-end must name a station the graph actually connects to the removal, and no station may be classified twice. This caught real curation drift while writing.
+- **The finding inverted the expected answer.** The widest blast radius is specialty gases at 101 of 131 stations, and it reroutes in two years — it already did, in 2022. Taiwan reaches 70 and takes a decade. Ranking exposure by reach, which is the number a graph can compute and therefore the one most supply-chain maps use, is close to backwards. That is the ninth finding, and `check-data.mjs` recomputes both numbers in its prose.
 
-`data/static/counterfactuals.json` — `{id, removes[stationIds], title, essay, reroutes[], deadEnds[], leadTimeYears}`; `src/views/faults.js`
+### Standing gaps
 
-### Acceptance
-
-Framed relentlessly as **exposure mapping, not prediction**. Substitutes and qualification lead-times shown in the same view as the damage.
-
-**Effort:** medium. The essays are the work.
+- **No per-edge coupling.** PLAN.md called for a curated coupling coefficient per edge so damage decays with depth. It is not there: every dependency is present or absent. That is the single biggest thing separating this from the Faults mechanic as specified.
+- **No inventory.** A shock absorbed by six months of stock renders identically to one absorbed by nothing.
+- **Station granularity.** A neon interruption is not the loss of all industrial gases. Scenarios say so in words; the picture does not.
+- The reroute and dead-end readings are the most contestable claims on the site, and unlike criticality they are individually argued — which makes them easier to disagree with productively.
 
 ---
 

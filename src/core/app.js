@@ -41,6 +41,8 @@ export const app = {
   atlasGoTo: () => {},     // views/atlas
   lagFit: () => {},        // views/timeline
   lagGoTo: () => {},       // views/timeline
+  faultsFit: () => {},     // views/faults
+  faultsGoTo: () => {},    // views/faults
   showNote: () => {},      // views/method
   tourStop: () => {}       // views/tour
 };

@@ -1,0 +1,178 @@
+{
+  "meta": {
+    "updated": "2026-08-12",
+    "framing": "This is an exposure map, not a prediction. Nothing here says a shock is likely, or how bad it would be. It says what sits downstream of a link in the dependency graph, and then — separately, and in a different voice — what a hand-written reading says would reroute and what would not. Those two things are kept apart on purpose, because conflating them is how supply-chain analysis becomes fiction.",
+    "note": "Removing a station and walking the graph gives reach: every station that depends on it, directly or through a chain. Reach is arithmetic, and it is not damage. A link with enormous reach and three suppliers is a nuisance; a link with modest reach and no substitute is a decade. The tiers below exist so the page can never quietly promote one into the other.",
+    "tiers": [
+      { "id": "removed", "label": "Removed", "note": "The station the scenario takes out. Chosen by hand; the graph does the rest." },
+      { "id": "dead", "label": "Dead-ends", "note": "Declared, not derived. A reading that nothing substitutes for this on a timescale anyone would call a response. The most contestable claim on the page." },
+      { "id": "reroute", "label": "Reroutes", "note": "Declared, not derived. A substitute exists and the entry says what it is and roughly how long qualifying it takes. Where a comparable substitution has already happened, the Lag chart holds the precedent." },
+      { "id": "reach", "label": "Downstream", "note": "Derived from the dependency graph and nothing else. These stations depend on the removed one somewhere up their chain. No claim is being made about whether they break." },
+      { "id": "clear", "label": "Not downstream", "note": "No path from the removed station to this one in the corpus. That is a statement about the graph, not a guarantee about the world." }
+    ],
+    "caveat": "Three things this cannot do. It has no per-edge coupling — every dependency is treated as present or absent, when in reality some are fatal and some are an inconvenience. It has no inventory — a shock absorbed by six months of stock looks identical to one absorbed by nothing. And its unit is the station, which is sometimes coarser than the real shock: a neon interruption is not the loss of all industrial gases, and where that mismatch matters the entry says so.",
+    "leadTimes": "Lead times are the years between the shock and a substitute carrying meaningful volume — not first sample, not an announcement. They are judgement, informed where possible by a substitution that has actually happened, named as a precedent and drawn from the Lag chart."
+  },
+
+  "faults": [
+    {
+      "id": "gases",
+      "title": "The specialty gases stop",
+      "sub": "the largest blast radius in the corpus, and the shallowest damage",
+      "removes": ["gas"],
+      "leadTimeYears": 2,
+      "precedent": "neon",
+      "granularity": "The corpus's unit here is all industrial and specialty gases, which is far coarser than any real shock. No plausible event removes helium, neon, argon, nitrogen and the fluorinated etchants at once. Read the reach as the outer bound of what the category touches, not as an estimate of what a gas crisis does.",
+      "essay": "Nothing in the corpus reaches further. Take out the gases and the walk downstream touches nearly the whole stack — crystal growth, the EUV source, deposition, etch, implant, fab operations, and everything those feed. It is the single largest number this page can produce, and it is close to meaningless as a measure of danger. <b>We have already run this experiment.</b> In 2022 roughly half the world's semiconductor-grade neon came from two Ukrainian producers and stopped. Prices spiked, buyers qualified Korean and Chinese supply, and within about two years the market had reorganised around it. No fab closed. The reach was total and the durable damage was approximately zero, because gases are a logistics problem with more than one supplier, and because the industry got a fright in 2015 and had been quietly diversifying ever since.",
+      "reroutes": [
+        { "station": "src", "how": "Excimer lasers burn neon continuously, and neon is a by-product of air separation, which is not geologically constrained — it is a plant. Korean, Chinese and American capacity replaced Ukrainian supply after 2022.", "leadTimeYears": 2, "timeline": "neon",
+          "source": { "who": "USITC", "what": "Ukraine, neon and semiconductors", "url": "https://www.usitc.gov/publications/332/executive_briefings/ebot_decarlo_goodman_ukraine_neon_and_semiconductors.pdf" } },
+        { "station": "etch", "how": "Fluorinated etch gases have several producers across the US, Japan, Korea and China, and the binding constraint on switching is qualification paperwork rather than chemistry.", "leadTimeYears": 2 },
+        { "station": "dep", "how": "Precursor supply is multi-sourced by policy at most fabs, because a single-sourced precursor is a known and much-disliked risk.", "leadTimeYears": 1 },
+        { "station": "cz", "how": "Argon for crystal pulling is separated from air anywhere there is a large air-separation unit, which is anywhere there is heavy industry.", "leadTimeYears": 1 },
+        { "station": "fabops", "how": "Helium is the awkward one — it comes out of natural gas or not at all — but its uses in the fab have substitutes, and the fields are in several countries.", "leadTimeYears": 3 }
+      ],
+      "deadEnds": [],
+      "source": { "who": "This site", "what": "the dependency graph, plus the 2022 neon shock as the natural experiment", "url": null }
+    },
+
+    {
+      "id": "minerals",
+      "title": "Critical minerals are licensed away",
+      "sub": "gallium, germanium, and the elements nobody stockpiled",
+      "removes": ["ree"],
+      "leadTimeYears": 3,
+      "precedent": "solvent-extraction",
+      "granularity": "One station covers rare earths, gallium, germanium and the rest. A real export-licensing action targets one or two of them at a time, which is exactly what has been happening since 2023.",
+      "essay": "Gallium is not mined. It is scraped out of the liquor of alumina refining, which means the country that refines the most aluminium makes almost all of it — on the order of ninety-eight per cent — and licensing it is therefore cheap to do and expensive to answer. The same is true of germanium, and of the heavy rare earths that keep a magnet magnetic when it gets hot. What makes this recoverable is that <b>none of it is geologically scarce.</b> The West stopped recovering gallium because it was not worth the trouble at four hundred dollars a kilogram, not because there was none. Restarting is a capital decision and a permitting decision, and both take about three years. What that period costs is a different question, and this page does not attempt to answer it.",
+      "reroutes": [
+        { "station": "comp", "how": "Gallium for GaN and GaAs substrates is recoverable from any large alumina refinery. Western recovery restarted after the 2023 licensing action; the constraint is permitting and capital, not geology.", "leadTimeYears": 3,
+          "source": { "who": "CSIS", "what": "Beyond rare earths — China's growing leverage over gallium supply chains", "url": "https://www.csis.org/analysis/beyond-rare-earths-chinas-growing-threat-gallium-supply-chains" } },
+        { "station": "robot", "how": "Dysprosium-lean and dysprosium-free magnet formulations exist and are already shipping in motors that tolerate the performance penalty. Ferrite substitutes exist further down.", "leadTimeYears": 3 },
+        { "station": "prec", "how": "Most precursors touched by this station have several sources; the ones that do not are single-sourced for commercial reasons rather than geological ones.", "leadTimeYears": 2 },
+        { "station": "tgt", "how": "Sputtering targets and consumables are a manufacturing capability rather than a resource, and the resource inputs have alternative refiners.", "leadTimeYears": 2 }
+      ],
+      "deadEnds": [],
+      "source": { "who": "USGS", "what": "Mineral commodity summaries — gallium, germanium and rare earths", "url": "https://www.usgs.gov/centers/national-minerals-information-center" }
+    },
+
+    {
+      "id": "quartz",
+      "title": "The Spruce Pine district goes offline",
+      "sub": "the famous chokepoint, which turns out to be a clock",
+      "removes": ["hpq"],
+      "leadTimeYears": 3,
+      "precedent": "czochralski",
+      "essay": "This is the site's most quotable dependency: quartz pure enough for a Czochralski crucible comes, in practice, from one small district in North Carolina, and the crucible is destroyed by every pull. A hurricane closed the district in September 2024 and the entire industry noticed. But notice what the graph does <i>not</i> say. The feedstock quartzite that becomes the silicon itself is geologically unremarkable and comes from everywhere; only the crucible material is special, and it is about <b>fifteen grams per wafer</b> against five hundred and seventy of ordinary rock. <b>Nothing here dead-ends.</b> Alternative deposits exist in Norway, Brazil, India and Russia, and synthetic high-purity quartz is a known process. The whole of the damage is the qualification period and the fact that nobody holds years of inventory of a consumable that cheap.",
+      "reroutes": [
+        { "station": "cz", "how": "Alternative deposits and synthetic routes both work. Qualifying a new crucible supplier means proving it does not contaminate the melt across a full process window, which is a two-to-four-year exercise nobody has had a reason to complete.", "leadTimeYears": 3 },
+        { "station": "poly", "how": "Smelter feedstock quartzite is common rock. This link is in the blast radius because the graph does not distinguish the two grades — the Cascade does, and puts the ratio at thirty-eight to one by mass.", "leadTimeYears": 0 },
+        { "station": "opt", "how": "Fused silica for optics draws on the same purity chain but has more qualified sources, and lens blanks are ordered years ahead in any case.", "leadTimeYears": 2 }
+      ],
+      "deadEnds": [],
+      "source": { "who": "CNBC", "what": "Helene damage at the Spruce Pine mines and the industry's exposure to them", "url": "https://www.cnbc.com/2024/10/03/helene-quartz-mine-semiconductor-north-carolina.html" }
+    },
+
+    {
+      "id": "euv",
+      "title": "EUV lithography is lost",
+      "sub": "the machine, the source and the mirrors",
+      "removes": ["src", "opt"],
+      "leadTimeYears": 12,
+      "precedent": "euv",
+      "essay": "Every leading-edge logic and DRAM process on Earth passes through a machine whose light source and optics are made by one company each, in one town each. Take those away and lithography does not stop — deep-ultraviolet immersion scanners are unaffected and print most layers already — but the leading edge does. <b>China is running this experiment now.</b> SMIC produces advanced nodes without a single EUV scanner by pushing DUV multi-patterning far past comfort, and it works, at a cost in mask count, cycle time and yield that gets worse every node. That is the reroute, and it is real. What it does not do is continue. Somewhere below five nanometres the overlay budget and the economics stop closing at the same time, and the thing that fixed that last time took <b>thirty-three years</b> to arrive.",
+      "reroutes": [
+        { "station": "scan", "how": "Deep-ultraviolet immersion with multi-patterning. It already prints the majority of layers on a leading-edge wafer, and it is what China's advanced nodes run on today — at several times the mask count and a yield penalty that compounds.", "leadTimeYears": 0, "timeline": "immersion-litho" },
+        { "station": "metr", "how": "E-beam and scatterometry inspection survive intact. Actinic mask inspection, which needs EUV light to see EUV masks, does not.", "leadTimeYears": 5 },
+        { "station": "fdry", "how": "Mature and mid-node capacity is untouched — the great majority of wafers in the world never see an EUV tool. Leading-edge output is what stops.", "leadTimeYears": 3 }
+      ],
+      "deadEnds": [
+        { "station": "gaa", "why": "Gate-all-around at production density needs the pitch EUV prints. Multi-patterned DUV can reach the dimensions on paper and cannot reach them at a cost or a yield anyone would run a business on." },
+        { "station": "bspd", "why": "Backside power delivery is built on the same leading-edge flow, and arrives in the same box it does." }
+      ],
+      "source": { "who": "This site", "what": "the dependency graph, with the Lag chart's 1986–2019 span as the precedent for replacing an optical generation", "url": null }
+    },
+
+    {
+      "id": "cowos",
+      "title": "Advanced packaging capacity halves",
+      "sub": "the constraint that has actually been binding",
+      "removes": ["cowos"],
+      "leadTimeYears": 3,
+      "precedent": "interposer",
+      "essay": "An accelerator is not one chip. It is two reticle-limited logic dies and eight memory stacks sitting on a piece of silicon wider than any exposure can print, and the number of lines in the world that can assemble that is small. For the last three years this — not wafer capacity — is what has rationed accelerators. The reroute is real but it is a step down: organic substrates and fan-out packaging work, at lower interconnect density, for smaller assemblies. You get a product. You do not get <i>this</i> product.",
+      "reroutes": [
+        { "station": "gpu", "how": "Fan-out and organic-substrate packaging can carry a smaller die with fewer memory stacks. The part exists; its bandwidth does not.", "leadTimeYears": 2 },
+        { "station": "hbm", "how": "EMIB, InFO and silicon bridges are alternative ways to get the dense short connections HBM needs. Two of them are in production elsewhere.", "leadTimeYears": 3, "timeline": "interposer" },
+        { "station": "test", "how": "Assembly and test capacity is broadly distributed — Malaysia, the Philippines, China and Vietnam all have it. The advanced end is what is scarce.", "leadTimeYears": 1 },
+        { "station": "host", "how": "Server CPUs use advanced packaging but at far lower interposer area, and several vendors already use alternatives.", "leadTimeYears": 2 }
+      ],
+      "deadEnds": [
+        { "station": "cpo", "why": "Co-packaged optics is not yet in volume anywhere — it has no right-hand end on the Lag chart — and it depends on exactly the packaging capability this scenario removes. You cannot reroute around a thing that has not arrived." }
+      ],
+      "source": { "who": "TrendForce", "what": "CoWoS supply-demand gap and capacity expansion through 2026", "url": "https://www.trendforce.com/news/2026/06/15/news-tsmc-cowos-supply-demand-gap-reportedly-seen-narrowing-from-20-to-10-by-end-2026-as-capacity-expands/" }
+    },
+
+    {
+      "id": "hbm",
+      "title": "High-bandwidth memory is capped",
+      "sub": "the scarce component, and the one nobody was watching in 2020",
+      "removes": ["hbm"],
+      "leadTimeYears": 4,
+      "precedent": "hbm",
+      "essay": "Most of the silicon in an AI accelerator is memory, not compute — roughly four to one by area — and the part that is scarce is the memory. Cap it and the compute dies are not slower, they are starved: a frontier model's forward pass is bound by how fast weights can be read, not by how fast they can be multiplied. The reroute for inference is real and unpleasant — smaller models, GDDR or LPDDR, much lower bandwidth — and there is no reroute at all for the training runs at the frontier. Three companies make this component. A fourth would take about four years, which is roughly what it took the first time.",
+      "reroutes": [
+        { "station": "inf", "how": "Serving can fall back to GDDR or LPDDR, or to smaller and more heavily quantised models. Latency and cost per token both get materially worse; the service continues.", "leadTimeYears": 1 },
+        { "station": "asic", "how": "Several inference ASICs already use LPDDR or large on-chip SRAM instead of HBM, precisely to avoid this dependency.", "leadTimeYears": 2 },
+        { "station": "multi", "how": "Multimodal workloads are bandwidth-hungry but tolerate batching better than interactive text, so they degrade rather than stop.", "leadTimeYears": 2 }
+      ],
+      "deadEnds": [
+        { "station": "gpu", "why": "A Blackwell-class part without high-bandwidth memory is not a slower accelerator. It is a different and much worse machine, and no amount of compute on the die compensates for a bus that is not there." },
+        { "station": "moe", "why": "Mixture of experts is a bet that you can hold enormous parameter counts and touch few of them per token. Take away memory bandwidth and the bet inverts — the architecture that was cheapest becomes the most expensive." }
+      ],
+      "source": { "who": "JEDEC · Micron", "what": "HBM standards and stack configurations", "url": "https://www.jedec.org/standards-documents/docs/jesd235a" }
+    },
+
+    {
+      "id": "cuda",
+      "title": "The CUDA moat is crossed",
+      "sub": "the smallest blast radius on this page, and the one people argue about most",
+      "removes": ["cuda"],
+      "leadTimeYears": 4,
+      "precedent": "cuda",
+      "essay": "Forty-three stations sit downstream — the smallest reach of any scenario here, and by some distance. The graph is right and also missing the point. Nothing about CUDA is physically scarce: ROCm, Triton, XLA and the compiler stacks underneath PyTorch all exist, all work, and all get better every year. What the graph cannot see is <b>switching cost measured in engineer-years</b> — two decades of libraries, kernels, numerical quirks and institutional memory that have to be rebuilt rather than bought. That is the moat, it is entirely real, and it is invisible to every dependency edge in this corpus. Read this scenario as a demonstration of what an exposure map cannot do.",
+      "reroutes": [
+        { "station": "kern", "how": "Alternative compiler stacks are production-grade for the common cases. The long tail of hand-tuned kernels is where the years go.", "leadTimeYears": 3, "timeline": "flash-attention" },
+        { "station": "inf", "how": "Inference is the easy half — it already runs across several vendors' stacks in production today, because serving is more standardised than training.", "leadTimeYears": 1 },
+        { "station": "coll", "how": "Collective communication libraries have credible alternatives; the algorithms have been public since 2009.", "leadTimeYears": 2, "timeline": "ring-allreduce" },
+        { "station": "para", "how": "Parallelism strategies are published research, not proprietary technology, and the frameworks that implement them are already multi-backend.", "leadTimeYears": 2 }
+      ],
+      "deadEnds": [],
+      "source": { "who": "This site", "what": "the dependency graph — and an explicit note on what it does not measure", "url": null }
+    },
+
+    {
+      "id": "taiwan",
+      "title": "Taiwan is interdicted",
+      "sub": "modest reach, and the only scenario here that does not reroute",
+      "removes": ["fdry", "cowos", "3d", "test"],
+      "leadTimeYears": 10,
+      "precedent": "gaa",
+      "granularity": "This removes the foundries, advanced packaging and test — the capabilities concentrated on the island — rather than every company headquartered there. Memory, substrates and passives would also be disrupted; the graph would show more if the corpus resolved them by geography rather than by capability.",
+      "essay": "Seventy stations downstream: fewer than the gases, fewer than the minerals, fewer than Spruce Pine. And it is the worst scenario on this page by a wide margin, because reach is not damage and this is where the two come apart hardest. Everything above the fault line either has a substitute or it does not, and here almost nothing does. Samsung and Intel both make leading-edge logic; their combined capacity is a fraction of what is lost, and <b>qualifying an existing design at a new foundry is twelve to twenty-four months after the capacity exists.</b> The Atlas has the sites that are meant to answer this — north Phoenix, Kumamoto, Chitose, Dresden — and every one of them is years from carrying the load. The number to hold on to is not seventy. It is a decade.",
+      "reroutes": [
+        { "station": "edge", "how": "Mature-node silicon for cars, sensors and industry is made in Europe, Japan, China, Korea and the United States. This is the large majority of the world's chips by unit and it is genuinely diversified.", "leadTimeYears": 1 },
+        { "station": "sens", "how": "Image sensors and perception hardware have significant Japanese and Korean capacity outside the fault.", "leadTimeYears": 2 },
+        { "station": "odm", "how": "System assembly has already moved substantially to Mexico, Vietnam and Thailand. It is the one part of this chain where the diversification is largely done.", "leadTimeYears": 1 }
+      ],
+      "deadEnds": [
+        { "station": "gpu", "why": "Leading-edge logic at volume. Two other companies can make it and neither at anything like this scale, and a design qualified for one foundry does not simply run at another." },
+        { "station": "asic", "why": "Every hyperscaler accelerator is fabricated and packaged inside this fault. The design teams survive; nothing they have designed can be built." },
+        { "station": "alt", "why": "The alternative-architecture companies were the most exposed of all — they had the least foundry leverage and the least allocation to begin with." },
+        { "station": "hbm", "why": "The stacks are made in Korea and the packaging that attaches them to anything is not. Memory survives the fault and stops mattering." },
+        { "station": "scaleup", "why": "Scale-up fabric silicon is made on the same leading-edge processes and packaged in the same buildings." }
+      ],
+      "source": { "who": "This site", "what": "the dependency graph, with the Atlas's site list as the check on where substitute capacity actually is", "url": null }
+    }
+  ]
+}
