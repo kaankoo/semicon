@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sand to Sentence — the full stack of machine intelligence</title>
-<meta name="description" content="An interactive cross-section of the AI economy: 27 strata, 131 stations, 530+ companies, from quartz sand to the last consumer of value.">
+<meta name="description" content="An interactive cross-section of the AI economy: 27 strata, 131 stations, 520+ companies, from quartz sand to the last consumer of value.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300..600&display=swap" rel="stylesheet">
@@ -20,6 +20,7 @@
   <div class="navs" role="tablist">
     <button role="tab" aria-selected="true" data-view="strata">Cross-section</button>
     <button role="tab" aria-selected="false" data-view="web">Web</button>
+    <button role="tab" aria-selected="false" data-view="mny">Money</button>
     <button role="tab" aria-selected="false" data-view="rul">Ruler</button>
     <button role="tab" aria-selected="false" data-view="atl">Atlas</button>
     <button role="tab" aria-selected="false" data-view="tml">Lag</button>
@@ -84,6 +85,39 @@
         <button class="btn" id="webWide">Zoom in to read</button>
         <button class="btn" id="webClear">Clear trace</button>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ MONEY ============ -->
+  <section class="view" id="v-mny">
+    <div class="mny">
+      <div class="atl__hud">
+        <p class="eyebrow">The same column, re-weighted</p>
+        <h2 class="rul__h">Where the money <em>actually sits.</em></h2>
+        <p class="rul__i">You have already walked down this column once, sized by how many stations each layer holds. Here it is again, sized by capital. Recognition and rearrangement teach more than either does alone — and every figure is derived from something committed, or it is a dash.</p>
+      </div>
+
+      <div class="mny__status" id="mnyStatus"></div>
+
+      <div class="mny__ctl">
+        <div class="atl__layers" id="mnyMetric" role="group" aria-label="Axis"></div>
+        <div class="atl__layers" id="mnyBasis" role="group" aria-label="Attribution basis"></div>
+        <p class="mny__axis" id="mnyAxis"></p>
+      </div>
+
+      <div class="mny__stage">
+        <svg id="mnySvg" aria-label="The 27 strata sized by aggregate capital"></svg>
+      </div>
+
+      <aside class="atl__panel mny__panel" id="mnyPanel"></aside>
+
+      <footer class="foot">
+        <h5>How to read this</h5>
+        <p>Bar length is the layer's total. Bar <b>saturation</b> is concentration — the Herfindahl index computed on attributed value, so a layer where one company holds most of it reads darker than one where twenty share it evenly. The hairline beneath each bar is <b>coverage</b>: how much of the layer's cast is in the ticker spine at all. A long bar over a short hairline is a lower bound wearing a confident face, and the panel says so out loud below 60%.</p>
+        <p style="margin-top:14px">A company at nineteen stations must not be counted nineteen times. Every one is split across its stations by weights that sum to one. The default is an <b>even split</b> — no judgement, fully reproducible. Thirteen entries carry <b>hand-set weights</b> instead, because an even split would put five per cent of NVIDIA in the scheduling layer; each says why, and the toggle above shows you exactly how much that judgement moved the answer. None of them are segment disclosures.</p>
+        <p style="margin-top:14px">Private companies have <b>no market value here at all</b>. They are counted in the cast and excluded from every total, because mixing a two-year-old private mark with a live public price produces a number that means nothing. Divisions carry an estimated share of their listed parent, flagged as an estimate. Attributing a parent's whole market cap to a division is wrong; attributing zero is also wrong.</p>
+        <p style="margin-top:14px"><b>Nothing here is investment advice.</b> No recommendations, no price targets, no view on any security. Sources, formulas and known weaknesses are on <b>Method</b>.</p>
+      </footer>
     </div>
   </section>
 
@@ -204,6 +238,7 @@
 
       <div class="flt__bar">
         <p class="flt__count" id="fltCount"></p>
+        <div class="atl__layers flt__capital" id="fltCapital"></div>
         <div class="atl__legend flt__legend" id="fltLegend"></div>
       </div>
 
@@ -320,7 +355,7 @@
       <div class="idxbar">
         <div class="fld">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-          <input id="q" type="search" placeholder="Search 530+ companies, technologies, materials, chokepoints…" autocomplete="off">
+          <input id="q" type="search" placeholder="Search 520+ companies, technologies, materials, chokepoints…" autocomplete="off">
         </div>
         <div class="chips" id="chips"></div>
       </div>

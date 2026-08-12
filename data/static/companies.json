@@ -1,0 +1,3721 @@
+{
+  "meta": {
+    "updated": "2026-08-12",
+    "note": "The ticker spine: the join between the dependency graph and anything with a price. Station lists are copied from stations.json and validated against it on every build, so this file cannot drift away from the corpus.",
+    "coverage": {
+      "curated": 283,
+      "corpus": 527
+    },
+    "attribution": "A company at nine stations must not be counted nine times. Every entry carries weights that sum to one. The default basis is `even` — an equal split, which involves no judgement and is fully reproducible. Where an even split would be visibly absurd (NVIDIA appears at nineteen stations) the weights are hand-set, marked `judgement`, and carry a one-line reason. None of them are segment disclosures, and the view offers the even split alongside so you can see how much the judgement moved the answer.",
+    "kinds": [
+      {
+        "id": "listed",
+        "label": "Listed",
+        "note": "Has a primary listing. Contributes to market-cap aggregates once quotes are ingested."
+      },
+      {
+        "id": "division",
+        "label": "Division",
+        "note": "Part of a listed parent. Attributing a parent's whole market cap to a division is wrong and attributing zero is also wrong, so each carries an estimated `parentShare` — an estimate, flagged as one."
+      },
+      {
+        "id": "private",
+        "label": "Private",
+        "note": "No listing. Counted in exposure and never in market-cap aggregates. A private mark and a public price are never silently mixed."
+      },
+      {
+        "id": "body",
+        "label": "Institution",
+        "note": "Research institute, consortium, standards body or state agency. No market value at all, and no attempt is made to invent one."
+      },
+      {
+        "id": "abstract",
+        "label": "Not an organisation",
+        "note": "The demand-side entries in stratum 27 — enterprises, developers, consumers. They exist in the corpus as endpoints, not as companies."
+      }
+    ],
+    "cik": "Left null on purpose. CIKs are resolved from the SEC's own ticker-to-CIK map at ingest time rather than typed by hand, because a hand-typed CIK is a silent wrong answer.",
+    "caveat": "This is a partial spine by design. PLAN.md's guidance was to start with the names carrying most of the stack's value rather than all 533, so aggregates computed from it are lower bounds on a layer and must be labelled as such. Coverage per stratum is computed and shown."
+  },
+  "companies": {
+    "nvidia": {
+      "name": "NVIDIA",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "NVDA",
+      "cik": null,
+      "stations": [
+        "mdp",
+        "gpu",
+        "num",
+        "host",
+        "scaleup",
+        "scaleout",
+        "cpo",
+        "rack",
+        "firm",
+        "sched",
+        "rel",
+        "cuda",
+        "kern",
+        "para",
+        "coll",
+        "inf",
+        "quant",
+        "vla",
+        "sim"
+      ],
+      "attribution": {
+        "mdp": 0.01,
+        "gpu": 0.42,
+        "num": 0.04,
+        "host": 0.06,
+        "scaleup": 0.1,
+        "scaleout": 0.06,
+        "cpo": 0.01,
+        "rack": 0.04,
+        "firm": 0.01,
+        "sched": 0.02,
+        "rel": 0.01,
+        "cuda": 0.08,
+        "kern": 0.03,
+        "para": 0.02,
+        "coll": 0.03,
+        "inf": 0.04,
+        "quant": 0.01,
+        "vla": 0.005,
+        "sim": 0.005
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "Data-centre compute is the overwhelming majority of revenue; the software and networking stations are real but small by revenue."
+    },
+    "anthropic": {
+      "name": "Anthropic",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "syn",
+        "arch",
+        "pre",
+        "post",
+        "reason",
+        "safe",
+        "interp",
+        "sec",
+        "tok",
+        "tool",
+        "mem",
+        "agent",
+        "code",
+        "work",
+        "search",
+        "def",
+        "ui",
+        "talent"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "google": {
+      "name": "Google",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "GOOGL",
+      "parentShare": 1,
+      "stations": [
+        "asic",
+        "host",
+        "edge",
+        "firm",
+        "hyper",
+        "rel",
+        "kern",
+        "coll",
+        "arch",
+        "sec",
+        "tok",
+        "tool",
+        "work",
+        "search",
+        "ui",
+        "dev",
+        "dist",
+        "energy"
+      ],
+      "attribution": {
+        "asic": 0.0603,
+        "host": 0.0302,
+        "edge": 0.0302,
+        "firm": 0.0101,
+        "hyper": 0.2211,
+        "rel": 0.0201,
+        "kern": 0.0302,
+        "coll": 0.0201,
+        "arch": 0.0402,
+        "sec": 0.0201,
+        "tok": 0.0503,
+        "tool": 0.0151,
+        "work": 0.0603,
+        "search": 0.1809,
+        "ui": 0.0804,
+        "dev": 0.005,
+        "dist": 0.1206,
+        "energy": 0.005
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "Advertising and cloud carry the revenue; the silicon and systems stations are cost centres that matter to the graph and not to the income statement.",
+      "note": "Alphabet's AI, cloud and silicon activities; no separate listing."
+    },
+    "openai": {
+      "name": "OpenAI",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "cuda",
+        "kern",
+        "syn",
+        "arch",
+        "pre",
+        "post",
+        "reason",
+        "multi",
+        "safe",
+        "interp",
+        "tok",
+        "tool",
+        "mem",
+        "agent",
+        "code",
+        "search",
+        "ui",
+        "talent"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "google-deepmind": {
+      "name": "Google DeepMind",
+      "kind": "division",
+      "jurisdiction": "UK/US",
+      "parent": "GOOGL",
+      "parentShare": 0.03,
+      "stations": [
+        "para",
+        "syn",
+        "prov",
+        "moe",
+        "pre",
+        "post",
+        "reason",
+        "multi",
+        "safe",
+        "interp",
+        "sci",
+        "vla",
+        "sim",
+        "talent"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Research division; share is nominal and not a segment disclosure."
+    },
+    "microsoft": {
+      "name": "Microsoft",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "MSFT",
+      "cik": null,
+      "stations": [
+        "asic",
+        "hyper",
+        "rel",
+        "para",
+        "sec",
+        "tool",
+        "work",
+        "search",
+        "def",
+        "ui",
+        "dist",
+        "energy"
+      ],
+      "attribution": {
+        "asic": 0.03,
+        "hyper": 0.34,
+        "rel": 0.02,
+        "para": 0.01,
+        "sec": 0.08,
+        "tool": 0.06,
+        "work": 0.22,
+        "search": 0.06,
+        "def": 0.005,
+        "ui": 0.05,
+        "dist": 0.12,
+        "energy": 0.005
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "Azure and productivity dominate; the silicon programme is strategically large and financially small."
+    },
+    "applied-materials": {
+      "name": "Applied Materials",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "AMAT",
+      "cik": null,
+      "stations": [
+        "metr",
+        "dep",
+        "etch",
+        "cmp",
+        "imp",
+        "fabops",
+        "bspd",
+        "beol",
+        "3d"
+      ],
+      "attribution": {
+        "metr": 0.1,
+        "dep": 0.3,
+        "etch": 0.18,
+        "cmp": 0.12,
+        "imp": 0.14,
+        "fabops": 0.01,
+        "bspd": 0.02,
+        "beol": 0.08,
+        "3d": 0.05
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "Deposition is the largest product line; the rest follow public product-group commentary."
+    },
+    "tsmc": {
+      "name": "TSMC",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "2330.TW",
+      "cik": null,
+      "stations": [
+        "pdk",
+        "gaa",
+        "bspd",
+        "yield",
+        "fdry",
+        "hbm",
+        "cowos",
+        "3d",
+        "cpo"
+      ],
+      "attribution": {
+        "pdk": 0.01,
+        "gaa": 0.1,
+        "bspd": 0.03,
+        "yield": 0.03,
+        "fdry": 0.62,
+        "hbm": 0.02,
+        "cowos": 0.12,
+        "3d": 0.06,
+        "cpo": 0.01
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "Wafer fabrication dominates; advanced packaging is the fastest-growing minority."
+    },
+    "marvell": {
+      "name": "Marvell",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "MRVL",
+      "cik": null,
+      "stations": [
+        "chip",
+        "other",
+        "asic",
+        "scaleup",
+        "scaleout",
+        "optics",
+        "cpo",
+        "serdes"
+      ],
+      "attribution": {
+        "chip": 0.06,
+        "other": 0.02,
+        "asic": 0.34,
+        "scaleup": 0.1,
+        "scaleout": 0.12,
+        "optics": 0.16,
+        "cpo": 0.02,
+        "serdes": 0.18
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "Custom silicon and interconnect."
+    },
+    "meta": {
+      "name": "Meta",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "META",
+      "cik": null,
+      "stations": [
+        "asic",
+        "firm",
+        "hyper",
+        "rel",
+        "kern",
+        "search",
+        "dev"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "amd": {
+      "name": "AMD",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "AMD",
+      "cik": null,
+      "stations": [
+        "gpu",
+        "num",
+        "host",
+        "scaleup",
+        "cuda",
+        "coll"
+      ],
+      "attribution": {
+        "gpu": 0.4,
+        "num": 0.06,
+        "host": 0.4,
+        "scaleup": 0.06,
+        "cuda": 0.04,
+        "coll": 0.04
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "Server CPUs and accelerators in rough balance."
+    },
+    "hugging-face": {
+      "name": "Hugging Face",
+      "kind": "private",
+      "jurisdiction": "US/FR",
+      "stations": [
+        "para",
+        "web",
+        "post",
+        "open",
+        "eval",
+        "quant"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "intel-foundry": {
+      "name": "Intel Foundry",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "INTC",
+      "parentShare": 0.35,
+      "stations": [
+        "pdk",
+        "gaa",
+        "bspd",
+        "fdry",
+        "cowos",
+        "3d"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Foundry segment; Intel reports it separately."
+    },
+    "broadcom": {
+      "name": "Broadcom",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "AVGO",
+      "cik": null,
+      "stations": [
+        "chip",
+        "asic",
+        "scaleup",
+        "scaleout",
+        "cpo"
+      ],
+      "attribution": {
+        "chip": 0.1,
+        "asic": 0.4,
+        "scaleup": 0.2,
+        "scaleout": 0.2,
+        "cpo": 0.1
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "Custom accelerators and networking silicon carry it."
+    },
+    "samsung-electronics": {
+      "name": "Samsung Electronics",
+      "kind": "listed",
+      "jurisdiction": "KR",
+      "ticker": "005930.KS",
+      "cik": null,
+      "stations": [
+        "dram",
+        "hbm",
+        "nand",
+        "other",
+        "dev"
+      ],
+      "attribution": {
+        "dram": 0.38,
+        "hbm": 0.08,
+        "nand": 0.28,
+        "other": 0.02,
+        "dev": 0.24
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "Memory and handsets are the business; HBM is a fast-growing slice of DRAM."
+    },
+    "synopsys": {
+      "name": "Synopsys",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "SNPS",
+      "cik": null,
+      "stations": [
+        "eda",
+        "ver",
+        "chip",
+        "mdp",
+        "yield"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "tokyo-electron": {
+      "name": "Tokyo Electron",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "8035.T",
+      "cik": null,
+      "stations": [
+        "scan",
+        "res",
+        "dep",
+        "etch",
+        "beol"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "deepseek": {
+      "name": "DeepSeek",
+      "kind": "private",
+      "jurisdiction": "CN",
+      "stations": [
+        "moe",
+        "pre",
+        "reason",
+        "open"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "delta-electronics": {
+      "name": "Delta Electronics",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "2308.TW",
+      "cik": null,
+      "stations": [
+        "rack",
+        "ups",
+        "conv",
+        "liq"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "intel": {
+      "name": "Intel",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "INTC",
+      "cik": null,
+      "stations": [
+        "gpu",
+        "host",
+        "cuda",
+        "coll"
+      ],
+      "attribution": {
+        "gpu": 0.2,
+        "host": 0.7,
+        "cuda": 0.05,
+        "coll": 0.05
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "Client and server CPUs remain nearly all of it."
+    },
+    "micron-technology": {
+      "name": "Micron Technology",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "MU",
+      "cik": null,
+      "stations": [
+        "dram",
+        "hbm",
+        "nand",
+        "other"
+      ],
+      "attribution": {
+        "dram": 0.55,
+        "hbm": 0.13,
+        "nand": 0.3,
+        "other": 0.02
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "DRAM led, NAND second, HBM the growth slice."
+    },
+    "mistral-ai": {
+      "name": "Mistral AI",
+      "kind": "private",
+      "jurisdiction": "FR",
+      "stations": [
+        "arch",
+        "moe",
+        "pre",
+        "open"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "samsung-foundry": {
+      "name": "Samsung Foundry",
+      "kind": "division",
+      "jurisdiction": "KR",
+      "parent": "005930.KS",
+      "parentShare": 0.11,
+      "stations": [
+        "pdk",
+        "gaa",
+        "bspd",
+        "fdry"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Foundry division; share is an estimate, not a segment disclosure."
+    },
+    "together-ai": {
+      "name": "Together AI",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "neo",
+        "kern",
+        "arch",
+        "inf"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "vertiv": {
+      "name": "Vertiv",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "VRT",
+      "cik": null,
+      "stations": [
+        "rack",
+        "gear",
+        "ups",
+        "liq"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "alibaba-qwen": {
+      "name": "Alibaba Qwen",
+      "kind": "division",
+      "jurisdiction": "CN",
+      "parent": "BABA",
+      "parentShare": 0.03,
+      "stations": [
+        "moe",
+        "pre",
+        "open"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "apple": {
+      "name": "Apple",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "AAPL",
+      "cik": null,
+      "stations": [
+        "edge",
+        "dev",
+        "dist"
+      ],
+      "attribution": {
+        "edge": 0.05,
+        "dev": 0.8,
+        "dist": 0.15
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "Hardware is the company."
+    },
+    "arm-holdings": {
+      "name": "Arm Holdings",
+      "kind": "listed",
+      "jurisdiction": "UK",
+      "ticker": "ARM",
+      "cik": null,
+      "stations": [
+        "isa",
+        "pdk",
+        "num"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "astera-labs": {
+      "name": "Astera Labs",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "ALAB",
+      "cik": null,
+      "stations": [
+        "other",
+        "scaleup",
+        "serdes"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "cadence-design-systems": {
+      "name": "Cadence Design Systems",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "CDNS",
+      "cik": null,
+      "stations": [
+        "eda",
+        "ver",
+        "chip"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "cloudflare": {
+      "name": "Cloudflare",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "NET",
+      "cik": null,
+      "stations": [
+        "web",
+        "route",
+        "dist"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "corning": {
+      "name": "Corning",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "GLW",
+      "cik": null,
+      "stations": [
+        "opt",
+        "cpo",
+        "dci"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "cxmt": {
+      "name": "CXMT",
+      "kind": "private",
+      "jurisdiction": "CN",
+      "stations": [
+        "dram",
+        "hbm",
+        "cnchip"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "entegris": {
+      "name": "Entegris",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "ENTG",
+      "cik": null,
+      "stations": [
+        "chem",
+        "prec",
+        "beol"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "groq": {
+      "name": "Groq",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "alt",
+        "inf",
+        "tok"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "imec": {
+      "name": "imec",
+      "kind": "body",
+      "jurisdiction": "BE",
+      "stations": [
+        "pdk",
+        "gaa",
+        "beol"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Belgian research institute; not a commercial entity."
+    },
+    "lam-research": {
+      "name": "Lam Research",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "LRCX",
+      "cik": null,
+      "stations": [
+        "dep",
+        "etch",
+        "beol"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "meta-ai": {
+      "name": "Meta AI",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "META",
+      "parentShare": 0.05,
+      "stations": [
+        "arch",
+        "pre",
+        "open"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Research division; share is nominal."
+    },
+    "scale-ai": {
+      "name": "Scale AI",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "lab",
+        "post",
+        "def"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "schneider-electric": {
+      "name": "Schneider Electric",
+      "kind": "listed",
+      "jurisdiction": "FR",
+      "ticker": "SU.PA",
+      "cik": null,
+      "stations": [
+        "gear",
+        "ups",
+        "vert"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "screen-holdings": {
+      "name": "SCREEN Holdings",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "7735.T",
+      "cik": null,
+      "stations": [
+        "res",
+        "cmp",
+        "imp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "siemens-eda": {
+      "name": "Siemens EDA",
+      "kind": "division",
+      "jurisdiction": "DE",
+      "parent": "SIE.DE",
+      "parentShare": 0.03,
+      "stations": [
+        "eda",
+        "ver",
+        "mdp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Formerly Mentor Graphics."
+    },
+    "sk-hynix": {
+      "name": "SK hynix",
+      "kind": "listed",
+      "jurisdiction": "KR",
+      "ticker": "000660.KS",
+      "cik": null,
+      "stations": [
+        "dram",
+        "hbm",
+        "other"
+      ],
+      "attribution": {
+        "dram": 0.5,
+        "hbm": 0.42,
+        "other": 0.08
+      },
+      "attributionBasis": "judgement",
+      "attributionWhy": "HBM is an unusually large share of this one, which is the point."
+    },
+    "xai": {
+      "name": "xAI",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "hyper",
+        "pre",
+        "talent"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "adobe": {
+      "name": "Adobe",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "ADBE",
+      "cik": null,
+      "stations": [
+        "prov",
+        "media"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "advantest": {
+      "name": "Advantest",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "6857.T",
+      "cik": null,
+      "stations": [
+        "yield",
+        "test"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "allen-institute-for-ai": {
+      "name": "Allen Institute for AI",
+      "kind": "body",
+      "jurisdiction": "US",
+      "stations": [
+        "web",
+        "open"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "alphawave-semi": {
+      "name": "Alphawave Semi",
+      "kind": "listed",
+      "jurisdiction": "UK",
+      "ticker": "AWE.L",
+      "cik": null,
+      "stations": [
+        "pdk",
+        "chip"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "amazon-web-services": {
+      "name": "Amazon Web Services",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "AMZN",
+      "parentShare": 0.17,
+      "stations": [
+        "hyper",
+        "dist"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "AWS segment share of Amazon revenue, approximate."
+    },
+    "amkor-technology": {
+      "name": "Amkor Technology",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "AMKR",
+      "cik": null,
+      "stations": [
+        "cowos",
+        "test"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "asml": {
+      "name": "ASML",
+      "kind": "listed",
+      "jurisdiction": "NL",
+      "ticker": "ASML",
+      "cik": null,
+      "stations": [
+        "opt",
+        "scan"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "biren-technology": {
+      "name": "Biren Technology",
+      "kind": "private",
+      "jurisdiction": "CN",
+      "stations": [
+        "gpu",
+        "cnchip"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "black-forest-labs": {
+      "name": "Black Forest Labs",
+      "kind": "private",
+      "jurisdiction": "DE",
+      "stations": [
+        "multi",
+        "media"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "canon": {
+      "name": "Canon",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "7751.T",
+      "cik": null,
+      "stations": [
+        "opt",
+        "scan"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "carl-zeiss-smt": {
+      "name": "Carl Zeiss SMT",
+      "kind": "private",
+      "jurisdiction": "DE",
+      "stations": [
+        "src",
+        "opt"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Division of Carl Zeiss AG, held by a foundation; not listed."
+    },
+    "coherent": {
+      "name": "Coherent",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "COHR",
+      "cik": null,
+      "stations": [
+        "comp",
+        "optics"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "constellation-energy": {
+      "name": "Constellation Energy",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "CEG",
+      "cik": null,
+      "stations": [
+        "prim",
+        "gen"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "coreweave": {
+      "name": "CoreWeave",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "CRWV",
+      "cik": null,
+      "stations": [
+        "neo",
+        "rel"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "dell-technologies": {
+      "name": "Dell Technologies",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "DELL",
+      "cik": null,
+      "stations": [
+        "rack",
+        "odm"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "eaton": {
+      "name": "Eaton",
+      "kind": "listed",
+      "jurisdiction": "IE/US",
+      "ticker": "ETN",
+      "cik": null,
+      "stations": [
+        "gear",
+        "ups"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "ebara": {
+      "name": "Ebara",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "6361.T",
+      "cik": null,
+      "stations": [
+        "tgt",
+        "cmp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "eleutherai": {
+      "name": "EleutherAI",
+      "kind": "body",
+      "jurisdiction": "US",
+      "stations": [
+        "web",
+        "interp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "elevenlabs": {
+      "name": "ElevenLabs",
+      "kind": "private",
+      "jurisdiction": "US/UK",
+      "stations": [
+        "multi",
+        "media"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "ev-group": {
+      "name": "EV Group",
+      "kind": "private",
+      "jurisdiction": "AT",
+      "stations": [
+        "bspd",
+        "3d"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "exyte": {
+      "name": "Exyte",
+      "kind": "private",
+      "jurisdiction": "DE",
+      "stations": [
+        "fabops",
+        "shell"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "ge-vernova": {
+      "name": "GE Vernova",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "GEV",
+      "cik": null,
+      "stations": [
+        "gear",
+        "gen"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "getty-images": {
+      "name": "Getty Images",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "GETY",
+      "cik": null,
+      "stations": [
+        "lic",
+        "ip"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "globalwafers": {
+      "name": "GlobalWafers",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "6488.TWO",
+      "cik": null,
+      "stations": [
+        "cz",
+        "waf"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "imagination-technologies": {
+      "name": "Imagination Technologies",
+      "kind": "private",
+      "jurisdiction": "UK",
+      "stations": [
+        "isa",
+        "gpu"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Privately held since 2017."
+    },
+    "isomorphic-labs": {
+      "name": "Isomorphic Labs",
+      "kind": "division",
+      "jurisdiction": "UK",
+      "parent": "GOOGL",
+      "parentShare": 0.01,
+      "stations": [
+        "health",
+        "sci"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Alphabet subsidiary."
+    },
+    "jsr-corporation": {
+      "name": "JSR Corporation",
+      "kind": "private",
+      "jurisdiction": "JP",
+      "stations": [
+        "chem",
+        "res"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Delisted in 2024 after acquisition by Japan Investment Corporation."
+    },
+    "jx-advanced-metals": {
+      "name": "JX Advanced Metals",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "5016.T",
+      "cik": null,
+      "stations": [
+        "tgt",
+        "comp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "kioxia": {
+      "name": "Kioxia",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "285A.T",
+      "cik": null,
+      "stations": [
+        "hbm",
+        "nand"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "kla-corporation": {
+      "name": "KLA Corporation",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "KLAC",
+      "cik": null,
+      "stations": [
+        "metr",
+        "yield"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "lightmatter": {
+      "name": "Lightmatter",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "alt",
+        "cpo"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "luma-ai": {
+      "name": "Luma AI",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "multi",
+        "media"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "mercor": {
+      "name": "Mercor",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "lab",
+        "talent"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "mgx": {
+      "name": "MGX",
+      "kind": "private",
+      "jurisdiction": "AE",
+      "stations": [
+        "sov",
+        "capex"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Abu Dhabi state-backed investment vehicle."
+    },
+    "microsoft-research": {
+      "name": "Microsoft Research",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "MSFT",
+      "parentShare": 0.01,
+      "stations": [
+        "num",
+        "sci"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Research division; share is nominal."
+    },
+    "moonshot-ai": {
+      "name": "Moonshot AI",
+      "kind": "private",
+      "jurisdiction": "CN",
+      "stations": [
+        "moe",
+        "reason"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "moore-threads": {
+      "name": "Moore Threads",
+      "kind": "private",
+      "jurisdiction": "CN",
+      "stations": [
+        "gpu",
+        "cnchip"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "nextera-energy": {
+      "name": "NextEra Energy",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "NEE",
+      "cik": null,
+      "stations": [
+        "prim",
+        "grid"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "notion": {
+      "name": "Notion",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "work",
+        "ui"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "oecd": {
+      "name": "OECD",
+      "kind": "body",
+      "jurisdiction": "—",
+      "stations": [
+        "reg",
+        "labour"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "open-compute-project": {
+      "name": "Open Compute Project",
+      "kind": "body",
+      "jurisdiction": "US",
+      "stations": [
+        "num",
+        "rack"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "palantir": {
+      "name": "Palantir",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "PLTR",
+      "cik": null,
+      "stations": [
+        "vert",
+        "def"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "partnership-on-ai": {
+      "name": "Partnership on AI",
+      "kind": "body",
+      "jurisdiction": "US",
+      "stations": [
+        "reg",
+        "labour"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "pdf-solutions": {
+      "name": "PDF Solutions",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "PDFS",
+      "cik": null,
+      "stations": [
+        "fabops",
+        "yield"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "qualcomm": {
+      "name": "Qualcomm",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "QCOM",
+      "cik": null,
+      "stations": [
+        "edge",
+        "dev"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "runway": {
+      "name": "Runway",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "multi",
+        "media"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "salesforce": {
+      "name": "Salesforce",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "CRM",
+      "cik": null,
+      "stations": [
+        "work",
+        "dist"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "shin-etsu-chemical": {
+      "name": "Shin-Etsu Chemical",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "4063.T",
+      "cik": null,
+      "stations": [
+        "chem",
+        "res"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "shin-etsu-handotai": {
+      "name": "Shin-Etsu Handotai",
+      "kind": "division",
+      "jurisdiction": "JP",
+      "parent": "4063.T",
+      "parentShare": 0.3,
+      "stations": [
+        "cz",
+        "waf"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Semiconductor silicon division of Shin-Etsu Chemical."
+    },
+    "siemens": {
+      "name": "Siemens",
+      "kind": "listed",
+      "jurisdiction": "DE",
+      "ticker": "SIE.DE",
+      "cik": null,
+      "stations": [
+        "fabops",
+        "vert"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "siemens-energy": {
+      "name": "Siemens Energy",
+      "kind": "listed",
+      "jurisdiction": "DE",
+      "ticker": "ENR.DE",
+      "cik": null,
+      "stations": [
+        "gear",
+        "gen"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "siltronic": {
+      "name": "Siltronic",
+      "kind": "listed",
+      "jurisdiction": "DE",
+      "ticker": "WAF.DE",
+      "cik": null,
+      "stations": [
+        "cz",
+        "waf"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "smic": {
+      "name": "SMIC",
+      "kind": "listed",
+      "jurisdiction": "CN",
+      "ticker": "688981.SS",
+      "cik": null,
+      "stations": [
+        "fdry",
+        "cnchip"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "softbank-group": {
+      "name": "SoftBank Group",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "9984.T",
+      "cik": null,
+      "stations": [
+        "sov",
+        "capex"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "sumco": {
+      "name": "SUMCO",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "3436.T",
+      "cik": null,
+      "stations": [
+        "cz",
+        "waf"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "supermicro": {
+      "name": "Supermicro",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "SMCI",
+      "cik": null,
+      "stations": [
+        "rack",
+        "odm"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "surge-ai": {
+      "name": "Surge AI",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "lab",
+        "post"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "tesla": {
+      "name": "Tesla",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "TSLA",
+      "cik": null,
+      "stations": [
+        "robot",
+        "av"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "tokyo-ohka-kogyo": {
+      "name": "Tokyo Ohka Kogyo",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "4186.T",
+      "cik": null,
+      "stations": [
+        "chem",
+        "res"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "umicore": {
+      "name": "Umicore",
+      "kind": "listed",
+      "jurisdiction": "BE",
+      "ticker": "UMI.BR",
+      "cik": null,
+      "stations": [
+        "ree",
+        "waste"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "world-labs": {
+      "name": "World Labs",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "multi",
+        "sim"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "z-ai-zhipu": {
+      "name": "Z.ai / Zhipu",
+      "kind": "private",
+      "jurisdiction": "CN",
+      "stations": [
+        "reason",
+        "open"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "3m": {
+      "name": "3M",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "MMM",
+      "cik": null,
+      "stations": [
+        "imm"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "abb": {
+      "name": "ABB",
+      "kind": "listed",
+      "jurisdiction": "CH",
+      "ticker": "ABBN.SW",
+      "cik": null,
+      "stations": [
+        "gear"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "adeia": {
+      "name": "Adeia",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "ADEA",
+      "cik": null,
+      "stations": [
+        "3d"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "aep": {
+      "name": "AEP",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "AEP",
+      "cik": null,
+      "stations": [
+        "grid"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "air-liquide": {
+      "name": "Air Liquide",
+      "kind": "listed",
+      "jurisdiction": "FR",
+      "ticker": "AI.PA",
+      "cik": null,
+      "stations": [
+        "gas"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "air-liquide-advanced-materials": {
+      "name": "Air Liquide Advanced Materials",
+      "kind": "division",
+      "jurisdiction": "FR",
+      "parent": "AI.PA",
+      "parentShare": 0.04,
+      "stations": [
+        "prec"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "air-products": {
+      "name": "Air Products",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "APD",
+      "cik": null,
+      "stations": [
+        "gas"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "alfa-laval": {
+      "name": "Alfa Laval",
+      "kind": "listed",
+      "jurisdiction": "SE",
+      "ticker": "ALFA.ST",
+      "cik": null,
+      "stations": [
+        "fac"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "amazon": {
+      "name": "Amazon",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "AMZN",
+      "cik": null,
+      "stations": [
+        "host"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "amazon-annapurna": {
+      "name": "Amazon / Annapurna",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "AMZN",
+      "parentShare": 0.02,
+      "stations": [
+        "asic"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Silicon design group inside AWS; share is nominal."
+    },
+    "amec": {
+      "name": "AMEC",
+      "kind": "listed",
+      "jurisdiction": "CN",
+      "ticker": "688012.SS",
+      "cik": null,
+      "stations": [
+        "etch"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "ampere-computing": {
+      "name": "Ampere Computing",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "host"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "amphenol": {
+      "name": "Amphenol",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "APH",
+      "cik": null,
+      "stations": [
+        "serdes"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "anduril": {
+      "name": "Anduril",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "def"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "anglo-american": {
+      "name": "Anglo American",
+      "kind": "listed",
+      "jurisdiction": "UK",
+      "ticker": "AAL.L",
+      "cik": null,
+      "stations": [
+        "ore"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "arista-networks": {
+      "name": "Arista Networks",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "ANET",
+      "cik": null,
+      "stations": [
+        "scaleout"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "ase-technology": {
+      "name": "ASE Technology",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "3711.TW",
+      "cik": null,
+      "stations": [
+        "cowos"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "asm-international": {
+      "name": "ASM International",
+      "kind": "listed",
+      "jurisdiction": "NL",
+      "ticker": "ASM.AS",
+      "cik": null,
+      "stations": [
+        "dep"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "asml-cymer": {
+      "name": "ASML (Cymer)",
+      "kind": "division",
+      "jurisdiction": "NL/US",
+      "parent": "ASML",
+      "parentShare": 0.06,
+      "stations": [
+        "src"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "asml-hmi": {
+      "name": "ASML (HMI)",
+      "kind": "division",
+      "jurisdiction": "NL",
+      "parent": "ASML",
+      "parentShare": 0.05,
+      "stations": [
+        "metr"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "asml-brion": {
+      "name": "ASML Brion",
+      "kind": "division",
+      "jurisdiction": "NL",
+      "parent": "ASML",
+      "parentShare": 0.02,
+      "stations": [
+        "mdp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "at-s": {
+      "name": "AT&S",
+      "kind": "listed",
+      "jurisdiction": "AT",
+      "ticker": "ATS.VI",
+      "cik": null,
+      "stations": [
+        "subs"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "aurubis": {
+      "name": "Aurubis",
+      "kind": "listed",
+      "jurisdiction": "DE",
+      "ticker": "NDA.DE",
+      "cik": null,
+      "stations": [
+        "waste"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "axcelis-technologies": {
+      "name": "Axcelis Technologies",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "ACLS",
+      "cik": null,
+      "stations": [
+        "imp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "axt-inc": {
+      "name": "AXT Inc",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "AXTI",
+      "cik": null,
+      "stations": [
+        "comp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "be-semiconductor-besi": {
+      "name": "BE Semiconductor (Besi)",
+      "kind": "listed",
+      "jurisdiction": "NL",
+      "ticker": "BESI.AS",
+      "cik": null,
+      "stations": [
+        "3d"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "bhp": {
+      "name": "BHP",
+      "kind": "listed",
+      "jurisdiction": "AU",
+      "ticker": "BHP",
+      "cik": null,
+      "stations": [
+        "ore"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "blackstone": {
+      "name": "Blackstone",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "BX",
+      "cik": null,
+      "stations": [
+        "capex"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "bloom-energy": {
+      "name": "Bloom Energy",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "BE",
+      "cik": null,
+      "stations": [
+        "gen"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "blue-owl-capital": {
+      "name": "Blue Owl Capital",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "OWL",
+      "cik": null,
+      "stations": [
+        "capex"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "bosch": {
+      "name": "Bosch",
+      "kind": "private",
+      "jurisdiction": "DE",
+      "stations": [
+        "sens"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Held by the Robert Bosch Stiftung; not listed."
+    },
+    "boston-dynamics": {
+      "name": "Boston Dynamics",
+      "kind": "division",
+      "jurisdiction": "US/KR",
+      "parent": "005380.KS",
+      "parentShare": 0.02,
+      "stations": [
+        "robot"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Hyundai Motor subsidiary."
+    },
+    "brookfield": {
+      "name": "Brookfield",
+      "kind": "listed",
+      "jurisdiction": "CA",
+      "ticker": "BN",
+      "cik": null,
+      "stations": [
+        "capex"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "c3-ai": {
+      "name": "C3 AI",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "AI",
+      "cik": null,
+      "stations": [
+        "vert"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "cambricon": {
+      "name": "Cambricon",
+      "kind": "listed",
+      "jurisdiction": "CN",
+      "ticker": "688256.SS",
+      "cik": null,
+      "stations": [
+        "cnchip"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "cameco": {
+      "name": "Cameco",
+      "kind": "listed",
+      "jurisdiction": "CA",
+      "ticker": "CCJ",
+      "cik": null,
+      "stations": [
+        "prim"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "cerebras-systems": {
+      "name": "Cerebras Systems",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "alt"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "china-mofcom": {
+      "name": "China MOFCOM",
+      "kind": "body",
+      "jurisdiction": "CN",
+      "stations": [
+        "export"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "ciena": {
+      "name": "Ciena",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "CIEN",
+      "cik": null,
+      "stations": [
+        "dci"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "cisco": {
+      "name": "Cisco",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "CSCO",
+      "cik": null,
+      "stations": [
+        "scaleout"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "cmc-materials-entegris": {
+      "name": "CMC Materials (Entegris)",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "ENTG",
+      "parentShare": 0.2,
+      "stations": [
+        "cmp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "codelco": {
+      "name": "Codelco",
+      "kind": "body",
+      "jurisdiction": "CL",
+      "stations": [
+        "ore"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Chilean state copper producer; not listed."
+    },
+    "cohere": {
+      "name": "Cohere",
+      "kind": "private",
+      "jurisdiction": "CA",
+      "stations": [
+        "rag"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "cohu": {
+      "name": "Cohu",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "COHU",
+      "cik": null,
+      "stations": [
+        "test"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "consumers": {
+      "name": "Consumers",
+      "kind": "abstract",
+      "jurisdiction": "—",
+      "stations": [
+        "value"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "credo-technology": {
+      "name": "Credo Technology",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "CRDO",
+      "cik": null,
+      "stations": [
+        "serdes"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "daifuku": {
+      "name": "Daifuku",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "6383.T",
+      "cik": null,
+      "stations": [
+        "fabops"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "databricks": {
+      "name": "Databricks",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "moe"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "deci-nvidia": {
+      "name": "Deci / NVIDIA",
+      "kind": "division",
+      "jurisdiction": "IL",
+      "parent": "NVDA",
+      "parentShare": 0.005,
+      "stations": [
+        "quant"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "developers": {
+      "name": "Developers",
+      "kind": "abstract",
+      "jurisdiction": "—",
+      "stations": [
+        "value"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "digital-realty": {
+      "name": "Digital Realty",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "DLR",
+      "cik": null,
+      "stations": [
+        "colo"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "dominion-energy": {
+      "name": "Dominion Energy",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "D",
+      "cik": null,
+      "stations": [
+        "grid"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "dupont": {
+      "name": "DuPont",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "DD",
+      "cik": null,
+      "stations": [
+        "cmp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "dupont-electronics": {
+      "name": "DuPont Electronics",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "DD",
+      "parentShare": 0.2,
+      "stations": [
+        "chem"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "edwards-vacuum-atlas-copco": {
+      "name": "Edwards Vacuum (Atlas Copco)",
+      "kind": "division",
+      "jurisdiction": "UK",
+      "parent": "ATCO-A.ST",
+      "parentShare": 0.1,
+      "stations": [
+        "tgt"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "elastic": {
+      "name": "Elastic",
+      "kind": "listed",
+      "jurisdiction": "NL/US",
+      "ticker": "ESTC",
+      "cik": null,
+      "stations": [
+        "rag"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "enterprises": {
+      "name": "Enterprises",
+      "kind": "abstract",
+      "jurisdiction": "—",
+      "stations": [
+        "value"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "epoch-ai": {
+      "name": "Epoch AI",
+      "kind": "body",
+      "jurisdiction": "US",
+      "stations": [
+        "eval"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "equinix": {
+      "name": "Equinix",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "EQIX",
+      "cik": null,
+      "stations": [
+        "colo"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "european-commission": {
+      "name": "European Commission",
+      "kind": "body",
+      "jurisdiction": "EU",
+      "stations": [
+        "reg"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "fabrinet": {
+      "name": "Fabrinet",
+      "kind": "listed",
+      "jurisdiction": "TH",
+      "ticker": "FN",
+      "cik": null,
+      "stations": [
+        "optics"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "figma": {
+      "name": "Figma",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "FIG",
+      "cik": null,
+      "stations": [
+        "ui"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "figure-ai": {
+      "name": "Figure AI",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "robot"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "formfactor": {
+      "name": "FormFactor",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "FORM",
+      "cik": null,
+      "stations": [
+        "test"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "foxconn-hon-hai": {
+      "name": "Foxconn / Hon Hai",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "2317.TW",
+      "cik": null,
+      "stations": [
+        "odm"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "freeport-mcmoran": {
+      "name": "Freeport-McMoRan",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "FCX",
+      "cik": null,
+      "stations": [
+        "ore"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "fujifilm": {
+      "name": "Fujifilm",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "4901.T",
+      "cik": null,
+      "stations": [
+        "res"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "fujifilm-electronic-materials": {
+      "name": "Fujifilm Electronic Materials",
+      "kind": "division",
+      "jurisdiction": "JP",
+      "parent": "4901.T",
+      "parentShare": 0.06,
+      "stations": [
+        "chem"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "gcl-technology": {
+      "name": "GCL Technology",
+      "kind": "listed",
+      "jurisdiction": "CN",
+      "ticker": "3800.HK",
+      "cik": null,
+      "stations": [
+        "poly"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "glencore": {
+      "name": "Glencore",
+      "kind": "listed",
+      "jurisdiction": "CH",
+      "ticker": "GLEN.L",
+      "cik": null,
+      "stations": [
+        "ore"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "globalfoundries": {
+      "name": "GlobalFoundries",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "GFS",
+      "cik": null,
+      "stations": [
+        "fdry"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "graphcore-softbank": {
+      "name": "Graphcore (SoftBank)",
+      "kind": "division",
+      "jurisdiction": "UK",
+      "parent": "9984.T",
+      "parentShare": 0.005,
+      "stations": [
+        "alt"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "gretel-nvidia": {
+      "name": "Gretel (NVIDIA)",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "NVDA",
+      "parentShare": 0.005,
+      "stations": [
+        "syn"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "helsing": {
+      "name": "Helsing",
+      "kind": "private",
+      "jurisdiction": "DE",
+      "stations": [
+        "def"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "hemlock-semiconductor": {
+      "name": "Hemlock Semiconductor",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "poly"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "hesai-technology": {
+      "name": "Hesai Technology",
+      "kind": "listed",
+      "jurisdiction": "CN",
+      "ticker": "HSAI",
+      "cik": null,
+      "stations": [
+        "sens"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "hewlett-packard-enterprise": {
+      "name": "Hewlett Packard Enterprise",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "HPE",
+      "cik": null,
+      "stations": [
+        "odm"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "hitachi-energy": {
+      "name": "Hitachi Energy",
+      "kind": "division",
+      "jurisdiction": "CH/JP",
+      "parent": "6501.T",
+      "parentShare": 0.15,
+      "stations": [
+        "gear"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "hitachi-high-tech": {
+      "name": "Hitachi High-Tech",
+      "kind": "division",
+      "jurisdiction": "JP",
+      "parent": "6501.T",
+      "parentShare": 0.08,
+      "stations": [
+        "etch"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "huawei-hisilicon": {
+      "name": "Huawei / HiSilicon",
+      "kind": "private",
+      "jurisdiction": "CN",
+      "stations": [
+        "cnchip"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "iberdrola": {
+      "name": "Iberdrola",
+      "kind": "listed",
+      "jurisdiction": "ES",
+      "ticker": "IBE.MC",
+      "cik": null,
+      "stations": [
+        "prim"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "ibiden": {
+      "name": "Ibiden",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "4062.T",
+      "cik": null,
+      "stations": [
+        "subs"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "ibm-research": {
+      "name": "IBM Research",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "IBM",
+      "parentShare": 0.04,
+      "stations": [
+        "gaa"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "infineon-technologies": {
+      "name": "Infineon Technologies",
+      "kind": "listed",
+      "jurisdiction": "DE",
+      "ticker": "IFX.DE",
+      "cik": null,
+      "stations": [
+        "conv"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "innolight": {
+      "name": "Innolight",
+      "kind": "listed",
+      "jurisdiction": "CN",
+      "ticker": "300308.SZ",
+      "cik": null,
+      "stations": [
+        "optics"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "international-energy-agency": {
+      "name": "International Energy Agency",
+      "kind": "body",
+      "jurisdiction": "—",
+      "stations": [
+        "energy"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "intuit": {
+      "name": "Intuit",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "INTU",
+      "cik": null,
+      "stations": [
+        "prof"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "iren": {
+      "name": "IREN",
+      "kind": "listed",
+      "jurisdiction": "AU",
+      "ticker": "IREN",
+      "cik": null,
+      "stations": [
+        "neo"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "iron-mountain": {
+      "name": "Iron Mountain",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "IRM",
+      "cik": null,
+      "stations": [
+        "waste"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "japan-meti": {
+      "name": "Japan METI",
+      "kind": "body",
+      "jurisdiction": "JP",
+      "stations": [
+        "export"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "johnson-controls": {
+      "name": "Johnson Controls",
+      "kind": "listed",
+      "jurisdiction": "IE/US",
+      "ticker": "JCI",
+      "cik": null,
+      "stations": [
+        "fac"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "kokusai-electric": {
+      "name": "Kokusai Electric",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "6525.T",
+      "cik": null,
+      "stations": [
+        "dep"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "lenovo": {
+      "name": "Lenovo",
+      "kind": "listed",
+      "jurisdiction": "CN",
+      "ticker": "0992.HK",
+      "cik": null,
+      "stations": [
+        "odm"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "linde": {
+      "name": "Linde",
+      "kind": "listed",
+      "jurisdiction": "UK/IE",
+      "ticker": "LIN",
+      "cik": null,
+      "stations": [
+        "gas"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "linde-electronics": {
+      "name": "Linde Electronics",
+      "kind": "division",
+      "jurisdiction": "UK/IE",
+      "parent": "LIN",
+      "parentShare": 0.08,
+      "stations": [
+        "prec"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "lumentum": {
+      "name": "Lumentum",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "LITE",
+      "cik": null,
+      "stations": [
+        "optics"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "luminar": {
+      "name": "Luminar",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "LAZR",
+      "cik": null,
+      "stations": [
+        "sens"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "lynas-rare-earths": {
+      "name": "Lynas Rare Earths",
+      "kind": "listed",
+      "jurisdiction": "AU",
+      "ticker": "LYC.AX",
+      "cik": null,
+      "stations": [
+        "ree"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "materion": {
+      "name": "Materion",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "MTRN",
+      "cik": null,
+      "stations": [
+        "tgt"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "mediatek": {
+      "name": "MediaTek",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "2454.TW",
+      "cik": null,
+      "stations": [
+        "edge"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "merck-kgaa-emd-electronics": {
+      "name": "Merck KGaA / EMD Electronics",
+      "kind": "listed",
+      "jurisdiction": "DE",
+      "ticker": "MRK.DE",
+      "cik": null,
+      "stations": [
+        "chem"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "messer": {
+      "name": "Messer",
+      "kind": "private",
+      "jurisdiction": "DE",
+      "stations": [
+        "gas"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "metr": {
+      "name": "METR",
+      "kind": "body",
+      "jurisdiction": "US",
+      "stations": [
+        "eval"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "mitsubishi-materials": {
+      "name": "Mitsubishi Materials",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "5711.T",
+      "cik": null,
+      "stations": [
+        "poly"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "momentive-technologies": {
+      "name": "Momentive Technologies",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "hpq"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "mosaic-databricks": {
+      "name": "Mosaic / Databricks",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "para"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "motivair-schneider": {
+      "name": "Motivair (Schneider)",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "SU.PA",
+      "parentShare": 0.01,
+      "stations": [
+        "liq"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "mp-materials": {
+      "name": "MP Materials",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "MP",
+      "cik": null,
+      "stations": [
+        "ree"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "mps-monolithic-power": {
+      "name": "MPS (Monolithic Power)",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "MPWR",
+      "cik": null,
+      "stations": [
+        "conv"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "nanya-technology": {
+      "name": "Nanya Technology",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "2408.TW",
+      "cik": null,
+      "stations": [
+        "dram"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "naura-technology": {
+      "name": "Naura Technology",
+      "kind": "listed",
+      "jurisdiction": "CN",
+      "ticker": "002371.SZ",
+      "cik": null,
+      "stations": [
+        "dep"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "navitas-semiconductor": {
+      "name": "Navitas Semiconductor",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "NVTS",
+      "cik": null,
+      "stations": [
+        "conv"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "nebius": {
+      "name": "Nebius",
+      "kind": "listed",
+      "jurisdiction": "NL",
+      "ticker": "NBIS",
+      "cik": null,
+      "stations": [
+        "neo"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "netapp": {
+      "name": "NetApp",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "NTAP",
+      "cik": null,
+      "stations": [
+        "stor"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "news-corp": {
+      "name": "News Corp",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "NWSA",
+      "cik": null,
+      "stations": [
+        "lic"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "nikon": {
+      "name": "Nikon",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "7731.T",
+      "cik": null,
+      "stations": [
+        "scan"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "nippon-sanso-taiyo-nippon": {
+      "name": "Nippon Sanso / Taiyo Nippon",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "4091.T",
+      "cik": null,
+      "stations": [
+        "gas"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "nist": {
+      "name": "NIST",
+      "kind": "body",
+      "jurisdiction": "US",
+      "stations": [
+        "reg"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "nordic-mining": {
+      "name": "Nordic Mining",
+      "kind": "listed",
+      "jurisdiction": "NO",
+      "ticker": "NOM.OL",
+      "cik": null,
+      "stations": [
+        "hpq"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "nvent": {
+      "name": "nVent",
+      "kind": "listed",
+      "jurisdiction": "UK/US",
+      "ticker": "NVT",
+      "cik": null,
+      "stations": [
+        "liq"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "oci-holdings": {
+      "name": "OCI Holdings",
+      "kind": "listed",
+      "jurisdiction": "KR",
+      "ticker": "010060.KS",
+      "cik": null,
+      "stations": [
+        "poly"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "onsemi": {
+      "name": "onsemi",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "ON",
+      "cik": null,
+      "stations": [
+        "conv"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "oracle": {
+      "name": "Oracle",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "ORCL",
+      "cik": null,
+      "stations": [
+        "hyper"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "ouster": {
+      "name": "Ouster",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "OUST",
+      "cik": null,
+      "stations": [
+        "sens"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "perplexity": {
+      "name": "Perplexity",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "search"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "phison": {
+      "name": "Phison",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "8299.TWO",
+      "cik": null,
+      "stations": [
+        "nand"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "public-sector": {
+      "name": "Public sector",
+      "kind": "abstract",
+      "jurisdiction": "—",
+      "stations": [
+        "value"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "pure-storage": {
+      "name": "Pure Storage",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "PSTG",
+      "cik": null,
+      "stations": [
+        "stor"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "quanta-computer": {
+      "name": "Quanta Computer",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "2382.TW",
+      "cik": null,
+      "stations": [
+        "odm"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "rambus": {
+      "name": "Rambus",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "RMBS",
+      "cik": null,
+      "stations": [
+        "other"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "rapidus": {
+      "name": "Rapidus",
+      "kind": "private",
+      "jurisdiction": "JP",
+      "stations": [
+        "fdry"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Japanese state-backed venture; not listed."
+    },
+    "recursion": {
+      "name": "Recursion",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "RXRX",
+      "cik": null,
+      "stations": [
+        "health"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "reddit": {
+      "name": "Reddit",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "RDDT",
+      "cik": null,
+      "stations": [
+        "lic"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "redwood-materials": {
+      "name": "Redwood Materials",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "waste"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "researchers": {
+      "name": "Researchers",
+      "kind": "abstract",
+      "jurisdiction": "—",
+      "stations": [
+        "value"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "run-ai-nvidia": {
+      "name": "Run:ai (NVIDIA)",
+      "kind": "division",
+      "jurisdiction": "IL",
+      "parent": "NVDA",
+      "parentShare": 0.005,
+      "stations": [
+        "sched"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "sambanova-systems": {
+      "name": "SambaNova Systems",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "alt"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "samsung": {
+      "name": "Samsung",
+      "kind": "division",
+      "jurisdiction": "KR",
+      "parent": "005930.KS",
+      "parentShare": 0.04,
+      "stations": [
+        "cowos"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Packaging and test activities."
+    },
+    "sandisk": {
+      "name": "SanDisk",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "SNDK",
+      "cik": null,
+      "stations": [
+        "nand"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "scale-ai-seal": {
+      "name": "Scale AI / SEAL",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "eval"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "servicenow": {
+      "name": "ServiceNow",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "NOW",
+      "cik": null,
+      "stations": [
+        "work"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "shin-etsu-quartz": {
+      "name": "Shin-Etsu Quartz",
+      "kind": "division",
+      "jurisdiction": "JP",
+      "parent": "4063.T",
+      "parentShare": 0.03,
+      "stations": [
+        "hpq"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "shinko-electric": {
+      "name": "Shinko Electric",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "6967.T",
+      "cik": null,
+      "stations": [
+        "subs"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "shutterstock": {
+      "name": "Shutterstock",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "SSTK",
+      "cik": null,
+      "stations": [
+        "lic"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "sibanye-stillwater": {
+      "name": "Sibanye-Stillwater",
+      "kind": "listed",
+      "jurisdiction": "ZA",
+      "ticker": "SBSW",
+      "cik": null,
+      "stations": [
+        "ore"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "sibelco": {
+      "name": "Sibelco",
+      "kind": "private",
+      "jurisdiction": "BE",
+      "stations": [
+        "hpq"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "sk-hynix-solidigm": {
+      "name": "SK hynix / Solidigm",
+      "kind": "division",
+      "jurisdiction": "KR/US",
+      "parent": "000660.KS",
+      "parentShare": 0.08,
+      "stations": [
+        "nand"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "sk-siltron": {
+      "name": "SK Siltron",
+      "kind": "division",
+      "jurisdiction": "KR",
+      "parent": "034730.KS",
+      "parentShare": 0.04,
+      "stations": [
+        "cz"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "SK Group subsidiary."
+    },
+    "soitec": {
+      "name": "Soitec",
+      "kind": "listed",
+      "jurisdiction": "FR",
+      "ticker": "SOI.PA",
+      "cik": null,
+      "stations": [
+        "waf"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "sony-semiconductor": {
+      "name": "Sony Semiconductor",
+      "kind": "division",
+      "jurisdiction": "JP",
+      "parent": "6758.T",
+      "parentShare": 0.15,
+      "stations": [
+        "sens"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "spil": {
+      "name": "SPIL",
+      "kind": "division",
+      "jurisdiction": "TW",
+      "parent": "3711.TW",
+      "parentShare": 0.25,
+      "stations": [
+        "cowos"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "sumitomo-electric": {
+      "name": "Sumitomo Electric",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "5802.T",
+      "cik": null,
+      "stations": [
+        "comp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "te-connectivity": {
+      "name": "TE Connectivity",
+      "kind": "listed",
+      "jurisdiction": "CH",
+      "ticker": "TEL",
+      "cik": null,
+      "stations": [
+        "serdes"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "tempus-ai": {
+      "name": "Tempus AI",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "TEM",
+      "cik": null,
+      "stations": [
+        "health"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "tenstorrent": {
+      "name": "Tenstorrent",
+      "kind": "private",
+      "jurisdiction": "US",
+      "stations": [
+        "alt"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "teradyne": {
+      "name": "Teradyne",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "TER",
+      "cik": null,
+      "stations": [
+        "test"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "the-quartz-corp": {
+      "name": "The Quartz Corp",
+      "kind": "private",
+      "jurisdiction": "NO",
+      "stations": [
+        "hpq"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "thomson-reuters": {
+      "name": "Thomson Reuters",
+      "kind": "listed",
+      "jurisdiction": "CA",
+      "ticker": "TRI",
+      "cik": null,
+      "stations": [
+        "prof"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "tokuyama": {
+      "name": "Tokuyama",
+      "kind": "listed",
+      "jurisdiction": "JP",
+      "ticker": "4043.T",
+      "cik": null,
+      "stations": [
+        "poly"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "tower-semiconductor": {
+      "name": "Tower Semiconductor",
+      "kind": "listed",
+      "jurisdiction": "IL",
+      "ticker": "TSEM",
+      "cik": null,
+      "stations": [
+        "fdry"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "trane-technologies": {
+      "name": "Trane Technologies",
+      "kind": "listed",
+      "jurisdiction": "IE/US",
+      "ticker": "TT",
+      "cik": null,
+      "stations": [
+        "fac"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "uk-ai-security-institute": {
+      "name": "UK AI Security Institute",
+      "kind": "body",
+      "jurisdiction": "UK",
+      "stations": [
+        "safe"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "umc": {
+      "name": "UMC",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "UMC",
+      "cik": null,
+      "stations": [
+        "fdry"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "unimicron": {
+      "name": "Unimicron",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "3037.TW",
+      "cik": null,
+      "stations": [
+        "subs"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "unitree": {
+      "name": "Unitree",
+      "kind": "private",
+      "jurisdiction": "CN",
+      "stations": [
+        "robot"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "us-bureau-of-industry-and-security": {
+      "name": "US Bureau of Industry and Security",
+      "kind": "body",
+      "jurisdiction": "US",
+      "stations": [
+        "export"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "us-caisi": {
+      "name": "US CAISI",
+      "kind": "body",
+      "jurisdiction": "US",
+      "stations": [
+        "safe"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "veeco-instruments": {
+      "name": "Veeco Instruments",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "VECO",
+      "cik": null,
+      "stations": [
+        "imp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "vicor": {
+      "name": "Vicor",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "VICR",
+      "cik": null,
+      "stations": [
+        "conv"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "vistra": {
+      "name": "Vistra",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "VST",
+      "cik": null,
+      "stations": [
+        "prim"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "wacker-chemie": {
+      "name": "Wacker Chemie",
+      "kind": "listed",
+      "jurisdiction": "DE",
+      "ticker": "WCH.DE",
+      "cik": null,
+      "stations": [
+        "poly"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "waymo": {
+      "name": "Waymo",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "GOOGL",
+      "parentShare": 0.02,
+      "stations": [
+        "av"
+      ],
+      "attribution": null,
+      "attributionBasis": "even",
+      "note": "Alphabet subsidiary, last marked in a 2024 external round."
+    },
+    "winbond": {
+      "name": "Winbond",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "2344.TW",
+      "cik": null,
+      "stations": [
+        "dram"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "wistron-wiwynn": {
+      "name": "Wistron / Wiwynn",
+      "kind": "listed",
+      "jurisdiction": "TW",
+      "ticker": "3231.TW",
+      "cik": null,
+      "stations": [
+        "odm"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "wolfspeed": {
+      "name": "Wolfspeed",
+      "kind": "listed",
+      "jurisdiction": "US",
+      "ticker": "WOLF",
+      "cik": null,
+      "stations": [
+        "comp"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "ymtc": {
+      "name": "YMTC",
+      "kind": "private",
+      "jurisdiction": "CN",
+      "stations": [
+        "nand"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    },
+    "zoox-amazon": {
+      "name": "Zoox (Amazon)",
+      "kind": "division",
+      "jurisdiction": "US",
+      "parent": "AMZN",
+      "parentShare": 0.01,
+      "stations": [
+        "av"
+      ],
+      "attribution": null,
+      "attributionBasis": "even"
+    }
+  }
+}

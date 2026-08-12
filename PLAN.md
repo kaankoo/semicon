@@ -4,7 +4,11 @@
 
 > **Revised scope.** The homepage stays exactly as it is. This becomes a new tab — **MONEY** — sitting between Web and Index, absorbing the Index table as its screener. Learning remains primary; price is the supporting evidence.
 >
-> **Status — 11 Aug 2026: not started.** This is Phase 8 in `ROADMAP.md`, deliberately last. The non-financial lenses in `IDEAS.md` take priority. The critical path when it does begin is `data/static/companies.json` (§5) — nothing downstream works without it.
+> **Status — 12 Aug 2026: partly shipped, unpriced.** Phase 1 and most of phase 2 are in. `data/static/companies.json` exists — 283 of 527 organisations, every multi-station one covered. The ingest job and its Action are written, dry-runnable and **switched off**: they have never been run against the live endpoints, and no prices are committed. The Money tab renders the spine and says so rather than showing figures typed from memory.
+>
+> Two decisions departed from this document, both recorded in `ROADMAP.md`: the tab sits between **Web and Ruler** and **Index was not absorbed**, and Faults shipped earlier as a non-financial view that now gains an optional capital overlay rather than being duplicated inside Money.
+>
+> Also corrected here: the corpus is **527 organisations, not 533**. Six appeared twice under different names and every aggregate would have double-counted them.
 >
 > `prototype-stack-priced.html` in the repo root is the design direction for §3.1. Its figures are illustrative placeholders, not data.
 

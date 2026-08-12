@@ -15,6 +15,7 @@ function show(v) {
   if (v === "atl") requestAnimationFrame(() => app.atlasFit());
   if (v === "tml") requestAnimationFrame(() => app.lagFit());
   if (v === "flt") requestAnimationFrame(() => app.faultsFit());
+  if (v === "mny") requestAnimationFrame(() => app.moneyFit());
   if (v !== "strata") window.scrollTo(0, 0);
 }
 

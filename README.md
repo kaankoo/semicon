@@ -1,6 +1,6 @@
 # Sand to Sentence
 
-An interactive cross-section of the AI economy — **27 strata, 131 stations, 533 organisations**, from a quartz seam in North Carolina to the last consumer of value.
+An interactive cross-section of the AI economy — **27 strata, 131 stations, 527 organisations**, from a quartz seam in North Carolina to the last consumer of value.
 
 Between a hole in the ground and a sentence on your screen sit roughly twenty-seven layers of civilisation. This is the whole chain, one layer at a time, with the companies that own each link.
 
@@ -33,6 +33,7 @@ src/
   lib/
     cascade.js             the unit-conversion chain and its arithmetic
     graph.js               traversal over the dependency edges
+    metrics.js             attribution, concentration, coverage
     glyphs.js              schematic shapes for the Ruler
     projection.js          equirectangular projection, geodesics, graticule
   views/
@@ -42,6 +43,7 @@ src/
     atlas.js               where the stack physically is
     timeline.js            how long each capability waited
     faults.js              what breaks if a link is cut
+    money.js               the stack, priced
     cascade.js             sand to sentence, quantified
     method.js              sources, assumptions and limits
     sheet.js               station dossiers
@@ -58,6 +60,7 @@ data/static/
   world.json               simplified coastline and boundaries, 56 KB
   timeline.json            70 capabilities, invented and shipped
   counterfactuals.json     8 scenarios, reach against judgement
+  companies.json           the ticker spine — 283 of 527 organisations
   notes.json               counterintuitive findings
   method.json              provenance and known limits
 scripts/
@@ -65,6 +68,7 @@ scripts/
   check-data.mjs           corpus integrity check (runs in CI)
   smoke.mjs                boots the app headlessly and asserts the DOM
   world.mjs                regenerates world.json from Natural Earth
+  ingest/run.mjs           the only thing here that touches a network
   parity.mjs               diffs two builds' DOM output
 ```
 
@@ -140,6 +144,26 @@ Nothing unfinished is given a date. Four entries — co-packaged optics, feature
 The headline is arithmetic over the corpus: **median wait of 10 years from rock to package, 6 through silicon, 3 from software to sentence** — and the test asserts both that the rendered numbers match the computed ones and that the gradient is still strictly decreasing.
 
 The finding it exists for is sharper than the gradient. Twelve capabilities waited thirty years or more, and only **three** of them were waiting on the science. Liquid cooling waited 43 years because air was cheaper; mixture of experts 30 because there were not yet enough parameters for routing to pay; backpropagation 42 for something to run on. That claim lives in `notes.json` as prose, so `check-data.mjs` holds the prose to the corpus — change an event and the build stops rather than shipping a stale sentence.
+
+---
+
+## Money
+
+The Descent's column, re-weighted by capital. Same twenty-seven rows, sized by money instead of by station count — recognition and rearrangement teach more than either alone.
+
+**Nothing on this page can invent a number.** Every figure comes from `src/lib/metrics.js`, which returns `null` rather than `0` when `data/live/quotes.json` has not been written. Ship the site without ever running the ingest job and the page renders the spine itself — companies per layer, listed against private, coverage per layer — and says plainly that no market data is committed. `npm test` asserts that with no data `layerTotals`, `valueOf` and `capitalAt` all return null, that a null formats as a dash, and that the empty state is stated rather than implied.
+
+`data/static/companies.json` is the join, and PLAN.md is right that it is the critical path: **283 of 527 organisations**, every multi-station one covered, mapped to a primary listing, a listed parent, or neither. A company at nineteen stations must not be counted nineteen times, so every one carries weights summing to one — an **even split** by default, with thirteen hand-set exceptions that each say why. The toggle shows exactly how much that judgement moved the answer; the build fails if any weight set stops being a partition of one, and asserts that attribution conserves value to floating point.
+
+Coverage is drawn as a hairline under every bar and stated in the panel below 60%, because a long bar over a short hairline is a lower bound wearing a confident face.
+
+Private companies have no market value here at all. Divisions carry an estimated share of a listed parent, flagged as an estimate. CIKs are left null on purpose and resolved from the SEC's own ticker map at ingest, because a hand-typed CIK is a silent wrong answer.
+
+### The ingest job
+
+`scripts/ingest/run.mjs` and `.github/workflows/ingest.yml`. Yahoo's v8 chart endpoint with a Stooq fallback, EDGAR company facts for US fundamentals and shares outstanding, ECB rates for FX. It writes `data/live/` and commits, so the site stays fully static and a failed run degrades to yesterday's numbers rather than to an error page.
+
+**It has never been run and the schedule is commented out** — turning it on is a decision, not a default. `--dry` exercises the plumbing without fetching anything, which is what keeps the pipeline from rotting while it is switched off. The rule the file exists to enforce: a source that fails keeps yesterday's value, marks it stale with the date it went stale, and writes the reason to `meta.json`. Never ship a silent stale number.
 
 ---
 

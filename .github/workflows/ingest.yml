@@ -1,0 +1,55 @@
+name: ingest
+
+# The daily market snapshot. Writes data/live/*.json and commits it, so
+# the site stays entirely static and a failed run degrades to yesterday's
+# numbers rather than to an error page.
+#
+# DISABLED BY DEFAULT. `schedule` is commented out because the pipeline
+# has never been run against the real endpoints and switching it on is a
+# decision, not a default. Run it by hand from the Actions tab first,
+# check what lands in data/live/, then uncomment the cron.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: "Dry run — exercise the plumbing, fetch nothing"
+        type: boolean
+        default: true
+  # schedule:
+  #   - cron: "30 22 * * 1-5"   # weekdays, 22:30 UTC, after the US close
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Ingest
+        run: node scripts/ingest/run.mjs ${{ inputs.dry && '--dry' || '' }}
+
+      - name: Validate what landed
+        run: npm run check
+
+      - name: Commit the snapshot
+        run: |
+          git config user.name  "ingest"
+          git config user.email "ingest@users.noreply.github.com"
+          git add data/live data/history
+          if git diff --staged --quiet; then
+            echo "nothing moved"
+          else
+            git commit -m "data: market snapshot $(date -u +%Y-%m-%d)"
+            git push
+          fi

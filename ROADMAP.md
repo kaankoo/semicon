@@ -2,7 +2,7 @@
 
 Status as of **12 Aug 2026**. Read `CLAUDE.md` first for conventions and the file routing table.
 
-The organising idea: the site holds **one body of knowledge** — 27 strata, 131 stations, 533 organisations — and each new section is **a different index on it**, not new content.
+The organising idea: the site holds **one body of knowledge** — 27 strata, 131 stations, 527 organisations — and each new section is **a different index on it**, not new content.
 
 | Lens | Question it answers | Status |
 |---|---|---|
@@ -14,7 +14,7 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | Space | Where on Earth does it happen? | ✅ Atlas |
 | Time | When did this become possible? | ✅ Lag |
 | Counterfactual | What breaks if this breaks? | ✅ Faults |
-| **Money** | **What is it worth?** | **next — see `PLAN.md`** |
+| Money | What is it worth? | ◐ Money — spine and pipeline shipped, unpriced |
 
 ---
 
@@ -29,8 +29,9 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | 4 · Atlas | — | 56 sites over 40 jurisdictions, every one anchored to a station. Circles are geodesic, not decorative, and the test proves it two ways. Hand-rolled equirectangular projection; Natural Earth at 56 KB. |
 | 5 · Lag | — | 70 capabilities with two dates each, laid out by stratum. A scrubber from 1947 fills bars as they land and lights the strata behind them. Nothing unfinished is given a date, and the build enforces it. |
 | 6 · Faults | — | 8 scenarios over the dependency graph. Reach is derived, reroutes and dead-ends are declared, and the two are never added together. `cone()` moved to `src/lib/graph.js` so the traversal is shared rather than copied. |
+| 7 · Money | — | The ticker spine — 283 of 527 organisations — plus the ingest job, `metrics.js`, and a Money tab that renders the spine honestly with no prices committed. PLAN.md phases 1 and most of 2. |
 
-**Current test surface:** 180 smoke assertions + corpus validation of 11 data files. `npm test`.
+**Current test surface:** 200 smoke assertions + corpus validation of 12 data files. `npm test`.
 
 ### What Phase 4 actually landed
 
@@ -128,21 +129,34 @@ Deep links are the highest value per hour of the six — they make everything el
 
 ---
 
-## Phase 8 — MONEY
+## Phase 7 — Money *(partly shipped — the unpriced half)*
 
-Fully specified in **`PLAN.md`**. Unstarted, and deliberately last: learning is primary, price is supporting evidence.
+PLAN.md's phase 1 and most of its phase 2. The tab sits **between Web and Ruler**; Index stayed where it is rather than being absorbed, because removing a tab people may have bookmarked is the one subtractive change this project has avoided making.
 
-Placement is settled — a `MONEY` tab **between Web and Index**, absorbing the Index table as its screener. The homepage never changes.
+### What landed
 
-### Critical path
+- **`data/static/companies.json` — the critical path.** 283 of 527 organisations, every multi-station one covered. Tickers, listed-parent mappings with an estimated `parentShare`, private marks kept out of every total, and attribution weights that partition one. CIKs deliberately left null and resolved at ingest from the SEC's own map.
+- **`scripts/ingest/run.mjs` + the Action.** Yahoo with a Stooq fallback, EDGAR facts, ECB FX, a diff and a changelog, committed to `data/live/`. Written, dry-runnable, and switched off.
+- **`src/lib/metrics.js`.** Attribution, layer totals, HHI on attributed value, coverage, blast-radius capital. Pure and testable without any live data.
+- **The Money view.** The Descent's column re-weighted, with coverage drawn beside every bar and a toggle between the even split and the declared weights.
+- **A capital overlay on Faults**, off by default, as PLAN.md gives the Web.
 
-`data/static/companies.json` — tickers, CIKs, parent mappings, attribution weights for the ~320 listed names among the 533. Nothing downstream works without it, and NVIDIA appearing at 19 stations makes attribution weights mandatory rather than optional.
+### What is deliberately not there
 
-### Read to start
+**No prices.** The ingest job has never been run against the live endpoints. Rather than seed the repo with figures typed from memory — which would have broken the rule every other view is built on — the page renders the spine and says so. `npm test` asserts that with nothing ingested every metric returns null rather than zero, that a null formats as a dash, and that the market-cap axis is disabled until data exists.
 
-`PLAN.md` in full · `CLAUDE.md` · `src/views/table.js` (becomes the screener) · `prototype-stack-priced.html` (the design direction, illustrative figures only)
+**Turning it on:** run `node scripts/ingest/run.mjs --dry` to prove the plumbing, then the same without `--dry`, then uncomment the `schedule` block in `.github/workflows/ingest.yml`.
 
-**Effort:** large. Phase 0–2 of `PLAN.md` before evaluating whether to continue.
+### What the spine already found
+
+Six organisations appeared in the corpus twice under different names — Tokyo Electron and TEL, Arm and Arm Holdings, Cadence and Cadence Design Systems, Amkor and Amkor Technology, KLA and KLA Corporation, SoftBank and SoftBank Group. Every aggregate would have double-counted them. The corpus is 527 organisations, not 533, and `check-data.mjs` now fails if two names ever claim one ticker.
+
+### Still to do, in PLAN.md's order
+
+- **Phase 2 remainder** — company dossiers reusing the sheet component, the computed Chokepoint Score shown beside the hand-set pips, Screener v1 with the financial columns.
+- **Phase 3** — per-edge coupling coefficients, which the Faults page still lacks.
+- **Phase 4** — `flows.json`, circularity ratio, and the Depth Curve. The Depth Curve's x-axis already exists: `depthOf()` in `metrics.js`.
+- **Phase 5** — command palette, density mode, history charts once ~60 trading days have accumulated, print stylesheet.
 
 ---
 

@@ -750,6 +750,119 @@ app.closeSheet();
   }
 }
 
+/* ---------- money ---------- */
+{
+  const SP = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/companies.json"), "utf8"));
+  const M = await import(pathToFileURL(path.join(ROOT, "src/lib/metrics.js")).href);
+
+  app.show("mny");
+  is("money view active", D.getElementById("v-mny").classList.contains("on"), true);
+  is("every stratum is a bar", D.querySelectorAll("#mnySvg .mny__r").length, app.L.length);
+  atLeast("panel populated", D.getElementById("mnyPanel").textContent.trim().length, 200);
+  atLeast("axes offered", D.querySelectorAll("#mnyMetric button").length, 2);
+  atLeast("bases offered", D.querySelectorAll("#mnyBasis button").length, 2);
+
+  /* the one property this whole section stands on: with nothing
+     ingested, nothing may produce a figure */
+  {
+    const empty = M.layerTotals(SP.companies, app.S, null);
+    const noVal = M.valueOf(Object.values(SP.companies).find(c => c.kind === "listed"), null);
+    const cap = M.capitalAt(["gpu"], SP.companies, null);
+    checks.push({ label: "no data means no number, never a zero",
+                  ok: empty === null && noVal === null && cap.value === null,
+                  actual: `layerTotals ${empty}, valueOf ${noVal}, capitalAt ${cap.value}`,
+                  expected: "null throughout" });
+    checks.push({ label: "…but who stands there is still countable",
+                  ok: cap.listed > 0 && cap.priced === 0,
+                  actual: `${cap.listed} listed and ${cap.private} private at the GPU station, 0 priced`,
+                  expected: "a cast without a valuation" });
+    is("…and a null formats as a dash", M.usd(null), "—");
+    is("…including a private company with a price table", M.valueOf(
+      Object.values(SP.companies).find(c => c.kind === "private"), { X: { marketCap: 1e12 } }), null);
+  }
+
+  /* the page must say so rather than quietly showing an empty chart */
+  {
+    const t = D.getElementById("mnyStatus").textContent.replace(/\s+/g, " ");
+    const quoted = fs.existsSync(path.join(ROOT, "data/live/quotes.json")) &&
+      Object.keys(JSON.parse(fs.readFileSync(path.join(ROOT, "data/live/quotes.json"), "utf8")).quotes || {}).length;
+    checks.push({ label: "the empty state is stated, not implied",
+                  ok: quoted ? /Priced/.test(t) : /No market data is committed/.test(t),
+                  actual: t.slice(0, 52) + "…", expected: quoted ? "a priced stamp" : "an explicit notice" });
+    is("the market-cap axis is disabled until it exists",
+       !!D.querySelector('#mnyMetric [data-metric="mcap"]').disabled, !quoted);
+  }
+
+  /* a company at nineteen stations must not be counted nineteen times */
+  {
+    const bad = Object.entries(SP.companies).filter(([, c]) => {
+      const w = M.weightsFor(c);
+      const sum = Object.values(w).reduce((a, b) => a + b, 0);
+      return Math.abs(sum - 1) > 2e-3 || Object.keys(w).length !== c.stations.length;
+    }).map(([id]) => id);
+    checks.push({ label: "every company's weights partition one", ok: bad.length === 0,
+                  actual: bad.length ? bad.slice(0, 3).join(", ") : `${Object.keys(SP.companies).length} companies`,
+                  expected: "all sum to 1 across all their stations" });
+
+    const nv = SP.companies["nvidia"];
+    checks.push({ label: "…and the even split really is even",
+                  ok: Math.abs(M.evenWeights(nv).gpu - 1 / nv.stations.length) < 1e-12,
+                  actual: `1/${nv.stations.length} at each of NVIDIA's stations`, expected: "uniform" });
+    checks.push({ label: "…while the declared one is not",
+                  ok: M.weightsFor(nv).gpu > M.evenWeights(nv).gpu * 3,
+                  actual: `gpu ${(M.weightsFor(nv).gpu * 100).toFixed(0)}% declared vs ` +
+                          `${(M.evenWeights(nv).gpu * 100).toFixed(0)}% even`,
+                  expected: "judgement moved it" });
+  }
+
+  /* with a synthetic price table the arithmetic must reconcile exactly —
+     this is the only place in the suite that invents a number, and it
+     is invented so the maths can be checked, never rendered */
+  {
+    const fake = {}; let listed = 0;
+    for (const c of Object.values(SP.companies))
+      if (c.kind === "listed") { fake[c.ticker] = { marketCap: 1e9 }; listed++; }
+    const t = M.layerTotals(SP.companies, app.S, fake);
+    const summed = Object.values(t.byStratum).reduce((a, b) => a + b, 0);
+    checks.push({ label: "attribution conserves value", ok: Math.abs(summed - t.total) / t.total < 1e-9,
+                  actual: `${(summed / 1e9).toFixed(3)}bn across strata vs ${(t.total / 1e9).toFixed(3)}bn total`,
+                  expected: "the same, to floating point" });
+    checks.push({ label: "…and divisions add their parent's share, not all of it",
+                  ok: t.total > listed * 1e9 && t.total < (listed + 40) * 1e9,
+                  actual: `${listed} listed at $1bn plus division shares = ${(t.total / 1e9).toFixed(1)}bn`,
+                  expected: "listed total plus fractional divisions" });
+    const h = M.hhi([1, 1, 1, 1]);
+    checks.push({ label: "the concentration index behaves", ok: Math.abs(h - 0.25) < 1e-12 && M.hhi([1]) === 1,
+                  actual: `four equal → ${h}, one alone → ${M.hhi([1])}`, expected: "0.25 and 1" });
+  }
+
+  /* coverage must be the corpus's, and honest about the thin layers */
+  {
+    const cov = M.coverage(SP.companies, app.S, app.L);
+    const thin = Object.entries(cov).filter(([, v]) => v.share < 0.4).map(([n]) => n);
+    checks.push({ label: "coverage is computed per stratum",
+                  ok: Object.keys(cov).length === app.L.length && cov[7].share > 0.9,
+                  actual: `stratum 07 at ${(cov[7].share * 100).toFixed(0)}%, ${thin.length} layers under 40%`,
+                  expected: "all 27, Node complete" });
+  }
+
+  /* the Faults overlay must degrade to a count, never to a fake total */
+  {
+    app.show("flt");
+    const btn = D.querySelector("#fltCapital [data-cap]");
+    is("faults offers the capital overlay", !!btn, true);
+    if (btn) {
+      btn.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      const t = D.getElementById("fltCount").textContent.replace(/\s+/g, " ");
+      checks.push({ label: "the overlay counts companies without pricing them",
+                    ok: /listed and/.test(t) && !/\$/.test(t),
+                    actual: t.slice(t.indexOf("listed") - 12, t.indexOf("listed") + 30) || t.slice(-60),
+                    expected: "a count, and no currency figure" });
+      btn.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    }
+  }
+}
+
 /* ---- report ---- */
 const failed = checks.filter(c => !c.ok);
 const pad = s => String(s).padEnd(34);

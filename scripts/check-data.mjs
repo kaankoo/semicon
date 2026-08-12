@@ -424,6 +424,100 @@ N.notes.forEach(n => {
 }
 ok.push(`${CF.faults.length} counterfactuals`);
 
+/* ---- companies ---- */
+const CO = read("companies.json");
+const KINDS_C = new Set((CO.meta.kinds || []).map(k => k.id));
+const corpusOrgs = {};
+S.forEach(s => s.co.forEach(c => { if (c[0] !== "—") (corpusOrgs[c[0]] = corpusOrgs[c[0]] || []).push(s.i); }));
+
+["updated", "note", "attribution", "kinds", "cik", "caveat", "coverage"].forEach(k => {
+  if (!CO.meta[k]) problems.push(`companies.json meta is missing "${k}"`);
+});
+["listed", "division", "private", "body", "abstract"].forEach(k => {
+  if (!KINDS_C.has(k)) problems.push(`companies.json does not declare the "${k}" kind`);
+});
+
+const tickers = {};
+Object.entries(CO.companies).forEach(([id, c]) => {
+  if (!c.name) { problems.push(`company ${id} has no name`); return; }
+  if (!KINDS_C.has(c.kind)) problems.push(`company ${id} has kind "${c.kind}"`);
+
+  /* the spine may not drift away from the corpus it joins onto */
+  const real = corpusOrgs[c.name];
+  if (!real) problems.push(`company ${id} ("${c.name}") does not appear in stations.json`);
+  else if (real.slice().sort().join() !== c.stations.slice().sort().join())
+    problems.push(`company ${id} lists stations the corpus disagrees with — ` +
+                  `spine has [${c.stations}], corpus has [${real}]`);
+
+  if (c.kind === "listed") {
+    if (!c.ticker) problems.push(`company ${id} is listed with no ticker`);
+    else (tickers[c.ticker] = tickers[c.ticker] || []).push(id);
+    if (c.cik !== null) problems.push(`company ${id} has a hand-typed CIK — those are resolved at ingest`);
+  }
+  if (c.kind === "division") {
+    if (!c.parent) problems.push(`company ${id} is a division with no parent`);
+    if (!(c.parentShare > 0 && c.parentShare <= 1))
+      problems.push(`company ${id} has parentShare ${c.parentShare}`);
+  }
+  if (c.kind !== "listed" && c.ticker) problems.push(`company ${id} is ${c.kind} but carries a ticker`);
+
+  /* a company at nine stations counted nine times makes every aggregate
+     nonsense — so weights, where declared, must be a partition of one */
+  if (c.attribution) {
+    const keys = Object.keys(c.attribution);
+    const sum = Object.values(c.attribution).reduce((a, b) => a + b, 0);
+    if (Math.abs(sum - 1) > 2e-3) problems.push(`company ${id} weights sum to ${sum.toFixed(4)}, not 1`);
+    keys.forEach(k => {
+      if (!ids.has(k)) problems.push(`company ${id} weights unknown station "${k}"`);
+      else if (!c.stations.includes(k)) problems.push(`company ${id} weights "${k}", a station it is not at`);
+    });
+    if (keys.length !== c.stations.length)
+      problems.push(`company ${id} weights ${keys.length} of its ${c.stations.length} stations — ` +
+                    `a partial partition silently loses value`);
+    if (c.attributionBasis !== "judgement")
+      problems.push(`company ${id} declares weights but calls the basis "${c.attributionBasis}"`);
+    if (!c.attributionWhy)
+      problems.push(`company ${id} hand-weights without saying why — judgement has to be defensible`);
+  } else if (c.attributionBasis !== "even") {
+    problems.push(`company ${id} has no weights, so its basis must be "even", not "${c.attributionBasis}"`);
+  }
+});
+
+Object.entries(tickers).forEach(([t, who]) => {
+  if (who.length > 1) problems.push(`ticker ${t} is claimed by ${who.length} companies: ${who.join(", ")}`);
+});
+
+/* the declared coverage must be the real coverage */
+{
+  const n = Object.keys(CO.companies).length, all = Object.keys(corpusOrgs).length;
+  if (CO.meta.coverage.curated !== n || CO.meta.coverage.corpus !== all)
+    problems.push(`companies.json declares coverage ${CO.meta.coverage.curated}/${CO.meta.coverage.corpus} ` +
+                  `but is ${n}/${all}`);
+  /* every organisation appearing at more than one station is where
+     attribution actually matters, so none of them may be missing */
+  const multi = Object.entries(corpusOrgs).filter(([, st]) => st.length > 1).map(([n2]) => n2);
+  const have = new Set(Object.values(CO.companies).map(c => c.name));
+  const gap = multi.filter(n2 => !have.has(n2));
+  if (gap.length) problems.push(`${gap.length} multi-station organisations are missing from the spine: ` +
+                                gap.slice(0, 5).join(", "));
+}
+
+/* live data is optional — but if it is there it must be shaped right,
+   and it must never be committed without a date */
+{
+  const q = path.join(D, "../live/quotes.json");
+  if (fs.existsSync(q)) {
+    const Q = JSON.parse(fs.readFileSync(q, "utf8"));
+    if (!Q.asOf) problems.push("data/live/quotes.json has no asOf date — a number with no vintage is not a number");
+    Object.entries(Q.quotes || {}).forEach(([t, v]) => {
+      if (v.marketCap != null && !(v.marketCap > 0)) problems.push(`quote ${t} has market cap ${v.marketCap}`);
+      if (v.price != null && !(v.price > 0)) problems.push(`quote ${t} has price ${v.price}`);
+      if (v.stale && !v.staleSince) problems.push(`quote ${t} is stale without saying since when`);
+    });
+  }
+}
+ok.push(`${Object.keys(CO.companies).length} companies in the spine`);
+
 /* ---- report ---- */
 if (problems.length) {
   console.error(`\n  ✗ ${problems.length} problem${problems.length > 1 ? "s" : ""}\n`);

@@ -2,7 +2,7 @@
   "name": "sand-to-sentence",
   "version": "2.0.0",
   "private": true,
-  "description": "An interactive cross-section of the AI economy \u2014 27 strata, 131 stations, 533 organisations, from quartz sand to the last consumer of value.",
+  "description": "An interactive cross-section of the AI economy \u2014 27 strata, 131 stations, 527 organisations, from quartz sand to the last consumer of value.",
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.mjs",

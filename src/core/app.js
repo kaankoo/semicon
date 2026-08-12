@@ -43,6 +43,7 @@ export const app = {
   lagGoTo: () => {},       // views/timeline
   faultsFit: () => {},     // views/faults
   faultsGoTo: () => {},    // views/faults
+  moneyFit: () => {},      // views/money
   showNote: () => {},      // views/method
   tourStop: () => {}       // views/tour
 };

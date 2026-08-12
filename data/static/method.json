@@ -25,7 +25,7 @@
     },
     {
       "term": "Organisation",
-      "def": "A company, institute or state body operating at a station. There are 533 across 40+ jurisdictions. Lists are illustrative of who matters at each link — they are not exhaustive, not ranked, and not a market-share estimate."
+      "def": "A company, institute or state body operating at a station. There are 527 across 40+ jurisdictions. Lists are illustrative of who matters at each link — they are not exhaustive, not ranked, and not a market-share estimate."
     }
   ],
 
@@ -111,6 +111,27 @@
       "vintage": "mid-2026"
     },
     {
+      "class": "The ticker spine",
+      "kind": "curated",
+      "who": "Primary listings and company disclosures",
+      "detail": "283 of the corpus's 527 organisations mapped to a primary listing, a listed parent, or neither. Every multi-station organisation is covered, because that is where attribution matters. CIKs are deliberately left empty and resolved from the SEC's own ticker map at ingest, since a hand-typed CIK is a silent wrong answer. Coverage is uneven and computed per stratum — the Node and Memory layers are complete, the Agency layer is under a quarter — and any layer total is a lower bound rather than a measurement.",
+      "vintage": "mid-2026"
+    },
+    {
+      "class": "Attribution weights",
+      "kind": "judgement",
+      "who": "Hand-assigned where declared, otherwise arithmetic",
+      "detail": "A company present at nineteen stations must not be counted nineteen times, so every one is split across its stations by weights summing to one. The default is an even split, which involves no judgement and is fully reproducible. Thirteen entries carry hand-set weights instead, each with a stated reason, because an even split would put five per cent of NVIDIA in the scheduling layer. None of them are segment disclosures and the view shows both bases side by side. Divisions carry an estimated share of a listed parent — an estimate, flagged as one, since attributing a parent's whole market cap to a division is wrong and attributing zero is also wrong.",
+      "vintage": "mid-2026"
+    },
+    {
+      "class": "Market prices and fundamentals",
+      "kind": "cited",
+      "who": "Yahoo Finance · Stooq · SEC EDGAR · ECB via Frankfurter",
+      "detail": "Written by a scheduled job into data/live/ and committed, so the site stays static and a failed run degrades to the previous day rather than to an error. Every quote carries the date it was fetched, and a value kept from a previous run is marked stale with the date it went stale — the page shows the badge rather than the number alone. At the time of writing the job has never been run against the live endpoints and no prices are committed, so the Money page shows the spine and says so.",
+      "vintage": "not yet run"
+    },
+    {
       "class": "Blast radius on the Faults page",
       "kind": "derived",
       "who": "The dependency graph",
@@ -162,7 +183,7 @@
     },
     {
       "title": "Company lists are illustrative",
-      "body": "533 organisations sounds comprehensive and is not. Whole categories of supplier are represented by two or three names. Absence from a list means nothing; presence means only that the organisation is worth knowing about at that link."
+      "body": "527 organisations sounds comprehensive and is not. Whole categories of supplier are represented by two or three names. Absence from a list means nothing; presence means only that the organisation is worth knowing about at that link."
     },
     {
       "title": "The Cascade's central case is a configuration, not an average",
@@ -171,6 +192,14 @@
     {
       "title": "Fab figures are industry averages",
       "body": "Water and electricity per wafer come from cross-industry data spanning many nodes. A leading-edge logic fab is plausibly worse than the average and a mature analog fab plausibly better. The chain treats them as one number because a better public one does not exist."
+    },
+    {
+      "title": "Every layer total is a lower bound",
+      "body": "The ticker spine covers 283 of 527 organisations and the gaps are not evenly spread. Node and Memory are complete; Agency and Thermal are under 40%, because those layers are mostly small private companies. A private company has no market value in any total here by design — mixing a two-year-old private mark with a live public price produces a figure that means nothing — so the missing names would mostly add nothing anyway. Mostly is not the same as nothing, and the coverage hairline under every bar exists so the shortfall is visible rather than assumed away."
+    },
+    {
+      "title": "Attribution across nineteen stations is genuinely ambiguous",
+      "body": "There is no correct answer to how much of NVIDIA belongs to the kernel layer. The even split is reproducible and wrong; the hand-set weights are more plausible and unfalsifiable. Both are shown, the difference between them is one click, and thirteen entries out of 283 are all that carry judgement. Where the two bases disagree sharply, treat the layer total as a range rather than a number."
     },
     {
       "title": "The Faults page has no coupling and no inventory",

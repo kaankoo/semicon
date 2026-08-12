@@ -56,5 +56,10 @@ export function initTable() {
   qEl.addEventListener("input", renderTable);
   renderTable();
 
-  app.focusSearch = () => qEl.focus();
+  /* an optional query, so another view can hand the table something to
+     look for rather than only handing it the cursor */
+  app.focusSearch = q => {
+    if (q != null) { qEl.value = q; renderTable(); }
+    qEl.focus();
+  };
 }

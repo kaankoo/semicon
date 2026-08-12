@@ -19,6 +19,7 @@ import { initRuler } from "./views/ruler.js";
 import { initAtlas } from "./views/atlas.js";
 import { initTimeline } from "./views/timeline.js";
 import { initFaults } from "./views/faults.js";
+import { initMoney } from "./views/money.js";
 import { initMethod } from "./views/method.js";
 import { loadNotes } from "./core/notes.js";
 
@@ -46,6 +47,7 @@ async function boot() {
   await initRuler();
   await initAtlas();
   await initTimeline();
+  await initMoney();
   await initFaults();
   await initCascade();
   await initMethod();
