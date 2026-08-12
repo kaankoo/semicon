@@ -22,6 +22,7 @@
     <button role="tab" aria-selected="false" data-view="web">Web</button>
     <button role="tab" aria-selected="false" data-view="rul">Ruler</button>
     <button role="tab" aria-selected="false" data-view="atl">Atlas</button>
+    <button role="tab" aria-selected="false" data-view="tml">Lag</button>
     <button role="tab" aria-selected="false" data-view="cas">Cascade</button>
     <button role="tab" aria-selected="false" data-view="idx">Index</button>
   </div>
@@ -142,6 +143,47 @@
         <h5>How to read this</h5>
         <p>Rings are <b>geodesic</b>: a hundred points, each exactly the stated distance from the centre, projected like any other geometry. That is why they widen towards the poles — an equirectangular map stretches east–west by 1/cos(latitude), and a ring that stayed circular on screen would be lying about the ground. Each site carries a <b>precision</b> flag saying what kind of coordinate it is: <i>sited</i> where the operator publishes the location, <i>approx</i> where it is reconstructed from public reporting, <i>area</i> where the point is the centre of a district.</p>
         <p style="margin-top:14px">Coordinates are for published corporate and public locations only. Nothing here is more precise than the operator has itself made public, and nothing is derived from imagery, filings or any other private source. The <b>export-control regime</b> layer is a reading of who writes and who is bound by the leading-edge tool controls — it is judgement, labelled as such on <b>Method</b>, and not a legal finding. Boundaries are Natural Earth's, drawn for orientation.</p>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ============ LAG ============ -->
+  <section class="view" id="v-tml">
+    <div class="tml">
+      <div class="atl__hud">
+        <p class="eyebrow">Every capability in the stack, with two dates</p>
+        <h2 class="rul__h">Everything here is <em>older</em> than it looks.</h2>
+        <p class="rul__i">The left end of each bar is the year a capability first worked. The right end is the year it arrived in volume. Drag the year, or sweep it, and watch the stack fill in. Click any bar to read what it was waiting for.</p>
+      </div>
+
+      <div class="tml__claim" id="tmlClaim"></div>
+
+      <div class="tml__ctl">
+        <button class="btn" id="tmlPlay">Sweep 1947 → now</button>
+        <div class="tml__scrub">
+          <input type="range" id="tmlRange" aria-label="Year">
+          <div class="tml__read"><b id="tmlYear"></b><span id="tmlLit"></span></div>
+        </div>
+        <div class="tml__strip" id="tmlStrip" aria-hidden="true"></div>
+      </div>
+
+      <div class="atl__ctl">
+        <div class="atl__layers" id="tmlLayers" role="group" aria-label="Chart layers"></div>
+        <div class="atl__legend tml__legend" id="tmlLegend"></div>
+      </div>
+
+      <div class="tml__stage">
+        <svg id="tmlSvg" aria-label="Bars showing the years between a capability first working and shipping in volume"></svg>
+      </div>
+
+      <aside class="atl__panel" id="tmlPanel"></aside>
+
+      <footer class="foot">
+        <h5>How to read this</h5>
+        <p><b>Invented</b> is the year the capability was first demonstrated in a form a specialist would recognise as working — a paper, a lab device, a proof of principle. <b>Shipped</b> is the year it reached volume, or general availability at a scale that changed what the layer above could assume. Both are judgement calls at the margin, so each bar carries a <b>confidence</b>: <i>dated</i> where a specialist would recognise both years, <i>contested</i> where one of them is a matter of where you draw the line.</p>
+        <p style="margin-top:14px">While the scrubber is short of today, each bar is drawn twice: solid as far as the year you are standing in, and faint for the rest of the wait. The faint part is the answer — it is what the wait turned out to be, not what anyone knew at the time.</p>
+        <p style="margin-top:14px">Four entries have <b>no right-hand end</b>. They work in a lab or in early production and have no volume date, and this view will not invent one — an arrow is not a forecast. A handful of bars run off the <b>left edge</b>: they were finished before 1947 and waited for an industry to exist. Their true year is in the panel.</p>
+        <p style="margin-top:14px">The events are <b>chosen, not enumerated</b>. The medians in the headline are properties of this selection, not measurements of the industry — honest about a pattern, useless as a dataset. There is a survivorship problem built in, too: capabilities that never shipped at all mostly do not appear, because nobody writes their history. Said again, at more length, on <b>Method</b>.</p>
       </footer>
     </div>
   </section>

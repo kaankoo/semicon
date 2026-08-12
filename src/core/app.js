@@ -39,6 +39,8 @@ export const app = {
   rulerGoTo: () => {},     // views/ruler
   atlasFit: () => {},      // views/atlas
   atlasGoTo: () => {},     // views/atlas
+  lagFit: () => {},        // views/timeline
+  lagGoTo: () => {},       // views/timeline
   showNote: () => {},      // views/method
   tourStop: () => {}       // views/tour
 };

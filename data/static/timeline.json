@@ -1,0 +1,379 @@
+{
+  "meta": {
+    "updated": "2026-08-12",
+    "span": [1947, 2028],
+    "now": 2026,
+    "note": "Every capability in this stack has two dates: the year it first worked, and the year it arrived in volume. The distance between them is the only thing this view draws. Bars are laid out by stratum, so the chart reads top-to-bottom as the stack reads — rock at the top of the list, sentences at the bottom.",
+    "definitions": {
+      "invented": "The year the capability was first demonstrated in a form a specialist would recognise as working — a paper, a lab device, a proof of principle. Not the year it was conceived, and not the year anyone could buy it.",
+      "shipped": "The year it reached volume: high-volume manufacturing, or general availability at a scale that changed what the layer above could assume. Not first silicon, not a press release, not a demo.",
+      "lag": "shipped − invented. Where an entry has not shipped, it has no lag and this view refuses to guess one."
+    },
+    "confidence": [
+      { "id": "dated", "label": "Dated", "note": "Both years are documented and a specialist would recognise them. Argue about a year either way, not a decade." },
+      { "id": "contested", "label": "Contested", "note": "One of the two dates is a judgement call — the science arrived over several years, or 'volume' is a matter of where you draw the line. The bar is right to within a few years, not to the year." },
+      { "id": "open", "label": "Not shipped", "note": "It works in a lab or in early production and has no volume date. This view draws an open bar and does not extrapolate. If you want to know when it arrives, so does everyone." }
+    ],
+    "clamped": "A few capabilities were finished before 1947 and waited for an industry to exist. Their bars run off the left edge of the chart; the panel gives the true year.",
+    "caveat": "The events are chosen, not enumerated. Any statistic drawn from them — including the median lag this page puts in a headline — is a property of this selection, not a measurement of the industry. It is honest about a pattern and useless as a dataset.",
+    "waitedFor": [
+      { "id": "unsolved", "label": "The science", "note": "It genuinely did not work yet. Somebody had to finish the physics, the chemistry or the materials before there was anything to ship." },
+      { "id": "tooling", "label": "A machine", "note": "The idea was sound and nothing existed that could do it at volume, to tolerance, repeatably. Most of this stack waited here." },
+      { "id": "economics", "label": "A better reason", "note": "It worked, and it was better, and the incumbent approach was cheaper — until some condition changed and it suddenly was not." },
+      { "id": "scale", "label": "Something to run on", "note": "It worked, and only pays above a size that did not exist yet: enough compute, enough data, enough parameters, enough demand." },
+      { "id": "demand", "label": "Someone to want it", "note": "It worked, it was affordable, and nobody needed it. This is the most common reason a good idea sits for thirty years." }
+    ]
+  },
+
+  "events": [
+    { "id": "transistor", "stratum": 7, "station": "gaa", "label": "The transistor",
+      "invented": 1947, "shipped": 1954, "waitedFor": "tooling", "confidence": "dated",
+      "note": "Bardeen and Brattain's point-contact device worked in December 1947; Shockley's junction transistor followed. Texas Instruments put silicon transistors into volume in 1954. Everything on this chart sits on top of these seven years.",
+      "source": { "who": "Nobel Prize", "what": "The transistor, Bardeen, Brattain and Shockley, 1956", "url": "https://www.nobelprize.org/prizes/physics/1956/summary/" } },
+
+    { "id": "czochralski", "stratum": 3, "station": "cz", "label": "Czochralski crystal growth",
+      "invented": 1918, "shipped": 1952, "waitedFor": "demand", "confidence": "contested",
+      "note": "Jan Czochralski published his pulling method in 1918, having reportedly discovered it by dipping a pen in molten tin. It described how to grow a single crystal and nobody had a use for one. Teal and Little applied it to germanium at Bell Labs in 1950, and single-crystal semiconductor ingots were in production within two years — thirty-four years after the method was finished.",
+      "source": { "who": "Czochralski, Z. Phys. Chem.", "what": "Ein neues Verfahren zur Messung der Kristallisationsgeschwindigkeit der Metalle, 1918", "url": "https://en.wikipedia.org/wiki/Czochralski_method" } },
+
+    { "id": "neon", "stratum": 1, "station": "gas", "label": "Neon, as a consumable",
+      "invented": 1898, "shipped": 1988, "waitedFor": "demand", "confidence": "contested",
+      "note": "Ramsay and Travers isolated neon from liquefied air in 1898 and it was a curiosity for most of a century. Excimer lithography made it a strategic input: a KrF stepper burns it continuously, and by the late 1980s an obscure by-product of steelworks air separation had become something fabs could not run without.",
+      "source": { "who": "USITC", "what": "Ukraine, neon and semiconductors", "url": "https://www.usitc.gov/publications/332/executive_briefings/ebot_decarlo_goodman_ukraine_neon_and_semiconductors.pdf" } },
+
+    { "id": "reverse-osmosis", "stratum": 1, "station": "h2o", "label": "Reverse osmosis",
+      "invented": 1959, "shipped": 1965, "waitedFor": "tooling", "confidence": "dated",
+      "note": "Loeb and Sourirajan's asymmetric cellulose-acetate membrane at UCLA made desalination practical. The fab industry inherited it: ultra-pure water systems are reverse osmosis followed by a great deal more, and a leading-edge fab drinks thousands of tonnes of it a day.",
+      "source": { "who": "Loeb & Sourirajan, UCLA", "what": "Sea water demineralization by means of an osmotic membrane, 1962", "url": "https://pubs.acs.org/doi/10.1021/ba-1963-0038.ch009" } },
+
+    { "id": "solvent-extraction", "stratum": 1, "station": "ree", "label": "Rare-earth separation",
+      "invented": 1957, "shipped": 1965, "waitedFor": "demand", "confidence": "contested",
+      "note": "Adjacent rare earths are chemically almost identical, which is why they stayed mixed for 150 years after their discovery. Ion exchange and then counter-current solvent extraction finally pulled them apart in the 1950s, and europium for colour television was the first product that needed it. Separation, not mining, is still where the concentration sits.",
+      "source": { "who": "USGS", "what": "Rare earths — statistics and information", "url": "https://www.usgs.gov/centers/national-minerals-information-center/rare-earths-statistics-and-information" } },
+
+    { "id": "siemens", "stratum": 2, "station": "poly", "label": "The Siemens process",
+      "invented": 1953, "shipped": 1961, "waitedFor": "tooling", "confidence": "contested",
+      "note": "Trichlorosilane decomposed onto a heated silicon rod, giving polysilicon pure enough to grow a crystal from. Seventy years later it is still how essentially all electronic-grade polysilicon is made, and it is still ferociously energy-hungry. Some steps do not get replaced; they get relocated to wherever electricity is cheap.",
+      "source": { "who": "Wacker Chemie", "what": "Polysilicon and the Siemens process", "url": "https://www.wacker.com/cms/en-us/products/product-groups/polysilicon/polysilicon.html" } },
+
+    { "id": "ion-implant", "stratum": 6, "station": "imp", "label": "Ion implantation",
+      "invented": 1954, "shipped": 1973, "waitedFor": "economics", "confidence": "contested",
+      "note": "Shockley patented the idea of firing dopant ions into silicon in 1954. Diffusion furnaces were good enough for a long time; implantation only became necessary when device geometries got small enough that where the dopant landed mattered as much as how much of it there was.",
+      "source": { "who": "Shockley, US Patent 2,787,564", "what": "Forming semiconductive devices by ionic bombardment, filed 1954", "url": "https://patents.google.com/patent/US2787564A/en" } },
+
+    { "id": "moores-law", "stratum": 26, "station": "capex", "label": "Moore's law, as a commitment",
+      "invented": 1965, "shipped": 1975, "waitedFor": "demand", "confidence": "contested",
+      "note": "Moore's 1965 article was an extrapolation from five data points. It became a plan rather than an observation once the industry started organising its capital spending around it — a rare case of a prediction that was made true by everyone believing it.",
+      "source": { "who": "Moore, Electronics", "what": "Cramming more components onto integrated circuits, 1965", "url": "https://newsroom.intel.com/wp-content/uploads/sites/11/2018/05/moores-law-electronics.pdf" } },
+
+    { "id": "dram-cell", "stratum": 8, "station": "dram", "label": "The one-transistor DRAM cell",
+      "invented": 1967, "shipped": 1970, "waitedFor": "tooling", "confidence": "dated",
+      "note": "Dennard's single-transistor, single-capacitor cell replaced six transistors with two components, and Intel's 1103 shipped three years later. It is one of the shortest lags in this corpus, because the economics were obvious the moment it worked. Nothing about DRAM has been that easy since.",
+      "source": { "who": "Dennard, US Patent 3,387,286", "what": "Field-effect transistor memory, filed 1967", "url": "https://patents.google.com/patent/US3387286A/en" } },
+
+    { "id": "ccgt", "stratum": 13, "station": "gen", "label": "The combined-cycle gas turbine",
+      "invented": 1949, "shipped": 1990, "waitedFor": "unsolved", "confidence": "contested",
+      "note": "Run a gas turbine, then use its exhaust to raise steam for a second turbine. Demonstrated in Oklahoma in 1949, and only economic at scale once materials science let turbine inlets run hot enough — by the 1990s it was the default new power station, and it is what most of the current data-centre build is quietly betting on.",
+      "source": { "who": "US Department of Energy", "what": "Combined-cycle technology history", "url": "https://www.energy.gov/" } },
+
+    { "id": "microchannel", "stratum": 14, "station": "liq", "label": "Direct-to-chip liquid cooling",
+      "invented": 1981, "shipped": 2024, "waitedFor": "economics", "confidence": "contested",
+      "note": "Tuckerman and Pease etched water channels into the back of a silicon die at Stanford in 1981 and removed 790 watts per square centimetre. Air was cheaper for forty years. The rack the current generation of accelerators ships in is, in essence, their idea — and it is the longest wait on this chart that has nothing to do with physics being hard.",
+      "source": { "who": "Tuckerman & Pease, IEEE Electron Device Letters", "what": "High-performance heat sinking for VLSI, 1981", "url": "https://ieeexplore.ieee.org/document/1482725" } },
+
+    { "id": "immersion-cooling", "stratum": 14, "station": "imm", "label": "Immersion cooling",
+      "invented": 1966, "shipped": 1985, "waitedFor": "economics", "confidence": "contested",
+      "note": "Submerging electronics in an inert fluorocarbon was an IBM idea in the 1960s and reached the public in the Cray-2, whose Fluorinert waterfall was as famous as its performance. Then it disappeared for thirty years. It is being re-argued now for exactly the reason it was proposed then.",
+      "source": { "who": "Cray Research", "what": "Cray-2 liquid immersion cooling, 1985", "url": "https://www.computerhistory.org/collections/catalog/102646190" } },
+
+    { "id": "backprop", "stratum": 19, "station": "arch", "label": "Backpropagation",
+      "invented": 1970, "shipped": 2012, "waitedFor": "scale", "confidence": "contested",
+      "note": "Linnainmaa published reverse-mode automatic differentiation in his 1970 master's thesis; Rumelhart, Hinton and Williams made it famous for neural networks in 1986. It then waited for hardware. AlexNet in 2012 changed nothing about the algorithm and everything about what it was running on — the wait was for the GPU, not for the idea.",
+      "source": { "who": "Rumelhart, Hinton & Williams, Nature", "what": "Learning representations by back-propagating errors, 1986", "url": "https://www.nature.com/articles/323533a0" } },
+
+    { "id": "ald", "stratum": 6, "station": "dep", "label": "Atomic layer deposition",
+      "invented": 1974, "shipped": 2007, "waitedFor": "demand", "confidence": "contested",
+      "note": "Suntola's alternating self-limiting surface reactions grow film by counting cycles rather than by timing a deposition, which is the only way to get a uniform two-nanometre layer across 300 millimetres. Developed for electroluminescent displays in Finland, it sat for three decades and then became unavoidable the moment gate oxides got thin enough to leak.",
+      "source": { "who": "Suntola & Antson, US Patent 4,058,430", "what": "Method for producing compound thin films, filed 1975", "url": "https://patents.google.com/patent/US4058430A/en" } },
+
+    { "id": "nand", "stratum": 8, "station": "nand", "label": "NAND flash",
+      "invented": 1987, "shipped": 1992, "waitedFor": "tooling", "confidence": "dated",
+      "note": "Masuoka's team at Toshiba gave up random access in exchange for density, which is exactly the trade storage wanted and memory did not. Everything about how training data is stored and streamed follows from that decision.",
+      "source": { "who": "Masuoka et al., IEDM", "what": "New ultra high density EPROM and flash EEPROM with NAND structure cell, 1987", "url": "https://ieeexplore.ieee.org/document/1487443" } },
+
+    { "id": "cmp", "stratum": 6, "station": "cmp", "label": "Chemical-mechanical planarisation",
+      "invented": 1986, "shipped": 1991, "waitedFor": "tooling", "confidence": "contested",
+      "note": "Polishing the wafer flat between layers, borrowed from optical lens finishing. It sounds like housekeeping and it is not: without a flat surface, lithography cannot keep the whole field in focus, so every layer above the first depends on it. Multi-level metal was impossible before it and routine afterwards.",
+      "source": { "who": "IBM Journal of Research and Development", "what": "Chemical-mechanical polishing for fabricating patterned W metal features, 1992", "url": "https://ieeexplore.ieee.org/document/5389517" } },
+
+    { "id": "phase-shift", "stratum": 5, "station": "mask", "label": "The phase-shift mask",
+      "invented": 1982, "shipped": 1995, "waitedFor": "tooling", "confidence": "contested",
+      "note": "Levenson's insight was that you can use destructive interference to print features smaller than the wavelength suggests, by shifting the phase of the light through part of the mask. It is the first of the tricks that let optical lithography survive well past the point where it should have stopped.",
+      "source": { "who": "Levenson, Viswanathan & Simpson, IEEE Trans. Electron Devices", "what": "Improving resolution in photolithography with a phase-shifting mask, 1982", "url": "https://ieeexplore.ieee.org/document/1482192" } },
+
+    { "id": "car-resist", "stratum": 5, "station": "res", "label": "Chemically amplified resist",
+      "invented": 1982, "shipped": 1994, "waitedFor": "demand", "confidence": "contested",
+      "note": "One photon releases an acid that catalyses many reactions, so the resist needs far less light to expose. Without amplification the exposure doses at deep-ultraviolet wavelengths would make throughput commercially hopeless. It is the reason lithography sources did not have to get proportionally brighter every node.",
+      "source": { "who": "Ito, Willson & Fréchet", "what": "Chemical amplification in resist systems, 1982", "url": "https://pubs.acs.org/doi/10.1021/bk-1984-0242.ch001" } },
+
+    { "id": "gaa", "stratum": 7, "station": "gaa", "label": "Gate-all-around",
+      "invented": 1990, "shipped": 2022, "waitedFor": "tooling", "confidence": "dated",
+      "note": "Colinge's silicon-on-insulator device wrapped the gate entirely around the channel, giving the electrostatics nowhere to leak. Thirty-two years later Samsung's 3GAE put it into production and TSMC's N2 followed. The transistor everything now being trained on runs through was finished when the World Wide Web was a proposal.",
+      "source": { "who": "Colinge et al., IEDM", "what": "Silicon-on-insulator gate-all-around device, 1990", "url": "https://ieeexplore.ieee.org/document/237128" } },
+
+    { "id": "moe", "stratum": 19, "station": "moe", "label": "Mixture of experts",
+      "invented": 1991, "shipped": 2021, "waitedFor": "scale", "confidence": "contested",
+      "note": "Jacobs, Jordan, Nowlan and Hinton proposed routing each input to a subset of specialised sub-networks in 1991. It is now how most frontier models are built, because it decouples parameter count from the cost of a forward pass. Thirty years, and the idea did not change — the thing that changed was having enough parameters for the routing to be worth it.",
+      "source": { "who": "Jacobs, Jordan, Nowlan & Hinton, Neural Computation", "what": "Adaptive mixtures of local experts, 1991", "url": "https://ieeexplore.ieee.org/document/6797059" } },
+
+    { "id": "tsv", "stratum": 9, "station": "3d", "label": "The through-silicon via",
+      "invented": 1962, "shipped": 2013, "waitedFor": "tooling", "confidence": "contested",
+      "note": "Shockley patented a conductive path etched clean through a wafer in 1962. It needed thinning, bonding and inspection that took another half-century to arrive. HBM is a stack of dies talking through thousands of them, which makes this patent the oldest thing in an AI accelerator.",
+      "source": { "who": "Shockley, US Patent 3,044,909", "what": "Semiconductive device and method of making, filed 1958", "url": "https://patents.google.com/patent/US3044909A/en" } },
+
+    { "id": "risc", "stratum": 4, "station": "isa", "label": "RISC",
+      "invented": 1981, "shipped": 1986, "waitedFor": "tooling", "confidence": "dated",
+      "note": "Berkeley's RISC-I and Stanford's MIPS argued that a simpler instruction set with a compiler behind it beats a complicated one. Every accelerator host, every phone and most of the world's shipped cores now agree. The argument was settled in five years and re-fought for thirty.",
+      "source": { "who": "Patterson & Ditzel, ACM SIGARCH", "what": "The case for the reduced instruction set computer, 1980", "url": "https://dl.acm.org/doi/10.1145/641914.641917" } },
+
+    { "id": "synthesis", "stratum": 4, "station": "eda", "label": "Logic synthesis",
+      "invented": 1986, "shipped": 1990, "waitedFor": "tooling", "confidence": "contested",
+      "note": "Describe behaviour, let a tool produce the gates. It moved design from drawing circuits to writing code, and it is the reason a team of a hundred can produce something with a hundred billion transistors in it. The abstraction held for forty years and is only now creaking.",
+      "source": { "who": "Synopsys", "what": "Design Compiler and the origins of RTL synthesis, 1986–87", "url": "https://www.synopsys.com/company/about-synopsys/synopsys-history.html" } },
+
+    { "id": "damascene", "stratum": 7, "station": "beol", "label": "Copper damascene",
+      "invented": 1993, "shipped": 1998, "waitedFor": "tooling", "confidence": "dated",
+      "note": "Copper conducts better than aluminium and cannot be etched, so IBM inverted the process: carve trenches, fill them with copper, polish the excess away. Named after a metal-inlay technique from Damascus. It bought the industry a decade of interconnect scaling and its limits are the reason ruthenium is now being discussed.",
+      "source": { "who": "IBM", "what": "Copper interconnect announcement, 1997", "url": "https://www.ibm.com/history/copper-chip" } },
+
+    { "id": "finfet", "stratum": 7, "station": "gaa", "label": "The FinFET",
+      "invented": 1999, "shipped": 2011, "waitedFor": "tooling", "confidence": "dated",
+      "note": "Hu, Bokor and King's fin stood the channel on its edge so the gate could wrap three sides of it, which is what kept scaling alive when the planar transistor stopped switching cleanly. Intel's 22 nm node put it into volume twelve years later, and everything leading-edge used it until gate-all-around replaced it.",
+      "source": { "who": "Hisamoto, Hu, Bokor, King et al., IEEE Trans. Electron Devices", "what": "FinFET — a self-aligned double-gate MOSFET, 2000", "url": "https://ieeexplore.ieee.org/document/887014" } },
+
+    { "id": "euv", "stratum": 5, "station": "scan", "label": "EUV lithography",
+      "invented": 1986, "shipped": 2019, "waitedFor": "unsolved", "confidence": "contested",
+      "note": "Kinoshita's soft X-ray projection experiments at NTT showed that imaging at around thirteen nanometres was possible. Thirty-three years, several national laboratories, one industry consortium and roughly nine billion dollars later, TSMC and Samsung put it into volume production. It is the longest and most expensive gap in the corpus, and every frontier model runs on chips that passed through it.",
+      "source": { "who": "Kinoshita et al., J. Vac. Sci. Technol. B", "what": "Soft X-ray reduction lithography using multilayer mirrors, 1989", "url": "https://avs.scitation.org/doi/10.1116/1.584405" } },
+
+    { "id": "immersion-litho", "stratum": 5, "station": "scan", "label": "Immersion lithography",
+      "invented": 1987, "shipped": 2006, "waitedFor": "demand", "confidence": "contested",
+      "note": "Put water between the final lens and the wafer and 193 nm light behaves as if it were 134 nm. Burn Lin argued for it for years against an industry that did not want liquid anywhere near a wafer. It kept optical lithography alive for the fifteen years EUV took to arrive, and it still prints most layers on a leading-edge wafer.",
+      "source": { "who": "Lin, IBM / SPIE", "what": "The paths to subhalf-micrometer optical lithography, 1987", "url": "https://www.spiedigitallibrary.org/conference-proceedings-of-spie/0774/1/" } },
+
+    { "id": "tin-source", "stratum": 5, "station": "src", "label": "The tin-plasma light source",
+      "invented": 2002, "shipped": 2019, "waitedFor": "unsolved", "confidence": "contested",
+      "note": "Fifty thousand tin droplets a second, each flattened by one laser pulse and vaporised by a second. Source power was the single thing holding EUV back for a decade — the optics were ready long before anything could light them brightly enough to be economic.",
+      "source": { "who": "Cymer / ASML", "what": "Laser-produced plasma EUV source development", "url": "https://www.asml.com/en/technology/lithography-principles/euv-lithography" } },
+
+    { "id": "euv-optics", "stratum": 5, "station": "opt", "label": "Sub-nanometre aspheric optics",
+      "invented": 1997, "shipped": 2019, "waitedFor": "tooling", "confidence": "contested",
+      "note": "Nothing transmits at 13.5 nm, so the whole optical path is mirrors, in vacuum, polished until the worst deviation across the surface is a fraction of a nanometre. Zeiss spent two decades getting from a figure that was merely extraordinary to one that was good enough to sell.",
+      "source": { "who": "Carl Zeiss SMT", "what": "EUV optics for semiconductor manufacturing", "url": "https://www.zeiss.com/semiconductor-manufacturing-technology/home.html" } },
+
+    { "id": "300mm", "stratum": 3, "station": "waf", "label": "The 300 mm wafer",
+      "invented": 1995, "shipped": 2001, "waitedFor": "economics", "confidence": "dated",
+      "note": "More than twice the area of a 200 mm wafer for a fraction more cost per pass. The industry had moved to a larger diameter roughly every decade for fifty years, and then it stopped: 450 mm was abandoned as uneconomic. Wafer area per tool has been frozen since, which is why adding capacity now means adding buildings.",
+      "source": { "who": "SEMI", "what": "SEMI M1 specification for 300 mm polished wafers", "url": "https://www.semi.org/en/standards" } },
+
+    { "id": "sic", "stratum": 3, "station": "comp", "label": "Silicon-carbide substrates",
+      "invented": 1987, "shipped": 2017, "waitedFor": "unsolved", "confidence": "contested",
+      "note": "A wider bandgap than silicon means switches that hold off more voltage and waste less of it as heat. Thirty years of learning to grow the boule without defects, and it now sits in the power conversion between the grid and the die — the part of the data centre where a percentage point is worth a power station.",
+      "source": { "who": "Wolfspeed", "what": "Silicon carbide substrate history", "url": "https://www.wolfspeed.com/" } },
+
+    { "id": "3d-nand", "stratum": 8, "station": "nand", "label": "3D NAND",
+      "invented": 2007, "shipped": 2013, "waitedFor": "tooling", "confidence": "dated",
+      "note": "When cells could not be made smaller, they were stacked instead — the first layer of the industry to go vertical, and the rehearsal for everything that followed in packaging. Toshiba's BiCS paper to Samsung's V-NAND in six years is fast for something that required etching a hole through two hundred layers.",
+      "source": { "who": "Tanaka et al., VLSI Symposium", "what": "Bit cost scalable technology with punch and plug process, 2007", "url": "https://ieeexplore.ieee.org/document/4270005" } },
+
+    { "id": "interposer", "stratum": 9, "station": "cowos", "label": "The silicon interposer",
+      "invented": 2008, "shipped": 2012, "waitedFor": "tooling", "confidence": "dated",
+      "note": "A piece of silicon whose only job is wiring, carrying dies side by side with connections far denser than a board can manage. Xilinx shipped the first big one in 2012. It is the direct ancestor of every accelerator package, and the reason packaging capacity rather than wafer capacity has been rationing them.",
+      "source": { "who": "Xilinx", "what": "Virtex-7 2000T stacked silicon interconnect, 2011–12", "url": "https://www.amd.com/en/products/adaptive-socs-and-fpgas.html" } },
+
+    { "id": "hbm", "stratum": 8, "station": "hbm", "label": "High-bandwidth memory",
+      "invented": 2011, "shipped": 2015, "waitedFor": "tooling", "confidence": "dated",
+      "note": "Stack the DRAM, drill through it, and give it a bus a thousand bits wide instead of a fast narrow one. It shipped in a graphics card in 2015 and mattered to almost nobody for eight years. It is now the scarcest strategic component in AI hardware.",
+      "source": { "who": "JEDEC", "what": "JESD235 High Bandwidth Memory DRAM standard, 2013", "url": "https://www.jedec.org/standards-documents/docs/jesd235a" } },
+
+    { "id": "hybrid-bond", "stratum": 9, "station": "3d", "label": "Hybrid bonding",
+      "invented": 2001, "shipped": 2016, "waitedFor": "tooling", "confidence": "contested",
+      "note": "Copper welded directly to copper with the surrounding oxide bonded at the same time, replacing solder microbumps with something five times finer. Ziptronix's patents date from 2001; Sony put it into image sensors in 2016 and logic followed. It is what lets a stack get taller without the thermal budget collapsing.",
+      "source": { "who": "Ziptronix / Adeia", "what": "Direct bond interconnect patents, from 2001", "url": "https://patents.google.com/patent/US6902987B1/en" } },
+
+    { "id": "backside-power", "stratum": 7, "station": "bspd", "label": "Backside power delivery",
+      "invented": 2019, "shipped": 2025, "waitedFor": "tooling", "confidence": "dated",
+      "note": "Move the power rails to the underside of the wafer and let the front side be signals only. It is the industry finally using the ninety-nine per cent of the wafer that was structural support. Six years from imec's proposal to Intel's 18A in volume, which is fast — the physics was never the hard part.",
+      "source": { "who": "imec", "what": "Backside power delivery network research", "url": "https://www.imec-int.com/en/articles/backside-power-delivery-network" } },
+
+    { "id": "gpgpu", "stratum": 10, "station": "gpu", "label": "The programmable GPU",
+      "invented": 2001, "shipped": 2007, "waitedFor": "demand", "confidence": "contested",
+      "note": "Shaders made the graphics pipeline programmable, and within a few years people were using it for things that were not graphics. CUDA in 2007 made that official. The hardware that trains every frontier model exists because rendering triangles happened to need the same arithmetic.",
+      "source": { "who": "NVIDIA", "what": "CUDA and the programmable shading pipeline", "url": "https://developer.nvidia.com/cuda-zone" } },
+
+    { "id": "cuda", "stratum": 17, "station": "cuda", "label": "CUDA",
+      "invented": 2006, "shipped": 2007, "waitedFor": "demand", "confidence": "dated",
+      "note": "Not an invention so much as a decision — to make general-purpose programming of a graphics processor pleasant, and then to keep supporting it for twenty years. The moat is not the language, it is the two decades of libraries, and there is no shortcut past two decades.",
+      "source": { "who": "NVIDIA", "what": "CUDA toolkit, first public release 2007", "url": "https://developer.nvidia.com/cuda-toolkit" } },
+
+    { "id": "tpu", "stratum": 10, "station": "asic", "label": "The training ASIC",
+      "invented": 2013, "shipped": 2016, "waitedFor": "scale", "confidence": "dated",
+      "note": "Google built a matrix-multiply engine because it calculated that speech recognition at scale would otherwise require doubling its data centres. Three years from decision to deployment, which is roughly the fastest anything on this chart moves once someone has already built the fab.",
+      "source": { "who": "Jouppi et al., ISCA", "what": "In-datacenter performance analysis of a Tensor Processing Unit, 2017", "url": "https://arxiv.org/abs/1704.04760" } },
+
+    { "id": "bfloat16", "stratum": 10, "station": "num", "label": "Narrow numeric formats",
+      "invented": 2018, "shipped": 2019, "waitedFor": "demand", "confidence": "contested",
+      "note": "bfloat16 keeps float32's exponent range and throws away mantissa bits nobody was using, and FP8 went further. It is the cheapest performance in the whole stack — a change of number format, no new physics — and the lag is about a year, because it costs nothing to try.",
+      "source": { "who": "Google Cloud", "what": "BFloat16: the secret to high performance on Cloud TPUs", "url": "https://cloud.google.com/blog/products/ai-machine-learning/bfloat16-the-secret-to-high-performance-on-cloud-tpus" } },
+
+    { "id": "si-photonics", "stratum": 11, "station": "optics", "label": "Silicon photonics",
+      "invented": 2004, "shipped": 2016, "waitedFor": "tooling", "confidence": "contested",
+      "note": "Intel's gigahertz silicon modulator showed that light could be manipulated in a CMOS fab rather than in exotic materials. Twelve years to volume transceivers. It is now the thing standing between a rack and a cluster, and the reason optics has moved from the edge of the board towards the package.",
+      "source": { "who": "Liu et al., Nature", "what": "A high-speed silicon optical modulator based on a MOS capacitor, 2004", "url": "https://www.nature.com/articles/nature02310" } },
+
+    { "id": "nvlink", "stratum": 11, "station": "scaleup", "label": "The scale-up fabric",
+      "invented": 2014, "shipped": 2016, "waitedFor": "scale", "confidence": "dated",
+      "note": "A dedicated high-bandwidth link between accelerators so that many of them behave as one. It is what turns seventy-two chips into a single machine, and it is the boundary that decides whether a model fits.",
+      "source": { "who": "NVIDIA", "what": "NVLink announcement, 2014", "url": "https://www.nvidia.com/en-us/data-center/nvlink/" } },
+
+    { "id": "cpo", "stratum": 11, "station": "cpo", "label": "Co-packaged optics",
+      "invented": 2019, "shipped": null, "waitedFor": "unsolved", "confidence": "open",
+      "note": "Move the optical engine into the switch package and stop paying to drive electrical signals across a board. Everyone agrees it is necessary and nobody has it in volume: the hard parts are the laser's reliability at package temperature and what happens when one channel fails inside a sealed module. This bar has no right-hand end and this view will not invent one.",
+      "source": { "who": "OIF / industry reporting", "what": "Co-packaged optics implementation agreements and pilot deployments", "url": "https://www.oiforum.com/" } },
+
+    { "id": "ocp-rack", "stratum": 12, "station": "rack", "label": "The open rack",
+      "invented": 2011, "shipped": 2013, "waitedFor": "scale", "confidence": "dated",
+      "note": "Facebook published its data-centre hardware designs and the industry standardised on them. It is the least glamorous entry here and it is why a hyperscaler can change server vendors without changing its buildings.",
+      "source": { "who": "Open Compute Project", "what": "Open Rack standard, from 2011", "url": "https://www.opencompute.org/" } },
+
+    { "id": "hvdc", "stratum": 13, "station": "grid", "label": "High-voltage DC transmission",
+      "invented": 1954, "shipped": 1972, "waitedFor": "tooling", "confidence": "contested",
+      "note": "Gotland's undersea link in 1954 proved you could move power long distances as direct current with less loss than alternating. It is how remote generation reaches the places that want it, and interconnection queues are now the binding constraint on the entire compute build-out.",
+      "source": { "who": "ABB / Hitachi Energy", "what": "Gotland HVDC link, 1954", "url": "https://www.hitachienergy.com/" } },
+
+    { "id": "48v", "stratum": 13, "station": "conv", "label": "48 V direct-to-die conversion",
+      "invented": 2016, "shipped": 2022, "waitedFor": "scale", "confidence": "contested",
+      "note": "Delivering a kilowatt to a die at under a volt means a thousand amps, and at a thousand amps the wiring is the problem. Converting from 48 volts as close to the die as physically possible is the answer, and it is one of the reasons the rack changed shape.",
+      "source": { "who": "Open Compute Project", "what": "48 V power delivery architectures", "url": "https://www.opencompute.org/" } },
+
+    { "id": "warehouse-dc", "stratum": 15, "station": "hyper", "label": "The warehouse-scale computer",
+      "invented": 2003, "shipped": 2009, "waitedFor": "scale", "confidence": "contested",
+      "note": "Treat the building as the computer and individual machines as components expected to fail. Google's papers made the argument public; the industry rebuilt itself around it. Every campus on the Atlas is a descendant.",
+      "source": { "who": "Barroso & Hölzle", "what": "The datacenter as a computer, 2009", "url": "https://research.google/pubs/pub35290/" } },
+
+    { "id": "borg-k8s", "stratum": 16, "station": "sched", "label": "Cluster scheduling",
+      "invented": 2005, "shipped": 2015, "waitedFor": "demand", "confidence": "contested",
+      "note": "Google ran Borg internally for a decade before Kubernetes made the ideas general. Training runs now depend on it entirely: a run that occupies tens of thousands of accelerators for months is a scheduling problem long before it is a mathematics problem.",
+      "source": { "who": "Verma et al., EuroSys", "what": "Large-scale cluster management at Google with Borg, 2015", "url": "https://research.google/pubs/pub43438/" } },
+
+    { "id": "ring-allreduce", "stratum": 17, "station": "coll", "label": "Ring all-reduce",
+      "invented": 2009, "shipped": 2017, "waitedFor": "demand", "confidence": "contested",
+      "note": "A way of summing gradients across many machines whose cost does not grow with the number of machines. It came out of high-performance computing, sat there for eight years, and then Baidu's implementation and Horovod carried it into deep learning. Data-parallel training at scale is this algorithm.",
+      "source": { "who": "Patarasuk & Yuan, J. Parallel Distrib. Comput.", "what": "Bandwidth optimal all-reduce algorithms for clusters of workstations, 2009", "url": "https://www.sciencedirect.com/science/article/abs/pii/S0743731508001767" } },
+
+    { "id": "flash-attention", "stratum": 17, "station": "kern", "label": "IO-aware attention kernels",
+      "invented": 2022, "shipped": 2023, "waitedFor": "demand", "confidence": "dated",
+      "note": "Attention was memory-bound, not compute-bound, and rewriting the kernel to keep data in on-chip memory made it several times faster with identical mathematics. One year from paper to universal adoption — the shortest lag here, because the cost of trying was a library upgrade.",
+      "source": { "who": "Dao et al.", "what": "FlashAttention: fast and memory-efficient exact attention with IO-awareness, 2022", "url": "https://arxiv.org/abs/2205.14135" } },
+
+    { "id": "common-crawl", "stratum": 18, "station": "web", "label": "Web-scale text corpora",
+      "invented": 2008, "shipped": 2011, "waitedFor": "demand", "confidence": "contested",
+      "note": "Common Crawl made a copy of a large part of the public web available to anyone. Nothing about it was technically hard. It is nevertheless the input without which none of stratum 19 exists, and the legal questions it raised are still open.",
+      "source": { "who": "Common Crawl", "what": "Public web crawl archive, from 2008", "url": "https://commoncrawl.org/" } },
+
+    { "id": "rlhf", "stratum": 18, "station": "lab", "label": "Learning from human preference",
+      "invented": 2017, "shipped": 2022, "waitedFor": "scale", "confidence": "dated",
+      "note": "Christiano and colleagues showed a model could be trained from pairwise human judgements rather than a written objective. Five years later it was the difference between a model that completes text and one people will talk to. It also created an industry of human annotation that barely existed before.",
+      "source": { "who": "Christiano et al., NeurIPS", "what": "Deep reinforcement learning from human preferences, 2017", "url": "https://arxiv.org/abs/1706.03741" } },
+
+    { "id": "transformer", "stratum": 19, "station": "arch", "label": "The transformer",
+      "invented": 2017, "shipped": 2022, "waitedFor": "scale", "confidence": "dated",
+      "note": "Attention with the recurrence removed, which made the architecture parallel and therefore trainable at a scale the previous one could not reach. Five years from paper to something a hundred million people used in a week. It is the shortest path from idea to consequence on this chart, and it ran on transistors designed thirty years earlier.",
+      "source": { "who": "Vaswani et al., NeurIPS", "what": "Attention is all you need, 2017", "url": "https://arxiv.org/abs/1706.03762" } },
+
+    { "id": "scaling-laws", "stratum": 19, "station": "pre", "label": "Scaling laws",
+      "invented": 2020, "shipped": 2020, "waitedFor": "scale", "confidence": "contested",
+      "note": "Loss falls as a power law in parameters, data and compute. This is the only entry here where the invention and the shipping are the same year, because the finding was itself a licence to spend — it turned model training from research into a capital allocation decision.",
+      "source": { "who": "Kaplan et al.", "what": "Scaling laws for neural language models, 2020", "url": "https://arxiv.org/abs/2001.08361" } },
+
+    { "id": "reasoning", "stratum": 19, "station": "reason", "label": "Test-time reasoning",
+      "invented": 2022, "shipped": 2024, "waitedFor": "scale", "confidence": "dated",
+      "note": "Letting a model spend more computation at the moment of answering, rather than only at training time. Two years from chain-of-thought prompting to models trained to do it by default — and it moved the largest single variable in the Cascade by two orders of magnitude.",
+      "source": { "who": "Wei et al., NeurIPS", "what": "Chain-of-thought prompting elicits reasoning in large language models, 2022", "url": "https://arxiv.org/abs/2201.11903" } },
+
+    { "id": "benchmarks", "stratum": 20, "station": "eval", "label": "The public benchmark",
+      "invented": 2018, "shipped": 2019, "waitedFor": "demand", "confidence": "contested",
+      "note": "GLUE and its successors gave the field a shared scoreboard, and a shared scoreboard is what turns research into a race. It shipped almost immediately because it cost nothing to adopt. It is also the entry on this chart with the shortest useful life: benchmarks saturate, leak into training data, and stop measuring the thing they were built to measure.",
+      "source": { "who": "Wang et al., ICLR", "what": "GLUE — a multi-task benchmark and analysis platform for natural language understanding, 2019", "url": "https://arxiv.org/abs/1804.07461" } },
+
+    { "id": "model-cards", "stratum": 20, "station": "safe", "label": "Model and system cards",
+      "invented": 2019, "shipped": 2023, "waitedFor": "demand", "confidence": "contested",
+      "note": "Mitchell and colleagues proposed that a model should ship with a document saying what it was trained on, what it was evaluated for and where it should not be used. Four years later it became standard practice for frontier releases — not because the idea improved, but because the consequences of not doing it did.",
+      "source": { "who": "Mitchell et al., FAT*", "what": "Model cards for model reporting, 2019", "url": "https://arxiv.org/abs/1810.03993" } },
+
+    { "id": "sae-interp", "stratum": 20, "station": "interp", "label": "Feature-level interpretability",
+      "invented": 2023, "shipped": null, "waitedFor": "unsolved", "confidence": "open",
+      "note": "Sparse autoencoders pull human-legible features out of a model's activations, which is the first thing resembling a way to see what is happening inside one. It is a live research programme, not a shipped capability, and drawing a completion date for it would be a fiction.",
+      "source": { "who": "Anthropic", "what": "Towards monosemanticity — decomposing language models with dictionary learning, 2023", "url": "https://transformer-circuits.pub/2023/monosemantic-features" } },
+
+    { "id": "quantisation", "stratum": 21, "station": "quant", "label": "Low-precision inference",
+      "invented": 2015, "shipped": 2023, "waitedFor": "demand", "confidence": "contested",
+      "note": "Serving a model at eight or four bits per weight instead of sixteen, for a loss in quality small enough that most users never notice. It is the single largest lever on what an answer costs, and it took eight years mostly because nobody needed it until inference volume got large.",
+      "source": { "who": "Han, Mao & Dally, ICLR", "what": "Deep compression — pruning, quantization and Huffman coding, 2016", "url": "https://arxiv.org/abs/1510.00149" } },
+
+    { "id": "paged-kv", "stratum": 21, "station": "inf", "label": "Paged attention serving",
+      "invented": 2023, "shipped": 2023, "waitedFor": "demand", "confidence": "dated",
+      "note": "Borrow virtual memory paging and apply it to the key-value cache, and a serving stack fits several times more concurrent requests on the same hardware. Idea to production in months, because it is software and the demand was already there.",
+      "source": { "who": "Kwon et al., SOSP", "what": "Efficient memory management for large language model serving with PagedAttention, 2023", "url": "https://arxiv.org/abs/2309.06180" } },
+
+    { "id": "rag", "stratum": 22, "station": "rag", "label": "Retrieval-augmented generation",
+      "invented": 2020, "shipped": 2023, "waitedFor": "demand", "confidence": "dated",
+      "note": "Look something up, then generate an answer conditioned on what you found. It is the standard answer to a model not knowing your documents, and three years is about how long it took to go from a research paper to a thing every company built.",
+      "source": { "who": "Lewis et al., NeurIPS", "what": "Retrieval-augmented generation for knowledge-intensive NLP tasks, 2020", "url": "https://arxiv.org/abs/2005.11401" } },
+
+    { "id": "tool-use", "stratum": 22, "station": "tool", "label": "Tool use and protocols",
+      "invented": 2022, "shipped": 2024, "waitedFor": "tooling", "confidence": "contested",
+      "note": "Give a model a way to call a function and it stops being a text generator. Standardising how that connection is described took another two years and is what turned individual integrations into an ecosystem.",
+      "source": { "who": "Schick et al.", "what": "Toolformer — language models can teach themselves to use tools, 2023", "url": "https://arxiv.org/abs/2302.04761" } },
+
+    { "id": "computer-use", "stratum": 22, "station": "agent", "label": "Computer-use agents",
+      "invented": 2024, "shipped": null, "waitedFor": "unsolved", "confidence": "open",
+      "note": "A model operating a screen the way a person does, rather than through an interface designed for it. It works often enough to be interesting and not often enough to be relied upon, and the gap between those two states is exactly what has no date.",
+      "source": { "who": "Public reporting", "what": "Computer-use model releases and evaluations, 2024–2026", "url": null } },
+
+    { "id": "code-assist", "stratum": 23, "station": "code", "label": "Neural code assistance",
+      "invented": 2020, "shipped": 2021, "waitedFor": "demand", "confidence": "dated",
+      "note": "The first application where the models paid for themselves, and the fastest transfer on this chart: about a year from the model to a product millions of engineers use daily. Software was the first industry to find out what this does to it.",
+      "source": { "who": "Chen et al.", "what": "Evaluating large language models trained on code, 2021", "url": "https://arxiv.org/abs/2107.03374" } },
+
+    { "id": "alphafold", "stratum": 23, "station": "sci", "label": "Learned structure prediction",
+      "invented": 2020, "shipped": 2021, "waitedFor": "scale", "confidence": "dated",
+      "note": "A fifty-year-old problem in biology answered well enough to be useful, then published as a database of two hundred million structures. It is the clearest case of the stack producing something that is not a chatbot, and the lag from result to general availability was one year.",
+      "source": { "who": "Jumper et al., Nature", "what": "Highly accurate protein structure prediction with AlphaFold, 2021", "url": "https://www.nature.com/articles/s41586-021-03819-2" } },
+
+    { "id": "av", "stratum": 24, "station": "av", "label": "Driverless vehicles",
+      "invented": 2005, "shipped": 2020, "waitedFor": "unsolved", "confidence": "contested",
+      "note": "Five vehicles finished the DARPA Grand Challenge in 2005 and the problem looked nearly solved. Commercial driverless service arrived fifteen years later, in a handful of cities, in good weather. It is the cautionary entry on this chart: a demonstration and a deployment can be separated by an enormous amount of unglamorous work.",
+      "source": { "who": "DARPA", "what": "Grand Challenge 2005 results", "url": "https://www.darpa.mil/about-us/timeline/-grand-challenge-for-autonomous-vehicles" } },
+
+    { "id": "vla", "stratum": 24, "station": "vla", "label": "Robot foundation models",
+      "invented": 2023, "shipped": null, "waitedFor": "unsolved", "confidence": "open",
+      "note": "One model trained across many robot embodiments, rather than one policy per task per machine. The data problem is the whole problem — there is no web-scale corpus of physical manipulation, and nobody has convincingly manufactured one yet.",
+      "source": { "who": "Brohan et al.", "what": "RT-2 — vision-language-action models transfer web knowledge to robotic control, 2023", "url": "https://arxiv.org/abs/2307.15818" } },
+
+    { "id": "conversational-ui", "stratum": 25, "station": "ui", "label": "The conversational interface",
+      "invented": 1966, "shipped": 2022, "waitedFor": "scale", "confidence": "contested",
+      "note": "Weizenbaum's ELIZA was a few hundred lines of pattern matching, and people confided in it anyway — which alarmed him for the rest of his life. Fifty-six years later the interface finally had something behind it. The idea was never the hard part.",
+      "source": { "who": "Weizenbaum, Communications of the ACM", "what": "ELIZA — a computer program for the study of natural language communication, 1966", "url": "https://dl.acm.org/doi/10.1145/365153.365168" } },
+
+    { "id": "export-controls", "stratum": 26, "station": "export", "label": "Export controls on compute",
+      "invented": 2022, "shipped": 2022, "waitedFor": "demand", "confidence": "dated",
+      "note": "In October 2022 the United States restricted the export of advanced accelerators and the tools to make them, on a performance threshold rather than a category. Written and in force in the same year — the only mechanism on this chart that moves faster than the technology it governs, which is precisely why it keeps being rewritten.",
+      "source": { "who": "US Department of Commerce, BIS", "what": "Advanced computing and semiconductor manufacturing equipment rules, October 2022", "url": "https://www.bis.gov/" } },
+
+    { "id": "pue", "stratum": 27, "station": "energy", "label": "Measuring data-centre efficiency",
+      "invented": 2007, "shipped": 2011, "waitedFor": "demand", "confidence": "contested",
+      "note": "Power usage effectiveness gave the industry one number to compete on, and it fell from around 2.0 to close to 1.1 over a decade. It also quietly stopped being the interesting number: at 1.1 the overhead is nearly gone and everything that remains is the computation itself.",
+      "source": { "who": "The Green Grid", "what": "PUE — a comprehensive examination of the metric, 2007", "url": "https://www.thegreengrid.org/" } }
+  ]
+}

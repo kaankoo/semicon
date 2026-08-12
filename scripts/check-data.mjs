@@ -248,6 +248,74 @@ N.notes.forEach(n => {
 if (!WD.meta || !WD.meta.source || !WD.meta.source.who) problems.push("world.json has no source");
 ok.push(`${AT.sites.length} atlas sites`);
 
+/* ---- timeline ---- */
+const TL = read("timeline.json");
+const CONF = new Set((TL.meta.confidence || []).map(c => c.id));
+const WAIT = new Set((TL.meta.waitedFor || []).map(c => c.id));
+const stationOf = {};
+S.forEach(s => { stationOf[s.i] = s; });
+const evIds = new Set();
+
+["updated", "span", "now", "note", "definitions", "confidence", "waitedFor", "caveat"].forEach(k => {
+  if (!TL.meta[k]) problems.push(`timeline.json meta is missing "${k}"`);
+});
+if (!(TL.meta.span[0] < TL.meta.now && TL.meta.now <= TL.meta.span[1]))
+  problems.push(`timeline span ${TL.meta.span} does not contain "now" (${TL.meta.now})`);
+
+TL.events.forEach(e => {
+  if (evIds.has(e.id)) problems.push(`duplicate timeline event: ${e.id}`);
+  evIds.add(e.id);
+  ["label", "note"].forEach(f => { if (!e[f]) problems.push(`timeline event ${e.id} is missing "${f}"`); });
+  if (!e.source || !e.source.who) problems.push(`timeline event ${e.id} has no source`);
+  if (!CONF.has(e.confidence)) problems.push(`timeline event ${e.id} has confidence "${e.confidence}"`);
+  if (!WAIT.has(e.waitedFor)) problems.push(`timeline event ${e.id} waited for "${e.waitedFor}"`);
+  /* the acceptance condition: every event is anchored in the corpus */
+  if (!ids.has(e.station)) problems.push(`timeline event ${e.id} points at unknown station "${e.station}"`);
+  else if (stationOf[e.station].L !== e.stratum)
+    problems.push(`timeline event ${e.id} claims stratum ${e.stratum} but station "${e.station}" is in ${stationOf[e.station].L}`);
+  if (!L.some(l => l.n === e.stratum)) problems.push(`timeline event ${e.id} points at unknown stratum ${e.stratum}`);
+  /* dates */
+  if (!(e.invented > 1800 && e.invented <= TL.meta.now))
+    problems.push(`timeline event ${e.id} was invented in ${e.invented}`);
+  if (e.shipped != null) {
+    if (e.shipped < e.invented) problems.push(`timeline event ${e.id} shipped before it worked`);
+    if (e.shipped > TL.meta.now) problems.push(`timeline event ${e.id} ships in ${e.shipped}, which has not happened`);
+    if (e.confidence === "open") problems.push(`timeline event ${e.id} has a ship date but is marked "open"`);
+  } else if (e.confidence !== "open") {
+    /* the whole point: nothing may imply a date it does not have */
+    problems.push(`timeline event ${e.id} has no ship date, so its confidence must be "open"`);
+  }
+  if (e.invented > TL.meta.span[1]) problems.push(`timeline event ${e.id} starts past the end of the chart`);
+});
+
+/* findings that point at the chart must land on a real event */
+N.notes.forEach(n => {
+  if (n.timeline && !evIds.has(n.timeline)) problems.push(`note ${n.id} points at unknown timeline event "${n.timeline}"`);
+});
+
+/* every stratum should be represented, or the gradient the page claims is
+   a statement about the strata that happen to be here */
+L.forEach(l => {
+  if (!TL.events.some(e => e.stratum === l.n))
+    problems.push(`stratum ${l.n} (${l.t}) has no entry on the timeline`);
+  if (!TL.events.some(e => e.stratum === l.n && e.shipped != null))
+    problems.push(`stratum ${l.n} (${l.t}) never lights — every entry it has is unshipped`);
+});
+
+/* the finding that this chart exists to support states two numbers in
+   prose. Hold the prose to the corpus: if a new event moves the counts,
+   the build stops here rather than shipping a stale sentence. */
+{
+  const long = TL.events.filter(e => e.shipped != null && e.shipped - e.invented >= 30);
+  const unsolved = long.filter(e => e.waitedFor === "unsolved");
+  const note = N.notes.find(n => n.id === "waiting-not-inventing");
+  if (!note) problems.push('the "waiting-not-inventing" finding is missing, but the Lag chart argues for it');
+  else if (note.figure !== `${unsolved.length} of ${long.length}`)
+    problems.push(`finding "waiting-not-inventing" reads "${note.figure}" but the timeline now says ` +
+                  `"${unsolved.length} of ${long.length}" — update its figure and its body together`);
+}
+ok.push(`${TL.events.length} timeline events`);
+
 /* ---- report ---- */
 if (problems.length) {
   console.error(`\n  ✗ ${problems.length} problem${problems.length > 1 ? "s" : ""}\n`);

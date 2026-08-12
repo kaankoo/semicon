@@ -512,6 +512,117 @@ app.closeSheet();
   }
 }
 
+/* ---------- lag ---------- */
+{
+  const TL = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/timeline.json"), "utf8"));
+  const { stats, landedBy } = await import(pathToFileURL(path.join(ROOT, "src/views/timeline.js")).href);
+
+  app.show("tml");
+  is("lag view active", D.getElementById("v-tml").classList.contains("on"), true);
+  is("every capability is a row", D.querySelectorAll("#tmlSvg .tml__r").length, TL.events.length);
+  is("the stack strip is drawn", D.querySelectorAll("#tmlStrip i").length, app.L.length);
+  atLeast("layers offered", D.querySelectorAll("#tmlLayers button").length, 3);
+  atLeast("panel populated", D.getElementById("tmlPanel").textContent.trim().length, 120);
+  atLeast("decade ticks drawn", D.querySelectorAll("#tmlSvg text.tml__tick").length, 6);
+
+  /* the headline must be arithmetic over the corpus, not a typed sentence */
+  {
+    const s = stats(TL);
+    const shown = D.getElementById("tmlClaim").textContent.replace(/\s+/g, " ");
+    const want = [s.deep.median, s.middle.median, s.shallow.median, s.long, s.longUnsolved];
+    const got = (shown.match(/\d+/g) || []).map(Number);
+    const ok = want.every(v => got.includes(v));
+    checks.push({ label: "the lag claim reconciles", ok,
+                  actual: `renders ${got.join("/")}, computes ${want.join("/")}`,
+                  expected: "the same numbers" });
+    /* …and the gradient it asserts must actually run the way it says */
+    checks.push({ label: "the gradient runs down the stack",
+                  ok: s.deep.median > s.middle.median && s.middle.median > s.shallow.median,
+                  actual: `${s.deep.median} → ${s.middle.median} → ${s.shallow.median} years`,
+                  expected: "strictly decreasing with depth" });
+  }
+
+  /* nothing without a ship date may be given one, anywhere */
+  {
+    const open = TL.events.filter(e => e.shipped == null);
+    const bad = open.filter(e => e.confidence !== "open").map(e => e.id);
+    checks.push({ label: "unshipped work claims no date", ok: bad.length === 0 && open.length > 0,
+                  actual: bad.length ? bad.join(", ") : `${open.length} open, all marked open`,
+                  expected: "every unshipped entry marked open" });
+    /* the view must draw them without an end cap */
+    const caps = D.querySelectorAll("#tmlSvg .tml__open").length;
+    is("open bars have no end", caps, open.length);
+  }
+
+  /* the scrubber must actually move the stack */
+  {
+    const at = y => { D.getElementById("tmlRange").value = String(y);
+                      D.getElementById("tmlRange").dispatchEvent(new window.Event("input", { bubbles: true }));
+                      return D.getElementById("tmlLit").textContent; };
+    const early = at(1960), mid = at(1990), late = at(TL.meta.now);
+    const n = t => +(t.match(/\d+/) || [0])[0];
+    checks.push({ label: "the scrubber lights strata as they land",
+                  ok: n(early) < n(mid) && n(mid) < n(late),
+                  actual: `1960: ${n(early)} · 1990: ${n(mid)} · ${TL.meta.now}: ${n(late)} strata`,
+                  expected: "monotonically increasing" });
+    /* and the readout must agree with the corpus, not with itself */
+    const truth = landedBy(1990, TL);
+    checks.push({ label: "…and the count is the corpus's", ok: n(mid) === truth.lit,
+                  actual: `renders ${n(mid)}, computes ${truth.lit}`, expected: "the same number" });
+    is("nothing had landed before the transistor", landedBy(TL.meta.span[0] - 1, TL).lit, 0);
+  }
+
+  /* a bar caught mid-wait must be drawn only as far as the handle */
+  {
+    D.getElementById("tmlRange").value = "2000";
+    D.getElementById("tmlRange").dispatchEvent(new window.Event("input", { bubbles: true }));
+    const row = D.querySelector('#tmlSvg [data-id="euv"]');
+    const track = +row.querySelector(".tml__track").getAttribute("width");
+    const fill = +row.querySelector(".tml__fill").getAttribute("width");
+    checks.push({ label: "a wait in progress is drawn short", ok: fill < track && fill > 0,
+                  actual: `fill ${fill.toFixed(0)} of ${track.toFixed(0)} px at 1980+`,
+                  expected: "partial" });
+    const done = D.querySelector('#tmlSvg [data-id="dram-cell"]');
+    checks.push({ label: "…and one that landed is drawn whole",
+                  ok: Math.abs(+done.querySelector(".tml__fill").getAttribute("width") -
+                               +done.querySelector(".tml__track").getAttribute("width")) < 0.6,
+                  actual: "fill matches track", expected: "full" });
+  }
+
+  /* clicking a bar opens it, and its station chip opens the station */
+  {
+    D.querySelector('#tmlSvg [data-id="microchannel"]').dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    is("clicking a bar opens it", D.querySelector("#tmlPanel .atl__pn")?.textContent, "Direct-to-chip liquid cooling");
+    atLeast("the panel gives the wait", D.querySelector("#tmlPanel .tml__lag")?.textContent.length || 0, 5);
+    const chip = D.querySelector("#tmlPanel [data-station]");
+    if (chip) {
+      chip.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      is("lag panel opens stations", D.getElementById("sheet").classList.contains("on"), true);
+      app.closeSheet();
+    }
+  }
+}
+
+/* findings that point at the chart must land on a real capability */
+{
+  const TL = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/timeline.json"), "utf8"));
+  const eIds = new Set(TL.events.map(e => e.id));
+  const bad = app.notes.all.filter(n => n.timeline && !eIds.has(n.timeline)).map(n => n.id);
+  checks.push({ label: "findings link to real capabilities", ok: bad.length === 0,
+                actual: bad.length ? bad.join(", ") : "all resolve", expected: "all resolve" });
+
+  app.openStation("liq");
+  const lb = D.querySelector("#shB [data-lag]");
+  is("a finding offers the chart", !!lb, true);
+  if (lb) {
+    lb.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise(r => setTimeout(r, 300));
+    is("it lands on the lag chart", D.getElementById("v-tml").classList.contains("on"), true);
+    is("…on the right capability", D.querySelector("#tmlPanel .atl__pn")?.textContent,
+       "Direct-to-chip liquid cooling");
+  }
+}
+
 /* ---- report ---- */
 const failed = checks.filter(c => !c.ok);
 const pad = s => String(s).padEnd(34);

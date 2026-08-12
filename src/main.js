@@ -17,6 +17,7 @@ import { initTour } from "./views/tour.js";
 import { initCascade } from "./views/cascade.js";
 import { initRuler } from "./views/ruler.js";
 import { initAtlas } from "./views/atlas.js";
+import { initTimeline } from "./views/timeline.js";
 import { initMethod } from "./views/method.js";
 import { loadNotes } from "./core/notes.js";
 
@@ -43,6 +44,7 @@ async function boot() {
   initTour();
   await initRuler();
   await initAtlas();
+  await initTimeline();
   await initCascade();
   await initMethod();
   initRouter();

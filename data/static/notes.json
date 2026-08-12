@@ -18,6 +18,7 @@
       "cascadeStep": "wafer",
       "ruler": "hbmpkg",
       "atlas": "cheongju",
+      "timeline": "hbm",
       "basis": "derived",
       "source": { "who": "Micron", "what": "HBM3E — 8- and 12-high stacks of 24 Gb 1β die in an 11 × 11 mm package", "url": "https://www.micron.com/products/memory/hbm/hbm3e" }
     },
@@ -48,6 +49,7 @@
       "strata": [5, 9, 10],
       "ruler": "reticle",
       "atlas": "chiayi",
+      "timeline": "hybrid-bond",
       "basis": "cited",
       "source": { "who": "NVIDIA", "what": "Blackwell — 208 bn transistors across two reticle-limited dies", "url": "https://www.nvidia.com/en-us/data-center/technologies/blackwell-architecture/" }
     },
@@ -93,6 +95,7 @@
       "stations": ["inf", "reason", "route", "quant"],
       "strata": [19, 21],
       "cascadeStep": "acc",
+      "timeline": "reasoning",
       "basis": "cited",
       "source": { "who": "Epoch AI", "what": "How much energy does ChatGPT use?", "url": "https://epoch.ai/gradient-updates/how-much-energy-does-chatgpt-use" }
     },
@@ -108,8 +111,23 @@
       "strata": [5, 7, 9, 26],
       "atlas": "hsinchu",
       "ruler": "hsinchu",
+      "timeline": "euv",
       "basis": "derived",
       "source": { "who": "This site", "what": "the Atlas — published site extents summed at true geographic scale", "url": null }
+    },
+    {
+      "id": "waiting-not-inventing",
+      "weight": 3,
+      "title": "The longest waits in this stack were not spent inventing anything",
+      "figure": "3 of 12",
+      "figureNote": "thirty-year waits that were actually waiting on the science",
+      "body": "Twelve capabilities on the Lag chart took thirty years or more to get from working to shipping — and only three of them — EUV lithography, silicon-carbide substrates and the combined-cycle turbine — spent that time with the science unfinished. The other nine worked the whole time. <b>Direct-to-chip liquid cooling</b> waited 43 years because air was cheaper. <b>Mixture of experts</b> waited 30 because there were not yet enough parameters for routing between them to pay. <b>Backpropagation</b> waited 42 for something to run on. <b>Atomic layer deposition</b> waited 33 because nothing needed a two-nanometre film.",
+      "soWhat": "The binding constraint in this industry is rarely an unsolved problem. It is far more often a solved one with no reason to exist yet — which reframes what a technology roadmap is for. If the pattern holds, the capability that unlocks 2040 is already sitting in a journal, and what it is waiting for is not a discovery but a price, a volume or a customer.",
+      "stations": ["liq", "moe", "dep", "arch", "scan"],
+      "strata": [5, 6, 14, 19],
+      "timeline": "microchannel",
+      "basis": "derived",
+      "source": { "who": "This site", "what": "the Lag chart — 68 capabilities, each with the reason it waited", "url": null }
     }
   ]
 }

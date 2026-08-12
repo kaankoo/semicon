@@ -12,8 +12,8 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | Energy & matter | What does it consume? | ✅ Cascade |
 | Provenance | How do we know? | ✅ Method |
 | Space | Where on Earth does it happen? | ✅ Atlas |
-| **Time** | **When did this become possible?** | **next** |
-| **Counterfactual** | What breaks if this breaks? | queued |
+| Time | When did this become possible? | ✅ Lag |
+| **Counterfactual** | **What breaks if this breaks?** | **next** |
 | **Money** | What is it worth? | queued — see `PLAN.md` |
 
 ---
@@ -27,8 +27,9 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | 2 · Grain + Method | `72ca256` | Counterintuitive findings as first-class objects surfacing in sheets, Cascade and Method. Method page generated from the live corpus. |
 | 3 · Ruler | `a1c18f2` | 36 objects over 18 decades at true relative size. Scale-truth asserted by test. |
 | 4 · Atlas | — | 56 sites over 40 jurisdictions, every one anchored to a station. Circles are geodesic, not decorative, and the test proves it two ways. Hand-rolled equirectangular projection; Natural Earth at 56 KB. |
+| 5 · Lag | — | 70 capabilities with two dates each, laid out by stratum. A scrubber from 1947 fills bars as they land and lights the strata behind them. Nothing unfinished is given a date, and the build enforces it. |
 
-**Current test surface:** 131 smoke assertions + corpus validation of 9 data files. `npm test`.
+**Current test surface:** 153 smoke assertions + corpus validation of 10 data files. `npm test`.
 
 ### What Phase 4 actually landed
 
@@ -54,44 +55,46 @@ Three bugs the tests caught that reading would not have: a relative-path encoder
 
 ---
 
-## Phase 5 — The Time Machine *(recommended next)*
+## Phase 5 — The Lag *(shipped)*
 
-**The thirty-year lag.** Each stratum gets two dates — when the science was finished, and when it shipped in volume. EUV: concept in the 1980s, production in 2019. Transformers: 2017 → 2022.
+**The thirty-year lag.** Every capability gets two dates — when it first worked, and when it shipped in volume. EUV: 1986 → 2019. Gate-all-around: 1990 → 2022. The transformer: 2017 → 2022.
 
-The insight it delivers: *the AI boom runs on physics that was finished decades ago, and the physics for 2040 is being decided in a lab this week.*
+### What it actually landed
 
-### Read to start
+Against the acceptance conditions it set itself:
 
-`CLAUDE.md` · `src/core/app.js` · `src/views/ruler.js` (the camera pattern transfers directly — a timeline is a 1-D camera) · `data/static/ruler.json` · `src/views/atlas.js` for the more recent precedent: layer toggles, a claim computed from the data rather than typed into the prose, and cross-view assertions holding two views to the same number
+- **Every event names a real stratum and station** — and the two must agree, which caught several miscodings. 70 events, all 27 strata, and `check-data.mjs` also fails if a stratum has *only* unshipped entries, because a stratum that never lights is a claim in itself.
+- **Nothing unfinished is given a date** — four entries have no right-hand end, the build fails if an entry without a ship date is marked anything but `open`, and the smoke test counts the open bars in the DOM to be sure the view renders them without a cap.
+- **A scrubber from 1947 lights strata as capability lands** — with a sweep button, and the test asserts the lit count rises monotonically and that the number rendered is the number the corpus computes.
 
-### Create
+Two things beyond the brief:
 
-- `data/static/timeline.json` — events `{id, invented, shipped, stratum, station, label, note, source, confidence}`
-- `src/views/timeline.js`
+- **The finding is sharper than the thesis was.** The gradient is real — median wait 10 years from rock to package, 6 through silicon, 3 from software to sentence — but the better story is what the long waits were *for*. A `waitedFor` field on every event splits them five ways, and it turns out that of the twelve capabilities that waited thirty years or more, only three were waiting on the science. The rest worked and waited for a machine, a price, a scale or a customer.
+- **The prose is held to the corpus.** The finding states "3 of 12" in words. `check-data.mjs` recomputes both numbers from `timeline.json` and fails if the sentence has drifted — the same trick as the Atlas's Milan comparison, applied to a claim written in English rather than one rendered by JavaScript.
 
-### Touch
+### Deviation from the brief
 
-Same six wiring files as Phase 4, prefix `.tml`.
+The roadmap said the Ruler's camera pattern would transfer directly. It did not, and should not have: eighty-one years fit across a screen at seventeen pixels each, so a camera would have been machinery in service of nothing. The view has a fixed axis and a scrubber instead. The camera pattern remains the right precedent for Phase 6.
 
-### Acceptance
+### Standing gaps
 
-- Every event names a real stratum or station.
-- Research-stage entries are visually separated from shipped ones and carry an explicit confidence — no implying we know when CFET arrives.
-- A scrubber from 1947 to now lights strata as capability lands.
-
-**Effort:** low-medium. Mostly curation, and pleasant curation.
+- The sample is chosen, not enumerated, with a survivorship problem built in: capabilities that never shipped mostly do not appear because nobody writes their history. Declared as a limit on Method, and it is the weakest thing about the page.
+- `waitedFor` is the most interpretive field on the site after criticality, and the headline finding rests entirely on it.
+- No keyboard route to an individual bar; arrow keys move the year only.
 
 ---
 
-## Phase 6 — Counterfactuals
+## Phase 6 — Counterfactuals *(recommended next)*
 
 The *Faults* mechanic from `PLAN.md` with the money removed. Remove EUV, HBM, CUDA, Taiwan, attention — follow what reroutes and what dead-ends.
 
 Reuses the Web's traversal (`cone()` in `src/views/web.js`), so it is mostly writing plus an animation.
 
+Three views now hold data the counterfactuals should reach into rather than restate: the Atlas knows where each thing is and what regime it sits under, the Lag knows how long its replacement took to arrive last time, and `waitedFor` says what that replacement was waiting on. A qualification lead-time is not a guess if the corpus already contains the last one.
+
 ### Read to start
 
-`CLAUDE.md` · `src/views/web.js` · `data/static/edges.json` · `src/core/notes.js`
+`CLAUDE.md` · `src/views/web.js` · `data/static/edges.json` · `src/core/notes.js` · `data/static/timeline.json` for lead-times that are already sourced
 
 ### Create
 

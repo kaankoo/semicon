@@ -111,6 +111,20 @@
       "vintage": "mid-2026"
     },
     {
+      "class": "Invention and shipping dates",
+      "kind": "curated",
+      "who": "Primary papers, patents and vendor announcements",
+      "detail": "68 capabilities, each with the year it was first demonstrated and the year it reached volume. Where possible the first date cites the paper or patent itself rather than a history of it. Both dates are judgement calls at the margin — science arrives over several years and 'volume' is a matter of where the line is drawn — so each entry carries a confidence: dated where a specialist would recognise both years, contested where one of them is arguable by several. Four entries have no shipping date and are not given one.",
+      "vintage": "1898–2026"
+    },
+    {
+      "class": "What each capability was waiting for",
+      "kind": "judgement",
+      "who": "Hand-assigned",
+      "detail": "A five-way reading of why the gap between working and shipping was as long as it was — unfinished science, a missing machine, an incumbent that was cheaper, a scale that did not exist yet, or nobody who wanted it. It is the most interpretive field on the site after criticality, and the finding that three of the twelve longest waits were waiting on the science rests entirely on it. A well-informed reader will reclassify several.",
+      "vintage": "mid-2026"
+    },
+    {
       "class": "Coastline and boundary geometry",
       "kind": "cited",
       "who": "Natural Earth",
@@ -143,6 +157,10 @@
     {
       "title": "Fab figures are industry averages",
       "body": "Water and electricity per wafer come from cross-industry data spanning many nodes. A leading-edge logic fab is plausibly worse than the average and a mature analog fab plausibly better. The chain treats them as one number because a better public one does not exist."
+    },
+    {
+      "title": "The Lag chart is a sample, not a census",
+      "body": "Sixty-eight capabilities were chosen because they illustrate something. The industry contains thousands. Every statistic on that page — the medians, the count of thirty-year waits, the claim that only three of them were waiting on the science — is a property of this selection and would move if the selection moved. Nothing was excluded for having an inconvenient lag, but nothing was systematically included either, and a survivorship problem is built in: capabilities that never shipped at all mostly do not appear, because nobody writes their history."
     },
     {
       "title": "A site is not a capacity",

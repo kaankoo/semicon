@@ -56,7 +56,7 @@ export function render(n, opts = {}) {
       <p class="grain__b">${n.body}</p>
       <p class="grain__s"><b>So what</b> ${n.soWhat}</p>
       ${cite ? `<p class="grain__c">${cite}</p>` : ""}
-      ${rulerLink(n)}${atlasLink(n)}
+      ${rulerLink(n)}${atlasLink(n)}${lagLink(n)}
       ${opts.links !== false ? grainLinks(n) : ""}
     </div>`;
 }
@@ -77,6 +77,11 @@ function rulerLink(n) {
 function atlasLink(n) {
   if (!n.atlas) return "";
   return `<button class="grain__r grain__r--atl" data-atlas="${n.atlas}">See where it is →</button>`;
+}
+
+function lagLink(n) {
+  if (!n.timeline) return "";
+  return `<button class="grain__r grain__r--tml" data-lag="${n.timeline}">See how long it waited →</button>`;
 }
 
 function grainLinks(n) {
@@ -111,6 +116,15 @@ export function wireNotes(root) {
       app.closeSheet();
       app.show("atl");
       setTimeout(() => app.atlasGoTo(b.dataset.atlas), 60);
+    });
+  });
+  root.querySelectorAll("[data-lag]").forEach(b => {
+    if (b.dataset.wired) return;
+    b.dataset.wired = "1";
+    b.addEventListener("click", () => {
+      app.closeSheet();
+      app.show("tml");
+      setTimeout(() => app.lagGoTo(b.dataset.lag), 60);
     });
   });
   root.querySelectorAll("[data-noteopen]").forEach(b => {

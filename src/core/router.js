@@ -13,6 +13,7 @@ function show(v) {
   if (v === "web" && !webFitted) { webFitted = true; requestAnimationFrame(() => app.fitWeb()); }
   if (v === "rul") requestAnimationFrame(() => app.rulerFit());
   if (v === "atl") requestAnimationFrame(() => app.atlasFit());
+  if (v === "tml") requestAnimationFrame(() => app.lagFit());
   if (v !== "strata") window.scrollTo(0, 0);
 }
 

@@ -39,6 +39,7 @@ src/
     web.js                 the dependency graph
     ruler.js               seventeen orders of magnitude, to scale
     atlas.js               where the stack physically is
+    timeline.js            how long each capability waited
     cascade.js             sand to sentence, quantified
     method.js              sources, assumptions and limits
     sheet.js               station dossiers
@@ -53,6 +54,7 @@ data/static/
   ruler.json               36 objects from the lattice to the Earth
   atlas.json               56 sites, each anchored to stations
   world.json               simplified coastline and boundaries, 56 KB
+  timeline.json            70 capabilities, invented and shipped
   notes.json               counterintuitive findings
   method.json              provenance and known limits
 scripts/
@@ -124,9 +126,23 @@ Four layers: true-scale circles, export-control regime, physical risk, and all n
 
 ---
 
+## The Lag
+
+Every capability in the stack with two dates: the year it first worked, and the year it arrived in volume. One bar each, laid out by stratum. The length of the bar is the entire argument.
+
+The chart has no camera — eighty-one years fit across a screen — so what moves is a **scrubber**. Drag a year, or sweep it from 1947, and bars fill as they land while a 27-cell strip lights the strata that have something working. A bar caught mid-wait is drawn solid only as far as the handle and faint beyond, so you watch the gaps open before you watch them close. `npm run check` fails if any stratum has no entry, or has only entries that never shipped — otherwise the chart would quietly claim that nothing in evaluation has ever landed.
+
+Nothing unfinished is given a date. Four entries — co-packaged optics, feature-level interpretability, computer-use agents, robot foundation models — have no right-hand end, and the build fails if an entry without a ship date is marked anything other than `open`. An arrow is not a forecast.
+
+The headline is arithmetic over the corpus: **median wait of 10 years from rock to package, 6 through silicon, 3 from software to sentence** — and the test asserts both that the rendered numbers match the computed ones and that the gradient is still strictly decreasing.
+
+The finding it exists for is sharper than the gradient. Twelve capabilities waited thirty years or more, and only **three** of them were waiting on the science. Liquid cooling waited 43 years because air was cheaper; mixture of experts 30 because there were not yet enough parameters for routing to pay; backpropagation 42 for something to run on. That claim lives in `notes.json` as prose, so `check-data.mjs` holds the prose to the corpus — change an event and the build stops rather than shipping a stale sentence.
+
+---
+
 ## Against the grain
 
-`data/static/notes.json` holds findings that contradict what most people assume — seven of them so far. Each is load-bearing: it changes how the rest of the stack reads.
+`data/static/notes.json` holds findings that contradict what most people assume — eight of them so far. Each is load-bearing: it changes how the rest of the stack reads.
 
 They are first-class objects rather than prose, so one fact surfaces everywhere it applies: as a full callout near the top of every station sheet it touches, as a one-line flag at the relevant Cascade step, and collected on the Method page — and, where it names one, a button through to the object on the Ruler or the site on the Atlas. Add a note, name the stations it belongs to, and it appears in all of them. `npm run check` fails if it names a station, stratum, cascade step, ruler object or atlas site that does not exist, or if it would surface nowhere.
 
