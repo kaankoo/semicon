@@ -1,12 +1,12 @@
 # Working on Sand to Sentence
 
-Read this file, then read **only what the routing table below tells you to**. The corpus is 295 KB; opening it whole burns the session for nothing.
+Read this file, then read **only what the routing table below tells you to**. The corpus is 395 KB; opening it whole burns the session for nothing.
 
 ---
 
 ## What this is
 
-A static, dependency-free site mapping the AI economy as 27 physical strata → 131 stations → 533 organisations, plus derived views (Ruler, Cascade, Method). Hand-curated knowledge is the asset; the code is thin.
+A static, dependency-free site mapping the AI economy as 27 physical strata → 131 stations → 533 organisations, plus derived views (Ruler, Atlas, Cascade, Method). Hand-curated knowledge is the asset; the code is thin.
 
 **Live:** GitHub Pages from `main`, public repo `kaankoo/semicon`. Deploys on push, gated on `npm test`.
 
@@ -40,15 +40,16 @@ index.html            markup shell only — 6 view sections, no logic
 src/main.js           boot: loadData → loadNotes → init each view → initRouter
 src/core/app.js       shared state + late-bound action registry   ← read this first
 src/core/data.js      loads strata/stations/edges, builds byId, byL, UP, DN
-src/core/router.js    view switching (#v-strata #v-web #v-rul #v-cas #v-mth #v-idx)
+src/core/router.js    view switching (#v-strata #v-web #v-rul #v-atl #v-cas #v-mth #v-idx)
 src/core/notes.js     "against the grain" findings, indexed by station/stratum/step
 src/lib/cascade.js    the unit-conversion arithmetic + fmt + reconcile
 src/lib/glyphs.js     15 procedural SVG shapes for the Ruler
-src/views/*.js        descent web ruler cascade method sheet table tour
+src/lib/projection.js equirectangular projection, geodesic rings, graticule
+src/views/*.js        descent web ruler atlas cascade method sheet table tour
 src/styles/app.css    one stylesheet, sectioned by banner comment
 ```
 
-Boot order matters only in that every view registers before `initRouter`. `initRuler`, `initCascade` and `initMethod` are `await`ed because they fetch their own data.
+Boot order matters only in that every view registers before `initRouter`. `initRuler`, `initAtlas`, `initCascade` and `initMethod` are `await`ed because they fetch their own data.
 
 ---
 
@@ -60,6 +61,10 @@ Boot order matters only in that every view registers before `initRouter`. `initR
 | Bug in the Cascade | `src/views/cascade.js`, `src/lib/cascade.js`, `data/static/cascade.json` | stations.json |
 | Cascade number looks wrong | `data/static/cascade.json` only — every parameter is there with its derivation | the JS |
 | Bug in the Ruler | `src/views/ruler.js`, `data/static/ruler.json`; glyph problems → `src/lib/glyphs.js` | stations.json |
+| Bug in the Atlas | `src/views/atlas.js`, `data/static/atlas.json` | stations.json, world.json |
+| A circle is the wrong size, or a site is in the wrong place | `data/static/atlas.json` only — `lat`, `lon` and `radiusKm` are the whole story | the JS |
+| Projection, geodesic or wrapping problem | `src/lib/projection.js` (150 lines, pure functions, no DOM) | — |
+| Coastline looks wrong or the file is too big | `scripts/world.mjs`, then regenerate — never hand-edit `world.json` | world.json |
 | Bug in the dependency web | `src/views/web.js`, `data/static/edges.json` | stations.json |
 | Bug in the descent / cards / rail | `src/views/descent.js` | stations.json |
 | Bug in a station sheet | `src/views/sheet.js`, then `npm run peek -- <id>` | stations.json |
@@ -84,12 +89,13 @@ Boot order matters only in that every view registers before `initRouter`. `initR
 | Against the grain | `   AGAINST THE GRAIN` | 493 | `.grain .grainline` |
 | Method | `   METHOD` | 537 | `.mth .mthlink` |
 | Ruler | `   RULER` | 621 | `.rul` |
+| Atlas | `   ATLAS` | 692 | `.atl` |
 
-`scripts/smoke.mjs` (350 lines) sections: `---- behaviour ----` · `---------- cascade ----------` · `---------- against the grain ----------` · `---------- method ----------` · `---------- ruler ----------` · `---- report ----`.
+`scripts/smoke.mjs` sections: `---- behaviour ----` · `---------- cascade ----------` · `---------- against the grain ----------` · `---------- method ----------` · `---------- ruler ----------` · `---------- atlas ----------` · `---- report ----`.
 
-`scripts/check-data.mjs` (177 lines) sections: `---- strata/stations/edges/organisations/cascade/notes/method/ruler ----`.
+`scripts/check-data.mjs` sections: `---- strata/stations/edges/organisations/cascade/notes/method/ruler/atlas ----`.
 
-`index.html` (261 lines) — view sections at lines 41, 67, 88, 117, 148, 209. Safe to read whole.
+`index.html` (~300 lines) — grep `============ ` for the view sections. Safe to read whole.
 
 ---
 
@@ -102,6 +108,8 @@ Boot order matters only in that every view registers before `initRouter`. `initR
 | `edges.json` | 605 ln | 356 dependency edges, `id → [upstream ids]` | edges block |
 | `cascade.json` | 157 ln | assumptions, constants (value/lo/hi/derivation/source), chain, branches | cascade block |
 | `ruler.json` | 155 ln | 36 objects: `{id,m,glyph,label,sub,precision,station,note}` | ruler block |
+| `atlas.json` | 320 ln | 56 sites: `{id,lat,lon,label,place,kind,radiusKm,stations[],precision,regime,risk,note,source}` | atlas block |
+| `world.json` | **generated** | coastline + boundaries as two path strings in lon/lat, 56 KB | atlas block |
 | `notes.json` | 95 ln | 6 findings, each naming stations/strata/cascadeStep/ruler | notes block |
 | `method.json` | 139 ln | provenance by kind, reading definitions, known limits | method block |
 
@@ -141,6 +149,11 @@ Station record shape — `i` id, `L` stratum, `n` name, `s` tagline, `w` what it
 | Cascade operator disagrees with the values | it cannot — `reconcile()` would fail. Run `npm test` | `src/lib/cascade.js` `factors` |
 | Ruler object never appears | its `m` may sit outside `meta.span`; `npm run check` catches this | `place()` in `src/views/ruler.js` |
 | Ruler feels empty at some scale | a decade gap — `npm run check` fails above 2 empty decades | `data/static/ruler.json` |
+| Atlas circles invisible or absurdly fat | strokes are counter-scaled in `paint()`, not by `vector-effect`. At k=2000 an unscaled 1.2-unit stroke is 2,400 px | `src/views/atlas.js` `paint()` |
+| An Atlas circle vanishes after flying somewhere | the camera left [-180,180); rings are drawn once, the coastline three times | `clampCam()` in `src/views/atlas.js` |
+| Atlas rings render black or unstyled | `syncLayers()` sets fill and stroke per path — check it is querying the group the rings actually live in | `src/views/atlas.js` `syncLayers()` |
+| A country is missing from the map | small islands below the area floor are dropped by design; sites still plot correctly | `scripts/world.mjs` `MIN_AREA` |
+| Coastline has streaks across the Pacific | a ring crossing the antimeridian was not split | `unwrap()` in `scripts/world.mjs` |
 | A finding appears on the wrong station | `data/static/notes.json` `stations[]` | `src/core/notes.js` indexing |
 | Method page missing an entry | `data/static/method.json` — it is generated, so the data is the bug | `src/views/method.js` |
 | Search finds nothing | the `q` field built in `initTable()` | `src/views/table.js` |
@@ -148,4 +161,4 @@ Station record shape — `i` id, `L` stratum, `n` name, `s` tagline, `w` what it
 | Style leaks between views | a prefix collision — every view owns a prefix | `src/styles/app.css` |
 | CI red, local green | `npm ci` vs `npm install`, or a file not committed | `.github/workflows/deploy.yml` |
 
-**First move for any bug: `npm test`.** 95 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
+**First move for any bug: `npm test`.** 131 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.

@@ -37,6 +37,8 @@ export const app = {
   focusSearch: () => {},   // views/table
   rulerFit: () => {},      // views/ruler
   rulerGoTo: () => {},     // views/ruler
+  atlasFit: () => {},      // views/atlas
+  atlasGoTo: () => {},     // views/atlas
   showNote: () => {},      // views/method
   tourStop: () => {}       // views/tour
 };

@@ -17,6 +17,7 @@
       "strata": [8, 9, 10],
       "cascadeStep": "wafer",
       "ruler": "hbmpkg",
+      "atlas": "cheongju",
       "basis": "derived",
       "source": { "who": "Micron", "what": "HBM3E — 8- and 12-high stacks of 24 Gb 1β die in an 11 × 11 mm package", "url": "https://www.micron.com/products/memory/hbm/hbm3e" }
     },
@@ -31,6 +32,7 @@
       "stations": ["fabops", "inf", "prim", "grid", "gen"],
       "strata": [6, 13, 21],
       "cascadeStep": "fabenergy",
+      "atlas": "ashburn",
       "basis": "derived",
       "source": { "who": "This site", "what": "the Cascade, at central assumptions", "url": null }
     },
@@ -45,6 +47,7 @@
       "stations": ["scan", "mask", "cowos", "gpu", "3d"],
       "strata": [5, 9, 10],
       "ruler": "reticle",
+      "atlas": "chiayi",
       "basis": "cited",
       "source": { "who": "NVIDIA", "what": "Blackwell — 208 bn transistors across two reticle-limited dies", "url": "https://www.nvidia.com/en-us/data-center/technologies/blackwell-architecture/" }
     },
@@ -59,6 +62,7 @@
       "stations": ["h2o", "liq", "fac", "imm"],
       "strata": [1, 14, 15],
       "cascadeStep": "fabwater",
+      "atlas": "tainan",
       "basis": "derived",
       "source": { "who": "Google Cloud", "what": "0.26 mL of water alongside 0.24 Wh per median Gemini text prompt", "url": "https://cloud.google.com/blog/products/infrastructure/measuring-the-environmental-impact-of-ai-inference" }
     },
@@ -74,6 +78,7 @@
       "strata": [1, 2, 3],
       "cascadeStep": "crucible",
       "ruler": "sand",
+      "atlas": "spruce-pine",
       "basis": "derived",
       "source": { "who": "This site", "what": "the Cascade — stoichiometry and crucible consumption", "url": null }
     },
@@ -90,6 +95,21 @@
       "cascadeStep": "acc",
       "basis": "cited",
       "source": { "who": "Epoch AI", "what": "How much energy does ChatGPT use?", "url": "https://epoch.ai/gradient-updates/how-much-energy-does-chatgpt-use" }
+    },
+    {
+      "id": "logic-fits-in-a-city",
+      "weight": 3,
+      "title": "Every leading-edge logic site on Earth would fit inside one mid-sized city",
+      "figure": "≈ 170 km²",
+      "figureNote": "ground enclosed by all nine sites, drawn at true scale",
+      "body": "Draw a circle round each site in the world currently running or bringing up logic at the 5 nm class and below — Hsinchu, Tainan, Taichung, Kaohsiung, Pyeongtaek, Leixlip, Chandler, north Phoenix, Hillsboro — at the real extent of each park or campus. Added together the nine enclose roughly <b>170 square kilometres</b>. Milan's administrative area is 182. Four of the nine, and the great majority of the capacity, sit on <b>one island</b>, within four hundred kilometres of each other.",
+      "soWhat": "Concentration in this industry is usually argued in percentages, which are easy to wave away. Measured as ground it stops being an abstraction: the entire physical substrate of machine intelligence is a handful of industrial parks you could drive between in an afternoon, and no amount of capital shortens the three years it takes to pour another one.",
+      "stations": ["fdry", "gaa", "scan", "cowos", "export"],
+      "strata": [5, 7, 9, 26],
+      "atlas": "hsinchu",
+      "ruler": "hsinchu",
+      "basis": "derived",
+      "source": { "who": "This site", "what": "the Atlas — published site extents summed at true geographic scale", "url": null }
     }
   ]
 }

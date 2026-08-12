@@ -33,10 +33,12 @@ src/
   lib/
     cascade.js             the unit-conversion chain and its arithmetic
     glyphs.js              schematic shapes for the Ruler
+    projection.js          equirectangular projection, geodesics, graticule
   views/
     descent.js             the cross-section: hero, rail, strata sections
     web.js                 the dependency graph
     ruler.js               seventeen orders of magnitude, to scale
+    atlas.js               where the stack physically is
     cascade.js             sand to sentence, quantified
     method.js              sources, assumptions and limits
     sheet.js               station dossiers
@@ -49,12 +51,15 @@ data/static/
   edges.json               the dependency graph
   cascade.json             conversion parameters, ranges and sources
   ruler.json               36 objects from the lattice to the Earth
+  atlas.json               56 sites, each anchored to stations
+  world.json               simplified coastline and boundaries, 56 KB
   notes.json               counterintuitive findings
   method.json              provenance and known limits
 scripts/
   dev.mjs                  zero-dependency dev server
   check-data.mjs           corpus integrity check (runs in CI)
   smoke.mjs                boots the app headlessly and asserts the DOM
+  world.mjs                regenerates world.json from Natural Earth
   parity.mjs               diffs two builds' DOM output
 ```
 
@@ -105,11 +110,25 @@ Two moments do the teaching. Around 10⁻⁹ a gate-all-around channel sits besi
 
 ---
 
+## The Atlas
+
+Fifty-six sites — mines, refineries, wafer plants, tool-makers, fabs, packaging houses, data-centre markets and one strait — each resolving to at least one station in the corpus. `npm run check` fails if a site names a station that does not exist.
+
+Circles are **true to the ground**. A chokepoint ring is not an ellipse chosen to look right; it is a hundred points, each computed to be exactly *r* kilometres from the centre along a great circle, then projected like any other geometry. Because the projection is equirectangular, the result comes out stretched east–west by 1/cos(latitude) — which is what a true circle looks like on this map, and the smoke test asserts both halves of that: every ring's radius is right to one part in 10⁹, and the drawn aspect matches 1/cos(latitude) rather than 1. Two sites cross-check against the Ruler: Spruce Pine's 30 km and Hsinchu's 6 km must be the same number in both views, or the build fails.
+
+The projection is hand-rolled and affine in lon/lat, which is the whole reason it was chosen — the coastline is one path string in degrees, so panning and zooming is a single SVG transform and no point is ever re-projected. `data/static/world.json` is Natural Earth 1:50m simplified to **56 KB** with a per-ring tolerance, so a continent is flattened hard while Taiwan keeps detail to a few kilometres. `scripts/world.mjs` re-decodes what it writes and fails if a single coordinate has drifted.
+
+The headline, computed rather than typed: draw a circle at true scale round every site on Earth running logic at the 5 nm class or below and the nine of them enclose about **170 km²** — less ground than Milan. The build fails if that stops being true.
+
+Four layers: true-scale circles, export-control regime, physical risk, and all names. The regime layer is judgement and is declared as such on Method.
+
+---
+
 ## Against the grain
 
-`data/static/notes.json` holds findings that contradict what most people assume — six of them so far. Each is load-bearing: it changes how the rest of the stack reads.
+`data/static/notes.json` holds findings that contradict what most people assume — seven of them so far. Each is load-bearing: it changes how the rest of the stack reads.
 
-They are first-class objects rather than prose, so one fact surfaces everywhere it applies: as a full callout near the top of every station sheet it touches, as a one-line flag at the relevant Cascade step, and collected on the Method page. Add a note, name the stations it belongs to, and it appears in all three places. `npm run check` fails if it names a station, stratum or cascade step that does not exist, or if it would surface nowhere.
+They are first-class objects rather than prose, so one fact surfaces everywhere it applies: as a full callout near the top of every station sheet it touches, as a one-line flag at the relevant Cascade step, and collected on the Method page — and, where it names one, a button through to the object on the Ruler or the site on the Atlas. Add a note, name the stations it belongs to, and it appears in all of them. `npm run check` fails if it names a station, stratum, cascade step, ruler object or atlas site that does not exist, or if it would surface nowhere.
 
 The heaviest one: **most of the silicon in an AI accelerator is memory, not compute** — roughly 1,600 mm² of logic against 6,000–7,500 mm² of HBM. It explains why the binding constraint sits in strata 08 and 09 rather than 10.
 
@@ -154,6 +173,7 @@ Built as a map for understanding, not a database of record.
 
 ## Where it's going
 
+- [`ROADMAP.md`](ROADMAP.md) — what has shipped and what comes next, with a file manifest per phase
 - [`IDEAS.md`](IDEAS.md) — the learning-first expansion: the Cascade, the Ruler, the Atlas, the Time Machine
 - [`PLAN.md`](PLAN.md) — the MONEY section: live market data joined to the dependency graph
 

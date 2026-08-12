@@ -336,6 +336,182 @@ app.closeSheet();
   }
 }
 
+/* ---------- atlas ---------- */
+{
+  const AT = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/atlas.json"), "utf8"));
+  const { ring, ringRadiusError, haversine, project, unproject, transform, wrapLon } =
+    await import(pathToFileURL(path.join(ROOT, "src/lib/projection.js")).href);
+  const { leadingArea, camera } = await import(pathToFileURL(path.join(ROOT, "src/views/atlas.js")).href);
+
+  app.show("atl");
+  is("atlas view active", D.getElementById("v-atl").classList.contains("on"), true);
+  is("every site is marked", D.querySelectorAll("#atlSvg .atl__m").length, AT.sites.length);
+  is("the world is drawn", !!D.querySelector("#atlSvg .atl__land"), true);
+  is("the world wraps", D.querySelectorAll("#atlSvg use").length, 3);
+  is("every radius is drawn", D.querySelectorAll("#atlSvg .atl__ring").length,
+     AT.sites.filter(s => s.radiusKm).length);
+  /* a ring with no colour on it is an invisible ring, and the geometry
+     being right does not help if nothing paints it */
+  {
+    const blind = [...D.querySelectorAll("#atlSvg .atl__ring")]
+      .filter(p => !/^#[0-9A-Fa-f]{6}$/.test(p.getAttribute("stroke") || ""));
+    checks.push({ label: "every circle is actually drawn", ok: blind.length === 0,
+                  actual: blind.length ? `${blind.length} with no stroke colour` : "all coloured",
+                  expected: "all coloured" });
+    const geo = D.querySelector("#atlSvg g[transform]");
+    checks.push({ label: "strokes are counter-scaled", ok: +D.querySelector("#atlSvg .atl__rings").getAttribute("stroke-width") > 0,
+                  actual: "stroke-width " + D.querySelector("#atlSvg .atl__rings").getAttribute("stroke-width"),
+                  expected: "a positive width in degrees" });
+    checks.push({ label: "the geometry group carries the camera", ok: /translate\(.+\) scale\(/.test(geo?.getAttribute("transform") || ""),
+                  actual: (geo?.getAttribute("transform") || "none").slice(0, 40), expected: "translate + scale" });
+  }
+
+  atLeast("layers offered", D.querySelectorAll("#atlLayers button").length, 3);
+  atLeast("stops offered", D.querySelectorAll("#atlStops button").length, 6);
+  atLeast("panel populated", D.getElementById("atlPanel").textContent.trim().length, 120);
+  atLeast("scale readout", D.getElementById("atlScale").textContent.trim().length, 2);
+
+  /* the whole point: a ring must enclose the ground it claims to.
+     Every vertex, on every site, at every latitude. */
+  let worst = 0, worstAt = null;
+  for (const s of AT.sites.filter(x => x.radiusKm)) {
+    const e = ringRadiusError(s.lon, s.lat, s.radiusKm);
+    if (e > worst) { worst = e; worstAt = s.id; }
+  }
+  checks.push({ label: "circles are true to the ground", ok: worst < 1e-9,
+                actual: `worst ${(worst * 100).toExponential(1)}% at ${worstAt}`,
+                expected: "under 1e-9 everywhere" });
+
+  /* …and must therefore NOT be circles on screen. A ring drawn as a
+     screen circle would have an aspect of exactly 1; a true one is
+     stretched east–west by 1/cos(latitude). */
+  {
+    const s = AT.sites.find(x => x.id === "hsinchu");
+    const pts = ring(s.lon, s.lat, s.radiusKm);
+    const lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
+    const aspect = (Math.max(...lons) - Math.min(...lons)) / (Math.max(...lats) - Math.min(...lats));
+    const want = 1 / Math.cos(s.lat * Math.PI / 180);
+    checks.push({ label: "the projection is not being cheated", ok: Math.abs(aspect - want) < 0.01,
+                  actual: `aspect ${aspect.toFixed(3)} at ${s.lat}°N`,
+                  expected: `1/cos(lat) = ${want.toFixed(3)}` });
+  }
+
+  /* the Atlas and the Ruler must agree about the same distance */
+  {
+    const R2 = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/ruler.json"), "utf8"));
+    const bad = AT.sites.filter(s => s.ruler).filter(s => {
+      const o = R2.objects.find(x => x.id === s.ruler);
+      return !o || Math.abs(o.m - s.radiusKm * 2000) > 1e-6;
+    }).map(s => s.id);
+    checks.push({ label: "atlas and ruler agree on size", ok: bad.length === 0,
+                  actual: bad.length ? bad.join(", ") : "spruce-pine, hsinchu",
+                  expected: "every cross-linked site matches" });
+  }
+
+  /* the headline sentence must be arithmetic, not a string */
+  {
+    const km2 = leadingArea(AT);
+    const shown = D.getElementById("atlClaim").textContent;
+    const inText = +(shown.match(/([\d,]+)\s*km²/) || [])[1]?.replace(/,/g, "");
+    checks.push({ label: "the concentration claim reconciles", ok: inText === Math.round(km2),
+                  actual: `renders ${inText}, computes ${Math.round(km2)}`,
+                  expected: "the same number" });
+    checks.push({ label: "…and is still true", ok: km2 < AT.meta.comparison.km2,
+                  actual: `${Math.round(km2)} km² vs ${AT.meta.comparison.label} at ${AT.meta.comparison.km2}`,
+                  expected: "smaller than the comparison" });
+  }
+
+  /* project and unproject must be exact inverses, or panning drifts */
+  {
+    const cam = { lon: 121, lat: 24.8, k: 240 };
+    const p = project(120.5, 25.1, cam, 1200, 600);
+    const u = unproject(p.x, p.y, cam, 1200, 600);
+    checks.push({ label: "the camera does not drift", ok: Math.abs(u.lon - 120.5) + Math.abs(u.lat - 25.1) < 1e-9,
+                  actual: `${Math.abs(u.lon - 120.5).toExponential(1)}° round trip`, expected: "exact" });
+    /* and the SVG transform must place things where project() says */
+    const m = transform(cam, 1200, 600).match(/translate\(([-\d.]+),([-\d.]+)\) scale\(([\d.]+)\)/);
+    const gx = +m[1] + 120.5 * +m[3], gy = +m[2] + -25.1 * +m[3];
+    checks.push({ label: "markers and geometry agree", ok: Math.abs(gx - p.x) < 0.02 && Math.abs(gy - p.y) < 0.02,
+                  actual: `${Math.abs(gx - p.x).toFixed(4)} px apart`, expected: "the same point" });
+  }
+
+  /* known distances, as a check on the sphere itself */
+  checks.push({ label: "the earth is the right size",
+                ok: Math.abs(haversine(-0.1276, 51.5072, 2.3522, 48.8566) - 344) < 6,
+                actual: haversine(-0.1276, 51.5072, 2.3522, 48.8566).toFixed(0) + " km London–Paris",
+                expected: "≈ 344 km" });
+
+  /* the world must not fall apart at the antimeridian */
+  is("longitudes wrap to the near copy", wrapLon(-179, 179), 181);
+
+  /* jumping to a site must open it and close the camera in */
+  const wide = D.getElementById("atlScale").textContent;
+  app.atlasGoTo("spruce-pine");
+  await new Promise(r => setTimeout(r, 500));
+  is("jumping opens the site", D.querySelector("#atlPanel .atl__pn")?.textContent, "Spruce Pine");
+  const near = D.getElementById("atlScale").textContent;
+  const km = t => (/thousand/.test(t) ? 1000 : 1) * parseFloat(t);
+  checks.push({ label: "jumping closes the camera in", ok: km(near) < km(wide) / 20 && km(near) > 0,
+                actual: `${wide} → ${near}`, expected: "a much tighter view" });
+  checks.push({ label: "the world view shows a world", ok: km(wide) > 20000,
+                actual: wide + " across", expected: "over 20,000 km" });
+
+  /* Fly the long way round and back. The rings are drawn once, at their
+     true longitude, so the camera must never wander into a copy of the
+     world where they are not — which is what happens if you let it chase
+     a site westward past the antimeridian. */
+  for (const id of ["hsinchu", "spruce-pine", "veldhoven", "abilene", "chitose", "escondida"]) {
+    app.atlasGoTo(id);
+    await new Promise(r => setTimeout(r, 420));
+    const c = camera(), s = AT.sites.find(x => x.id === id);
+    const p = project(s.lon, s.lat, c, c.W, c.H);
+    const inside = p.x > 0 && p.x < c.W && p.y > 0 && p.y < c.H;
+    checks.push({ label: `${id} stays on the stage`, ok: inside && Math.abs(c.lon) <= 180,
+                  actual: `camera at ${c.lon.toFixed(1)}°, site at ${p.x.toFixed(0)},${p.y.toFixed(0)} px`,
+                  expected: "on stage, camera within ±180°" });
+  }
+
+  /* …and the corpus must keep clear of the seam that assumption rests on */
+  {
+    const near = AT.sites.filter(s => Math.abs(s.lon) > 170).map(s => s.id);
+    checks.push({ label: "no site sits on the antimeridian", ok: near.length === 0,
+                  actual: near.length ? near.join(", ") : "furthest is " +
+                    Math.max(...AT.sites.map(s => Math.abs(s.lon))).toFixed(0) + "°",
+                  expected: "all within ±170°" });
+  }
+
+  /* a station chip in the panel must open that station */
+  app.atlasGoTo("spruce-pine");
+  await new Promise(r => setTimeout(r, 420));
+  const chip = D.querySelector("#atlPanel [data-station]");
+  if (chip) {
+    chip.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    is("atlas panel opens stations", D.getElementById("sheet").classList.contains("on"), true);
+    app.closeSheet();
+  }
+}
+
+/* findings that point at the map must land on a real site */
+{
+  const AT = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/atlas.json"), "utf8"));
+  const sIds = new Set(AT.sites.map(s => s.id));
+  const bad = app.notes.all.filter(n => n.atlas && !sIds.has(n.atlas)).map(n => n.id);
+  checks.push({ label: "findings link to real atlas sites", ok: bad.length === 0,
+                actual: bad.length ? bad.join(", ") : "all resolve", expected: "all resolve" });
+
+  /* the acceptance condition: Spruce Pine is one click from the finding
+     that makes it matter */
+  app.openStation("hpq");
+  const ab = D.querySelector("#shB [data-atlas]");
+  is("a finding offers the map", !!ab, true);
+  if (ab) {
+    ab.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await new Promise(r => setTimeout(r, 500));
+    is("it lands on the atlas", D.getElementById("v-atl").classList.contains("on"), true);
+    is("…on the right site", D.querySelector("#atlPanel .atl__pn")?.textContent, "Spruce Pine");
+  }
+}
+
 /* ---- report ---- */
 const failed = checks.filter(c => !c.ok);
 const pad = s => String(s).padEnd(34);

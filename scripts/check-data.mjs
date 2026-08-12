@@ -167,6 +167,87 @@ for (let e = lo; e <= hi; e++) {
 if (worst > 2) problems.push(`ruler has a ${worst}-decade gap around 10^${gapAt} — the journey stalls there`);
 ok.push(`${R.objects.length} scale objects over ${(hi - lo + 1)} decades`);
 
+/* ---- atlas ---- */
+const AT = read("atlas.json");
+const WD = read("world.json");
+const KINDS_A = new Set(["mine", "refine", "wafer", "tool", "fab", "memory", "package", "site", "chokepoint"]);
+const PREC_A = new Set(["sited", "approx", "area"]);
+const REGIMES = new Set((AT.meta.regimes || []).map(r => r.id));
+const RISKS = new Set((AT.meta.risks || []).map(r => r.id));
+const rulerIds = new Set(R.objects.map(o => o.id));
+const siteIds = new Set();
+
+["updated", "note", "coordinates", "projection", "comparison", "regimes", "risks"].forEach(k => {
+  if (!AT.meta[k]) problems.push(`atlas.json meta is missing "${k}"`);
+});
+if (!(AT.meta.comparison && AT.meta.comparison.km2 > 0 && AT.meta.comparison.label))
+  problems.push("atlas comparison needs a label and an area");
+
+AT.sites.forEach(s => {
+  if (siteIds.has(s.id)) problems.push(`duplicate atlas site: ${s.id}`);
+  siteIds.add(s.id);
+  ["label", "place", "note"].forEach(f => { if (!s[f]) problems.push(`atlas site ${s.id} is missing "${f}"`); });
+  if (!(s.lat >= -90 && s.lat <= 90)) problems.push(`atlas site ${s.id} has latitude ${s.lat}`);
+  /* The Atlas tiles the coastline across the antimeridian but draws each
+     scale ring once, at its true longitude. That is only safe while no
+     site sits near the seam. See clampCam() in src/views/atlas.js. */
+  if (!(s.lon >= -170 && s.lon <= 170))
+    problems.push(`atlas site ${s.id} is at longitude ${s.lon}, too close to the antimeridian for a single-copy ring`);
+  if (!KINDS_A.has(s.kind)) problems.push(`atlas site ${s.id} has kind "${s.kind}"`);
+  if (!PREC_A.has(s.precision)) problems.push(`atlas site ${s.id} has precision "${s.precision}"`);
+  if (!REGIMES.has(s.regime)) problems.push(`atlas site ${s.id} has regime "${s.regime}"`);
+  if (s.risk && !RISKS.has(s.risk.k)) problems.push(`atlas site ${s.id} has risk kind "${s.risk.k}"`);
+  if (s.risk && !s.risk.note) problems.push(`atlas site ${s.id} declares a risk without saying what it is`);
+  if (!s.source || !s.source.who) problems.push(`atlas site ${s.id} has no source`);
+  if (s.radiusKm != null && !(s.radiusKm > 0)) problems.push(`atlas site ${s.id} has radius ${s.radiusKm}`);
+  /* the acceptance condition: every site is anchored in the corpus */
+  if (!Array.isArray(s.stations) || !s.stations.length)
+    problems.push(`atlas site ${s.id} names no station`);
+  (s.stations || []).forEach(x => {
+    if (!ids.has(x)) problems.push(`atlas site ${s.id} points at unknown station "${x}"`);
+  });
+  if (s.leading && !(s.radiusKm > 0))
+    problems.push(`atlas site ${s.id} is flagged leading-edge but has no radius to draw`);
+  /* a site that claims a Ruler object must be the same size as it */
+  if (s.ruler) {
+    if (!rulerIds.has(s.ruler)) problems.push(`atlas site ${s.id} points at unknown ruler object "${s.ruler}"`);
+    else {
+      const o = R.objects.find(x => x.id === s.ruler);
+      if (Math.abs(o.m - s.radiusKm * 2000) > 1e-6)
+        problems.push(`atlas site ${s.id} is ${s.radiusKm * 2} km across but the ruler draws ${s.ruler} at ${o.m / 1000} km`);
+    }
+  }
+});
+
+/* the concentration claim must survive its own data */
+const leadKm2 = AT.sites.filter(s => s.leading)
+  .reduce((n, s) => n + Math.PI * s.radiusKm * s.radiusKm, 0);
+if (!(leadKm2 > 0)) problems.push("atlas has no leading-edge sites, so the concentration claim says nothing");
+if (leadKm2 >= AT.meta.comparison.km2)
+  problems.push(`leading-edge sites now enclose ${leadKm2.toFixed(0)} km², which is no longer less than ` +
+                `${AT.meta.comparison.label} at ${AT.meta.comparison.km2} km² — pick a bigger comparison or check the radii`);
+
+/* findings that point at the map must land somewhere real */
+N.notes.forEach(n => {
+  if (n.atlas && !siteIds.has(n.atlas)) problems.push(`note ${n.id} points at unknown atlas site "${n.atlas}"`);
+});
+
+/* the coastline must actually be geometry, and must parse */
+["land", "borders"].forEach(k => {
+  const d = WD[k];
+  if (typeof d !== "string" || d.length < 1000) { problems.push(`world.json "${k}" is missing or empty`); return; }
+  if (!/^M/.test(d)) problems.push(`world.json "${k}" does not start with a move`);
+  if (/[^MlLZz0-9.\- ]/.test(d)) problems.push(`world.json "${k}" contains an unexpected path command`);
+  /* every ring must carry an even number of coordinates, or a relative
+     delta has been swallowed by its neighbour — see scripts/world.mjs */
+  const odd = d.split("M").slice(1).filter(p =>
+    (("M" + p).match(/[MlLZz]|-?(?:\d+\.?\d*|\.\d+)/g) || [])
+      .filter(t => !/^[MlLZz]$/.test(t)).length % 2);
+  if (odd.length) problems.push(`world.json "${k}" has ${odd.length} rings with a broken coordinate pair`);
+});
+if (!WD.meta || !WD.meta.source || !WD.meta.source.who) problems.push("world.json has no source");
+ok.push(`${AT.sites.length} atlas sites`);
+
 /* ---- report ---- */
 if (problems.length) {
   console.error(`\n  ✗ ${problems.length} problem${problems.length > 1 ? "s" : ""}\n`);

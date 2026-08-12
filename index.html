@@ -21,6 +21,7 @@
     <button role="tab" aria-selected="true" data-view="strata">Cross-section</button>
     <button role="tab" aria-selected="false" data-view="web">Web</button>
     <button role="tab" aria-selected="false" data-view="rul">Ruler</button>
+    <button role="tab" aria-selected="false" data-view="atl">Atlas</button>
     <button role="tab" aria-selected="false" data-view="cas">Cascade</button>
     <button role="tab" aria-selected="false" data-view="idx">Index</button>
   </div>
@@ -109,6 +110,38 @@
         <h5>How to read this</h5>
         <p>The horizontal axis is logarithmic: every 300 pixels is one power of ten. Objects are drawn at <b>true relative size</b> — if something looks a hundred times bigger than its neighbour, it is a hundred times bigger. That is why most of the ruler looks empty. Seventeen orders of magnitude do not fit on a screen, and pretending otherwise is the usual lie in diagrams like this.</p>
         <p style="margin-top:14px">Shapes are schematic; proportions are not. Each object carries a <b>precision</b> flag — <i>exact</i> for defined or measured quantities, <i>typical</i> for a representative production value that varies by vendor and node, <i>approx</i> for the right order of magnitude and not much more. Sources and reasoning are on the <b>Method</b> page.</p>
+      </footer>
+    </div>
+  </section>
+
+  <!-- ============ ATLAS ============ -->
+  <section class="view" id="v-atl">
+    <div class="atl">
+      <div class="atl__hud">
+        <p class="eyebrow">Forty jurisdictions, drawn to scale</p>
+        <h2 class="rul__h">Every chokepoint is a <em>place.</em></h2>
+        <p class="rul__i">Fifty-six sites, each resolving to stations in the corpus. Drag to pan, scroll to zoom, click anything to open it. Circles are true to the ground — the ring around Spruce Pine really is thirty kilometres across.</p>
+      </div>
+
+      <div class="atl__stage">
+        <svg id="atlSvg" aria-label="A world map of the sites the machine-intelligence stack depends on"></svg>
+        <div class="rul__read"><span>across the view</span><b id="atlScale"></b></div>
+        <div class="atl__legend" id="atlLegend"></div>
+      </div>
+
+      <div class="atl__claim" id="atlClaim"></div>
+
+      <div class="atl__ctl">
+        <div class="atl__layers" id="atlLayers" role="group" aria-label="Map layers"></div>
+        <div class="rul__stops atl__stops" id="atlStops"></div>
+      </div>
+
+      <aside class="atl__panel" id="atlPanel"></aside>
+
+      <footer class="foot">
+        <h5>How to read this</h5>
+        <p>Rings are <b>geodesic</b>: a hundred points, each exactly the stated distance from the centre, projected like any other geometry. That is why they widen towards the poles — an equirectangular map stretches east–west by 1/cos(latitude), and a ring that stayed circular on screen would be lying about the ground. Each site carries a <b>precision</b> flag saying what kind of coordinate it is: <i>sited</i> where the operator publishes the location, <i>approx</i> where it is reconstructed from public reporting, <i>area</i> where the point is the centre of a district.</p>
+        <p style="margin-top:14px">Coordinates are for published corporate and public locations only. Nothing here is more precise than the operator has itself made public, and nothing is derived from imagery, filings or any other private source. The <b>export-control regime</b> layer is a reading of who writes and who is bound by the leading-edge tool controls — it is judgement, labelled as such on <b>Method</b>, and not a legal finding. Boundaries are Natural Earth's, drawn for orientation.</p>
       </footer>
     </div>
   </section>
