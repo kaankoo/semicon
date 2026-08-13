@@ -782,7 +782,13 @@ app.closeSheet();
   is("every stratum is a bar", D.querySelectorAll("#moatSvg .moat__r").length, app.L.length);
   atLeast("panel populated", D.getElementById("moatPanel").textContent.trim().length, 200);
   atLeast("axes offered", D.querySelectorAll("#moatMetric button").length, 2);
-  atLeast("bases offered", D.querySelectorAll("#moatBasis button").length, 2);
+
+  /* The attribution toggle was inherited from the priced page, where it
+     re-split every market cap. Nothing on this page is divided by those
+     weights, so it changed one sentence in the footer and nothing else —
+     a prominent control above the chart that did not move the chart. */
+  is("no control that does not move the chart",
+     !!D.getElementById("moatBasis"), false);
 
   /* THE REASON THIS PAGE DOES NOT PLOT A HEADCOUNT.
      Every station names five to eight organisations because that is the
@@ -872,6 +878,41 @@ app.closeSheet();
     app.moatGoTo(5);
     is("…and the panel says so out loud",
        /single-sourced at the joints/.test(D.getElementById("moatPanel").textContent), true);
+  }
+
+  /* The roster is the Index's table, not a bespoke list — same classes,
+     same columns — so the two read as one table in two places. And the
+     row count is not the organisation count: a firm at three stations in
+     one layer is three rows and one vote, which the header must say
+     rather than leave the reader to work out. */
+  {
+    app.moatGoTo(5);
+    const p = D.getElementById("moatPanel");
+    const rows = p.querySelectorAll(".moat__tbl tbody tr");
+    const cols = [...p.querySelectorAll(".moat__tbl thead th")].map(t => t.textContent);
+    is("the roster uses the Index's columns",
+       cols.join("|"), "Company|What it does here|Station|Base|Price");
+    atLeast("…and is populated", rows.length, 20);
+    checks.push({ label: "…with the Index's own classes, not a parallel style",
+                  ok: !!p.querySelector(".moat__tbl .cn") && !!p.querySelector(".moat__tbl .cq") &&
+                      !!p.querySelector(".moat__tbl .tag"),
+                  actual: "cn / cr / tag / flagx / cq", expected: "shared with #tb" });
+
+    const distinct = new Set();
+    app.S.filter(x => x.L === 5).forEach(x => x.co.forEach(c => {
+      if (c[0] && c[0] !== "—") distinct.add(c[0]);
+    }));
+    checks.push({ label: "rows exceed organisations, and the panel says which is which",
+                  ok: rows.length > distinct.size &&
+                      p.textContent.includes(`${distinct.size}`) &&
+                      p.textContent.includes(`${rows.length} station rows`),
+                  actual: `${distinct.size} organisations across ${rows.length} rows, both stated`,
+                  expected: "one vote per organisation, one row per station" });
+
+    /* a row opens its station, the way an Index row does */
+    rows[0].dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    is("a roster row opens its station", D.getElementById("sheet").classList.contains("on"), true);
+    app.closeSheet();
   }
 
   /* a company at nineteen stations must not be counted nineteen times */

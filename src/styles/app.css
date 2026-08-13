@@ -240,7 +240,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .lline{stroke:#151D31;stroke-width:1;vector-effect:non-scaling-stroke}
 
 /* ---------- index view ---------- */
-.idx{padding:44px 6vw 120px;max-width:1500px;margin:0 auto}
+.idx{padding:44px 3vw 120px;max-width:min(1860px,95vw);margin:0 auto}
 .idxbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:26px;
   position:sticky;top:56px;background:rgba(6,8,15,.94);backdrop-filter:blur(12px);
   padding:16px 0;z-index:20;border-bottom:1px solid var(--line)}
@@ -402,7 +402,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 /* ============================================================
    CASCADE
    ============================================================ */
-.cas{max-width:1360px;margin:0 auto;padding:60px 6vw 90px}
+.cas{max-width:min(1680px,95vw);margin:0 auto;padding:60px 3vw 90px}
 .cas__top{max-width:74ch}
 .cas__h{font-family:var(--disp);font-weight:900;font-variation-settings:'wdth' 88;
   font-size:clamp(30px,4.4vw,56px);line-height:.98;letter-spacing:-.026em;margin:0}
@@ -556,7 +556,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   color:var(--ash);padding:7px 11px;border-radius:7px;border:1px solid transparent;transition:.18s var(--ease);flex:none}
 .mthlink:hover{color:var(--qz);border-color:var(--line2)}
 .mthlink[aria-selected=true],.view#v-mth.on ~ *{}
-.mth{max-width:1180px;margin:0 auto;padding:60px 6vw 90px}
+.mth{max-width:min(1480px,95vw);margin:0 auto;padding:60px 3vw 90px}
 .mth__top{max-width:74ch}
 .mth__counts{display:flex;flex-wrap:wrap;gap:0;margin:28px 0 0;border-top:1px solid var(--line)}
 .mth__ct{padding:15px 24px 0 0;margin-right:24px;border-right:1px solid var(--line)}
@@ -636,7 +636,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 /* ============================================================
    RULER
    ============================================================ */
-.rul{max-width:1560px;margin:0 auto;padding:44px 4vw 80px}
+.rul{max-width:min(1860px,95vw);margin:0 auto;padding:44px 3vw 80px}
 .rul__hud{max-width:66ch;padding:0 2vw}
 .rul__h{font-family:var(--disp);font-weight:900;font-variation-settings:'wdth' 88;
   font-size:clamp(30px,4.4vw,54px);line-height:.98;letter-spacing:-.026em;margin:0}
@@ -707,7 +707,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 /* ============================================================
    ATLAS
    ============================================================ */
-.atl{max-width:1560px;margin:0 auto;padding:44px 4vw 80px}
+.atl{max-width:min(1860px,95vw);margin:0 auto;padding:44px 3vw 80px}
 .atl__hud{max-width:66ch;padding:0 2vw}
 
 .atl__stage{position:relative;margin-top:26px;height:min(64vh,620px);border:1px solid var(--line);
@@ -782,7 +782,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 /* ============================================================
    LAG
    ============================================================ */
-.tml{max-width:1560px;margin:0 auto;padding:44px 4vw 80px}
+.tml{max-width:min(1860px,95vw);margin:0 auto;padding:44px 3vw 80px}
 
 .tml__claim{margin-top:24px}
 .tml__claim button{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:11.5px;
@@ -852,7 +852,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 /* ============================================================
    FAULTS
    ============================================================ */
-.flt{max-width:1560px;margin:0 auto;padding:44px 4vw 80px}
+.flt{max-width:min(1860px,95vw);margin:0 auto;padding:44px 3vw 80px}
 
 .flt__claim{margin-top:24px}
 .flt__claim button{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:11.5px;
@@ -940,8 +940,16 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 /* ============================================================
    MOAT
    ============================================================ */
-.moat{max-width:1560px;margin:0 auto;padding:44px 4vw 80px}
+.moat{max-width:min(1860px,95vw);margin:0 auto;padding:44px 3vw 80px}
 
+/* hud beside headline on a wide screen: two measured columns use the
+   width that one measured column was wasting */
+.moat__head2{display:grid;gap:26px 44px;align-items:start;margin-top:8px}
+@media(min-width:1180px){
+  .moat__head2{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}
+  .moat__head2 .atl__hud{max-width:none}
+  .moat__head2 .moat__status{margin-top:0}
+}
 .moat__status{margin-top:24px;border:1px solid var(--line);border-left:2px solid var(--ok);
   border-radius:0 12px 12px 0;padding:16px 20px;background:linear-gradient(100deg,rgba(63,203,142,.05),var(--ox) 60%)}
 .moat__status--none{border-left-color:var(--brs);background:linear-gradient(100deg,rgba(227,168,62,.05),var(--ox) 60%)}
@@ -950,7 +958,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   color:var(--brs);font-weight:600;margin:0 0 9px}
 .moat__status--stale .moat__sk,.moat__staleb{color:var(--mag)}
 .moat__status:not(.moat__status--none) .moat__sk{color:var(--ok)}
-.moat__status p{font-size:14px;color:var(--ash2);font-weight:300;line-height:1.62;margin:0 0 9px;max-width:74ch}
+.moat__status p{font-size:14px;color:var(--ash2);font-weight:300;line-height:1.62;margin:0 0 9px;max-width:70ch}
 .moat__status p:last-child{margin-bottom:0}
 .moat__status b{color:var(--qz);font-weight:500;font-variant-numeric:tabular-nums}
 .moat__status pre{font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--pls);
@@ -977,8 +985,9 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .moat__v{font-family:var(--mono);font-size:9.5px;fill:var(--ash2);letter-spacing:.04em;
   font-variant-numeric:tabular-nums}
 
-.moat__panel{border-left-color:var(--ok);
+.moat__panel{border-left-color:var(--ok);max-width:none;
   background:linear-gradient(100deg,rgba(63,203,142,.045),var(--ox) 52%)}
+.moat__panel .atl__pb,.moat__panel .moat__warn,.moat__panel .moat__cov2{max-width:82ch}
 .moat__pk{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:7px}
 .moat__pk>span{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em}
 .moat__fig{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--qz);
@@ -1001,22 +1010,16 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .moat__jchip b{color:var(--qz);font-weight:600;margin-right:7px}
 .moat__cov2{font-size:12.5px;color:var(--ash);font-weight:300;line-height:1.6;margin:15px 0 0;max-width:70ch}
 
-/* who works at this depth — the view the site did not have */
-.moat__names{display:flex;flex-direction:column;margin-top:15px;
-  border-top:1px solid var(--line)}
-.moat__co{display:grid;grid-template-columns:1fr 42px 92px;gap:10px;align-items:center;
-  padding:7px 2px;border-bottom:1px solid rgba(29,39,66,.5)}
-.moat__co:hover{background:var(--ox)}
-.moat__con{font-size:13.4px;color:var(--ash2);text-align:left;font-weight:300;transition:.14s}
-.moat__co:hover .moat__con{color:var(--qz)}
-.moat__cj{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--ash);
-  text-transform:uppercase;text-align:right}
-.moat__cq{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-align:right;
-  color:var(--pls);text-decoration:none;font-variant-numeric:tabular-nums}
-.moat__cq:hover{color:var(--qz);text-decoration:underline}
-.moat__cq--none{color:#3A4668}
-.moat__attr{font-size:13.5px;color:var(--ash);font-weight:300;line-height:1.62;max-width:70ch}
-.moat__attr b{color:var(--ash2);font-weight:500}
+/* who works at this depth — the view the site did not have.
+   Deliberately the Index's own table rather than a bespoke list: same
+   columns, same classes, so the reader meets one table in two places
+   instead of two summaries of the same corpus. */
+.moat__tbl{margin-top:16px}
+.moat__tbl th{position:sticky;top:56px;background:rgba(6,8,15,.94);backdrop-filter:blur(12px);z-index:2}
+.moat__tbl .cn a{color:inherit;text-decoration:none}
+.moat__tbl .cn a:hover{color:var(--qz)}
+.moat__tbl .cgo{color:var(--ash);font-size:11px}
+.moat__tbl td{vertical-align:top}
 
 @media(max-width:760px){
   .moat{padding:34px 4vw 64px}

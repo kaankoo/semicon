@@ -34,7 +34,7 @@
 
 import { app } from "../core/app.js";
 import { jurisdictionsByStratum, bandConcentration, bandHeadcount, curationBand,
-         chokepointsAt, coverage, weightsFor, evenWeights, pct, idx } from "../lib/metrics.js";
+         chokepointsAt, coverage, pct, idx } from "../lib/metrics.js";
 import { lookupFor } from "../lib/tickers.js";
 
 const GUTTER = 210;
@@ -44,7 +44,7 @@ const BAR = 13;
 const HEAD = 26;
 
 let J = {}, cov = {}, svg = null;
-let metric = "hhi", basis = "declared";
+let metric = "hhi";
 let W = 1200, chartW = 900;
 
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
@@ -110,8 +110,6 @@ function paint() {
   document.getElementById("moatAxis").textContent = label;
   document.querySelectorAll("#moatMetric button").forEach(b =>
     b.setAttribute("aria-pressed", String(b.dataset.metric === metric)));
-  document.querySelectorAll("#moatBasis button").forEach(b =>
-    b.setAttribute("aria-pressed", String(b.dataset.basis === basis)));
 }
 
 /* ---------- the panel ----------
@@ -124,17 +122,24 @@ function detail(n) {
   const j = J[n];
   const chk = chokepointsAt(app.S, n);
 
-  /* every organisation named anywhere in this stratum, once each, with
-     the jurisdiction it was recorded under and a lookup where we hold
-     one. Read from stations.json rather than the spine, so the list is
-     the full 527-organisation cast and not the 283 with tickers. */
-  const here = new Map();
+  /* The roster, built exactly as the Index builds its rows — one per
+     organisation per station, same four columns plus the price link —
+     so the two read as one table in two places rather than as two
+     different summaries of the same corpus.
+   *
+   *  Note the row count is not the organisation count: a firm at three
+   *  stations in this layer is three rows here and one vote in the
+   *  index above. The header says both numbers so the difference is
+   *  never something the reader has to work out. */
+  const rows = [];
+  const distinct = new Set();
   app.S.filter(s => s.L === n).forEach(s => s.co.forEach(co => {
-    if (!co[0] || co[0] === "—" || here.has(co[0])) return;
-    here.set(co[0], { name: co[0], role: co[1], jur: co[3] && co[3] !== "—" ? co[3] : null });
+    if (!co[0] || co[0] === "—") return;
+    distinct.add(co[0]);
+    rows.push({ name: co[0], role: co[1], domain: co[2], jur: co[3] && co[3] !== "—" ? co[3] : null, st: s });
   }));
-  const names = [...here.values()].sort((a, b) =>
-    (a.jur || "zz").localeCompare(b.jur || "zz") || a.name.localeCompare(b.name));
+  rows.sort((a, b) => (a.jur || "zz").localeCompare(b.jur || "zz") ||
+                      a.name.localeCompare(b.name) || a.st.n.localeCompare(b.st.n));
 
   const ranked = Object.entries(j.tally).sort((a, b) => b[1] - a[1]);
 
@@ -161,17 +166,37 @@ function detail(n) {
       <span class="moat__jchip"><b>${esc(k)}</b>${v % 1 ? v.toFixed(1) : v}</span>`).join("")}</div>
 
     <p class="moat__cov2">${c.curated} of ${c.corpus} of these are in the ticker spine — the rest carry no
-      market listing to look up, which is what a dash in the price column means.</p>
+      market listing to look up, which is what a dash in the price column means. ${distinct.size}
+      organisations across ${rows.length} station rows: a firm working at three stations in this layer is
+      three rows here and one vote in the index above.</p>
 
-    <div class="moat__names">${names.map(x => {
-      const lk = lookupFor(x.name, app.byName);
-      return `<div class="moat__co">
-        <button class="moat__con" data-co="${esc(x.name)}" title="${esc(x.role || "")}">${esc(x.name)}</button>
-        <span class="moat__cj">${x.jur ? esc(x.jur) : "—"}</span>
-        ${lk ? `<a class="moat__cq" href="${lk.url}" target="_blank" rel="noopener"
-             title="${esc(lk.via ? "via its listed parent, " + lk.via : "look up " + lk.ticker)}">${esc(lk.ticker)} ↗</a>`
-             : `<span class="moat__cq moat__cq--none">—</span>`}
-      </div>`; }).join("")}</div>`;
+    <table class="tbl moat__tbl">
+      <thead><tr>
+        <th style="width:22%">Company</th><th style="width:34%">What it does here</th>
+        <th style="width:24%">Station</th><th style="width:8%">Base</th><th style="width:12%">Price</th>
+      </tr></thead>
+      <tbody>${rows.map(x => {
+        const lk = lookupFor(x.name, app.byName);
+        return `<tr data-st="${esc(x.st.i)}">
+          <td class="cn">${x.domain && x.domain !== "—"
+            ? `<a href="https://${esc(x.domain.replace(/^https?:\/\//, ""))}" target="_blank" rel="noopener">${esc(x.name)} <span class="cgo">↗</span></a>`
+            : esc(x.name)}</td>
+          <td class="cr">${esc(x.role || "")}</td>
+          <td><span class="tag" style="--c:${app.col(n)}">${app.pad(n)} ${esc(x.st.n)}</span></td>
+          <td class="flagx">${x.jur ? esc(x.jur) : "—"}</td>
+          <td class="cq">${lk
+            ? `<a href="${lk.url}" target="_blank" rel="noopener" title="${
+                esc(lk.via && lk.via !== lk.ticker ? "No listing of its own — this is its parent, " + lk.via
+                    : "Look up " + lk.ticker)}">${esc(lk.ticker)} ↗</a>`
+            : `<span class="cq--none">—</span>`}</td>
+        </tr>`; }).join("")}</tbody>
+    </table>`;
+
+  document.querySelectorAll("#moatPanel tbody tr").forEach(tr =>
+    tr.addEventListener("click", e => {
+      if (e.target.closest("a")) return;
+      app.openStation(tr.dataset.st);
+    }));
 
   document.querySelectorAll("#moatPanel [data-go]").forEach(b =>
     b.addEventListener("click", () => app.go(+b.dataset.go)));
@@ -221,12 +246,6 @@ export function initMoat() {
   document.querySelectorAll("#moatMetric button").forEach(b =>
     b.addEventListener("click", () => { metric = b.dataset.metric; paint(); }));
 
-  document.getElementById("moatBasis").innerHTML = `
-    <button data-basis="declared">Declared weights</button>
-    <button data-basis="even">Even split</button>`;
-  document.querySelectorAll("#moatBasis button").forEach(b =>
-    b.addEventListener("click", () => { basis = b.dataset.basis; attribution(); }));
-
   addEventListener("resize", () => {
     if (document.getElementById("v-moat").classList.contains("on")) size();
   });
@@ -236,7 +255,6 @@ export function initMoat() {
 
   status();
   headcountCaveat();
-  attribution();
   size();
   detail(5);
 }
@@ -257,26 +275,6 @@ function headcountCaveat() {
     <b>${deep.toFixed(1)}</b> per stratum across the deepest nine against <b>${shallow.toFixed(1)}</b>
     across the shallowest three, which is flat. Jurisdiction was recorded for its own sake, one field per
     organisation per station, and it is the thing in this data that genuinely varies.`;
-}
-
-/* How a company spanning many stations is apportioned. Kept from the
-   priced version because the question survives the prices: NVIDIA is
-   named at nineteen stations and is not nineteen companies. */
-function attribution() {
-  const spine = Object.values(app.spine.companies);
-  const multi = spine.filter(c => c.stations.length > 1);
-  const w = basis === "even" ? evenWeights : weightsFor;
-  const declared = spine.filter(c => c.attribution).length;
-  const el = document.getElementById("moatAttr");
-  if (!el) return;
-  const n = app.byName["NVIDIA"];
-  const top = n ? Object.entries(w(n)).sort((a, b) => b[1] - a[1])[0] : null;
-  el.innerHTML = `<b>${multi.length}</b> of ${spine.length} organisations stand at more than one station.
-    ${declared} carry hand-set weights; the rest split evenly.
-    ${top ? `On this basis NVIDIA's largest single station is <b>${esc(app.byId[top[0]]?.n || top[0])}</b>
-      at ${pct(top[1])}.` : ""}`;
-  document.querySelectorAll("#moatBasis button").forEach(b =>
-    b.setAttribute("aria-pressed", String(b.dataset.basis === basis)));
 }
 
 function size() {

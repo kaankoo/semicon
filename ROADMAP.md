@@ -32,7 +32,7 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | 7 · Money | `d000983` | The ticker spine — 283 of 527 organisations — plus the ingest job, `metrics.js`, and a Money tab rendering the spine unpriced. **Superseded by Phase 8.** |
 | 8 · Moat | — | Money removed. Jurisdictional concentration per stratum, chokepoint pips beside it, a per-layer roster, and price links out to Yahoo. No page holds a price; the nightly ingest became a weekly link check. |
 
-**Current test surface:** 223 assertions + corpus validation of 11 data files. `npm test`.
+**Current test surface:** 228 assertions + corpus validation of 11 data files. `npm test`.
 
 ### What Phase 4 actually landed
 
@@ -249,6 +249,12 @@ It does not contradict Faults, it sharpens it: **a layer can be cosmopolitan in 
 - **`parent` on a division holds a ticker, not a name.** It reads like a name field. Resolving it as one silently dropped 12 of 38 division links — Google DeepMind, Waymo, Sony Semiconductor, Hitachi Energy — because their parents operate at no station and are not spine rows.
 - **The weekly check now derives its list from `allTickers()`**, the same function the Index links on, so a symbol can never be linked-but-unchecked. Those 12 parent tickers were previously invisible to it.
 - Three tickers failed the live run and remain suspect: `AWE.L`, `PSTG`, `6967.T`. The weekly job will now name them every Monday until they are fixed.
+
+### Follow-up, same day
+
+- **The pages were wasting half a wide screen.** Moat through Cascade were capped at 1560 px inside viewports often half again as wide, and the inner blocks were measured for reading on top of that, so everything hugged the left. The frames now run to `min(1860px, 95vw)`, and on Moat the hud and the headline sit side by side as two measured columns rather than one measured column above another — the space gets used without any line becoming 200 characters long.
+- **The attribution toggle is gone.** *Declared weights / Even split* was inherited from the priced page, where it re-split every market capitalisation. Nothing on Moat is divided by those weights, so it changed one sentence in the footer and nothing else: a prominent control above a chart that did not move the chart. A smoke assertion now fails if it comes back. The weights themselves stay in `companies.json` — thirteen hand-set and individually argued, still held to summing to one by the build — and Method now says plainly that they are dormant rather than load-bearing.
+- **The per-stratum card is the Index's table.** Page-wide, with the Index's own columns and its own classes: Company, What it does here, Station, Base, Price. One row per organisation per station, so a firm at three stations in a layer is three rows — and since that is not the organisation count the index above is computed on, the header states both numbers rather than leaving the reader to reconcile them. Clicking a row opens the station, exactly as in the Index.
 
 ### Standing gaps
 

@@ -12,7 +12,7 @@ A static, dependency-free site mapping the AI economy as 27 physical strata → 
 
 ```bash
 npm run dev      # http://localhost:5173 — ES modules need HTTP, file:// will not work
-npm test         # check-data + smoke — 223 assertions. Run before every commit
+npm test         # check-data + smoke — 228 assertions. Run before every commit
 npm run peek -- hbm          # one station, without opening stations.json
 npm run peek -- --ids        # all 131 ids
 npm run peek -- --find euv   # search names, taglines and prose

@@ -116,9 +116,9 @@
     },
     {
       "class": "Attribution weights",
-      "kind": "judgement",
+      "kind": "curated",
       "who": "Hand-assigned where declared, otherwise arithmetic",
-      "detail": "A company present at nineteen stations must not be counted nineteen times, so every one is split across its stations by weights summing to one. The default is an even split, which involves no judgement and is fully reproducible. Thirteen entries carry hand-set weights instead, each with a stated reason, because an even split would put five per cent of NVIDIA in the scheduling layer. None of them are segment disclosures and the Moat page shows both bases side by side. The weights no longer divide a market cap — nothing is divided any more — but the question they answer survives the prices: NVIDIA stands at nineteen stations and is not nineteen companies.",
+      "detail": "A company present at nineteen stations must not be counted nineteen times, so every one carries weights across its stations summing to one — an even split by default, with thirteen entries hand-set and individually reasoned. This is now curation without a view. The weights existed to divide a market capitalisation, and nothing on this site is divided any more; the Moat index counts an organisation once per stratum rather than fractionally. They are kept because the judgement in them is real and expensive to recreate, and because `npm test` holds them to summing to one so they cannot rot while unused. Nothing rendered depends on them, which is stated here rather than left for a reader to discover.",
       "vintage": "mid-2026"
     },
     {
@@ -206,8 +206,8 @@
       "body": "The Moat index measures how many jurisdictions a layer's organisations sit in and how evenly. It says nothing about whether any of them could replace another. Patterning spans eight jurisdictions and holds four stations the corpus marks as single points of failure; a layer can be cosmopolitan in aggregate and single-sourced at every joint that matters. The chokepoint pips are drawn beside the bars for exactly this reason and are never folded into them, and Faults is where substitutability is actually argued."
     },
     {
-      "title": "Attribution across nineteen stations is genuinely ambiguous",
-      "body": "There is no correct answer to how much of NVIDIA belongs to the kernel layer. The even split is reproducible and wrong; the hand-set weights are more plausible and unfalsifiable. Both are shown, the difference between them is one click, and thirteen entries out of 283 are all that carry judgement. Where the two bases disagree sharply, treat the layer total as a range rather than a number."
+      "title": "Attribution weights are carried but no longer used",
+      "body": "There is no correct answer to how much of NVIDIA belongs to the kernel layer, and this site no longer needs one. The weights were built to apportion a market capitalisation across a company's stations; with no valuation anywhere, nothing consumes them. They remain in companies.json, still asserted by the build, and no page reads them. If a future feature wants to weight anything by company, the judgement is already there and already argued — but until then it is dormant data, and this page would rather say so than let it look load-bearing."
     },
     {
       "title": "The Faults page has no coupling and no inventory",
