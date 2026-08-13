@@ -2,13 +2,14 @@
 
 *Learning-first expansion paths. Written as an alternative and a complement to PLAN.md.*
 
-> **Status — 11 Aug 2026.** This document is the thinking, not the plan of record. See **`ROADMAP.md`** for what shipped and what is next.
+> **Status — 13 Aug 2026: this document is done.** Everything it proposed as a lens has shipped. Kept for the reasoning, not as a plan — see **`ROADMAP.md`** for what is left.
 >
-> **Built:** §1 The Cascade · §2 The Ruler · §8 the provenance layer (as the Method page)
-> **Next:** §4 The Atlas · §5 The Time Machine · §6 The Counterfactual Engine
-> **Not started:** §3 Process Theatre · §7 The Living Frontier · the remaining multipliers
+> **Shipped:** §1 The Cascade · §2 The Ruler · §4 The Atlas · §5 The Time Machine (as **Lag**) · §6 The Counterfactual Engine (as **Faults**) · §8's provenance layer (as **Method**)
+> **Not built, and still good ideas:** §3 Process Theatre · §7 The Living Frontier · the remaining multipliers, which now live in `ROADMAP.md`
 >
-> The structure proposed at the end was adopted with one change: the Cascade and Ruler became sibling tabs rather than living together inside one "Ruler" room, and Method sits outside the tab group because it is meta rather than content.
+> Two things the document got wrong, worth remembering. The Cascade and Ruler became sibling tabs rather than rooms inside one "Ruler", and Method sits outside the tab group because it is meta rather than content. And §5 predicted the Ruler's camera would transfer directly to a timeline; it did not, because eighty-one years fit on a screen and a camera would have been machinery in service of nothing.
+>
+> The corpus is **527 organisations**, not the 533 stated below — six appeared twice under different names and were merged when the ticker spine was built.
 
 ---
 
@@ -22,11 +23,12 @@ But depth is only one axis along which this material is organised. The same 131 
 |---|---|---|
 | **Depth** | What sits on top of what? | ✅ the Descent |
 | **Causality** | What depends on what? | ✅ the Web |
-| **Scale** | How big is it, physically? | ❌ |
-| **Time** | When did this become possible? | ❌ |
-| **Space** | Where on Earth does it happen? | ❌ |
-| **Energy & matter** | What does it consume? | ❌ |
-| **Money** | What is it worth? | ❌ (PLAN.md) |
+| **Scale** | How big is it, physically? | ✅ the Ruler |
+| **Time** | When did this become possible? | ✅ Lag |
+| **Space** | Where on Earth does it happen? | ✅ the Atlas |
+| **Energy & matter** | What does it consume? | ✅ the Cascade |
+| **Counterfactual** | What breaks if this breaks? | ✅ Faults |
+| **Money** | What is it worth? | ◐ Money — spine shipped, unpriced |
 
 **That's the structural idea: every new section is a new index on the existing content, not new content.** Nothing gets rewritten. A station like *EUV source* already exists — it simply acquires a position on a scale ruler, a date on a timeline, a pin on a map, and an energy budget. Same 131 objects, six ways to walk them.
 

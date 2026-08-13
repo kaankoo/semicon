@@ -224,8 +224,30 @@ async function main() {
   write(path.join(LIVE, "fundamentals.json"), { ...stamp, fundamentals });
   write(path.join(LIVE, "changelog.json"), { ...stamp, moves: changelog.slice(0, 20) });
   write(path.join(LIVE, "meta.json"), meta);
-  if (!DRY && Object.keys(quotes).length)
-    write(path.join(HISTORY, `${today}.json`), { asOf: today, quotes });
+
+  /* --- the daily close, appended ---
+     One file per trading day, deliberately lean: a ticker, its close and
+     its market cap, and nothing else. About 5 KB a day, so a year of
+     commits is a megabyte rather than a hundred.
+
+     A stale quote is omitted rather than repeated. Writing yesterday's
+     price under today's date would fabricate a data point, and a history
+     series is exactly where that lie would be hardest to see later. A
+     ticker that failed simply has a gap, which is honest and which any
+     chart can draw as a break. */
+  if (!DRY) {
+    const close = {}, cap = {};
+    for (const [t, q] of Object.entries(quotes)) {
+      if (q.stale) continue;
+      if (q.price != null) close[t] = q.price;
+      if (q.marketCap != null) cap[t] = Math.round(q.marketCap);
+    }
+    if (Object.keys(close).length) {
+      write(path.join(HISTORY, `${today}.json`), { asOf: today, close, cap });
+      meta.history = { asOf: today, closes: Object.keys(close).length, omittedStale: meta.kept };
+    }
+    write(path.join(LIVE, "meta.json"), meta);
+  }
 
   console.log(`\n  ${DRY ? "dry run complete" : "ingest complete"} — ` +
               `${Object.keys(quotes).length} quotes, ${Object.keys(fundamentals).length} filers, ` +

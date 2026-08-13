@@ -12,10 +12,13 @@ ES modules and `fetch()` both require HTTP, so the site cannot be opened straigh
 
 ```bash
 npm run dev          # → http://localhost:5173
-npm run check        # validate the corpus
+npm test             # 200 assertions — corpus validation + a headless boot
+npm run peek -- hbm  # one station, without opening the 8,887-line corpus
 ```
 
-No dependencies. Node 20+.
+No runtime dependencies. Node 20+. jsdom is dev-only; the market ingest uses built-in `fetch` and nothing else.
+
+Eight lenses on one body of knowledge: **Descent · Web · Money · Ruler · Atlas · Lag · Faults · Cascade**, with **Method** and **Index** alongside.
 
 ---
 
@@ -231,8 +234,11 @@ Built as a map for understanding, not a database of record.
 ## Where it's going
 
 - [`ROADMAP.md`](ROADMAP.md) — what has shipped and what comes next, with a file manifest per phase
-- [`IDEAS.md`](IDEAS.md) — the learning-first expansion: the Cascade, the Ruler, the Atlas, the Time Machine
-- [`PLAN.md`](PLAN.md) — the MONEY section: live market data joined to the dependency graph
+- [`PLAN.md`](PLAN.md) — the MONEY section as originally specified, with a header recording what shipped and what departed from it
+- [`IDEAS.md`](IDEAS.md) — the original non-financial thinking. Every lens it proposed has shipped; kept for the reasoning
+- [`CLAUDE.md`](CLAUDE.md) — conventions, the file routing table, and which files are finished and should not be opened
+
+The strongest thing left unbuilt is a **heat map of the AI trade grouped by position in the production chain** rather than by sector. Every finance site has a heat map; none of them can group by depth in the physical stack, because none of them has the graph. It needs no new curation — only prices. `ROADMAP.md` has the design and the caveat.
 
 ---
 

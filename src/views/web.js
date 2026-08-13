@@ -12,7 +12,7 @@ const RW = 46, W = 1700, PADT = 40;
 
 let svg, H, pos = {}, gRoot, gEdge, gNode;
 let pinned = null;
-let vx = 0, vy = 0, vs = 1, drag = null, pinch = null;
+let vx = 0, vy = 0, vs = 1, drag = null, pinch = null, moved = false;
 
 /* ---------- layout ---------- */
 function build() {
@@ -74,8 +74,17 @@ function build() {
     t.textContent = s.n.length > 17 ? s.n.slice(0, 16) + "…" : s.n;
     g.appendChild(c); g.appendChild(t);
     g.addEventListener("mouseenter", () => trace(s.i, true));
-    g.addEventListener("mouseleave", () => { if (!pinned) clearTrace(); });
-    g.addEventListener("click", e => { e.stopPropagation(); app.openStation(s.i); });
+    /* leaving a node restores the pinned cone rather than dropping to
+       nothing — otherwise a pin silently evaporates the moment the
+       pointer crosses another node */
+    g.addEventListener("mouseleave", () => {
+      if (!pinned) clearTrace();
+      else if (pinned !== s.i) trace(pinned, true);
+    });
+    /* a click both opens the station and pins its cone, so the mapping
+       is still there when the sheet is closed. Without this the trace
+       lives only as long as the hover and there is nothing to clear. */
+    g.addEventListener("click", e => { e.stopPropagation(); trace(s.i); app.openStation(s.i); });
     gNode.appendChild(g);
   });
 }
@@ -83,6 +92,13 @@ function build() {
 /* ---------- tracing ----------
    `cone` now lives in src/lib/graph.js so the Faults view can walk the
    graph with exactly this code rather than a copy of it. */
+
+/** The Clear trace button is only meaningful while something is pinned.
+ *  Rather than sit there doing nothing, it goes flat until there is. */
+function syncClear() {
+  const b = document.getElementById("webClear");
+  if (b) b.disabled = !pinned;
+}
 
 function trace(id, soft) {
   const { UP, DN, byId, col } = app;
@@ -107,7 +123,9 @@ function trace(id, soft) {
   const s = byId[id];
   document.getElementById("hudT").textContent = s.n;
   document.getElementById("hudP").innerHTML =
-    `<b style="color:${col(s.L)}">${anc.size}</b> stations upstream · <b style="color:var(--brs)">${des.size}</b> downstream.<br>${s.s}.`;
+    `<b style="color:${col(s.L)}">${anc.size}</b> stations upstream · <b style="color:var(--brs)">${des.size}</b> downstream.<br>${s.s}.` +
+    (pinned === id ? `<br><span class="webpin">Pinned — clear it below, or click empty space.</span>` : "");
+  syncClear();
 }
 
 function clearTrace() {
@@ -115,7 +133,8 @@ function clearTrace() {
   document.querySelectorAll(".nodeg").forEach(g => g.classList.remove("dim", "lit", "up", "dn"));
   document.querySelectorAll(".edge").forEach(e => e.classList.remove("lit", "litd", "dim"));
   document.getElementById("hudT").textContent = "The dependency web";
-  document.getElementById("hudP").textContent = "Every station, stacked by depth. Hover a node to light its supply cone; click to open it. Drag to pan, scroll to zoom in for labels.";
+  document.getElementById("hudP").textContent = "Every station, stacked by depth. Hover a node to light its supply cone; click to pin it and open the station. Drag to pan, scroll to zoom in for labels.";
+  syncClear();
 }
 
 /* ---------- view transform ---------- */
@@ -148,14 +167,15 @@ export function initWeb() {
   document.getElementById("webClear").addEventListener("click", clearTrace);
   document.getElementById("webReset").addEventListener("click", () => { fitWeb(); clearTrace(); });
   document.getElementById("webWide").addEventListener("click", () => fitWeb("wide"));
+  syncClear();
 
   addEventListener("resize", () => {
     if (document.getElementById("v-web").classList.contains("on")) fitWeb();
   });
 
-  svg.addEventListener("mousedown", e => { drag = { x: e.clientX - vx, y: e.clientY - vy }; svg.classList.add("drag"); });
+  svg.addEventListener("mousedown", e => { drag = { x: e.clientX - vx, y: e.clientY - vy }; moved = false; svg.classList.add("drag"); });
   addEventListener("mouseup", () => { drag = null; svg.classList.remove("drag"); });
-  addEventListener("mousemove", e => { if (!drag) return; vx = e.clientX - drag.x; vy = e.clientY - drag.y; applyView(); });
+  addEventListener("mousemove", e => { if (!drag) return; moved = true; vx = e.clientX - drag.x; vy = e.clientY - drag.y; applyView(); });
 
   svg.addEventListener("wheel", e => {
     e.preventDefault();
@@ -183,7 +203,12 @@ export function initWeb() {
   }, { passive: false });
 
   svg.addEventListener("touchend", () => { drag = null; pinch = null; });
-  svg.addEventListener("click", () => { if (pinned) clearTrace(); });
+  /* a pan ends in a click event; releasing the pin because someone moved
+     the graph would be maddening, so a click that travelled is ignored */
+  svg.addEventListener("click", () => {
+    if (moved) { moved = false; return; }
+    if (pinned) clearTrace();
+  });
 
   app.trace = trace;
   app.clearTrace = clearTrace;

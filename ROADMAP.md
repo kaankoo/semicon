@@ -1,6 +1,6 @@
 # Roadmap
 
-Status as of **12 Aug 2026**. Read `CLAUDE.md` first for conventions and the file routing table.
+Status as of **13 Aug 2026**. All eight lenses shipped; Money is shipped unpriced. Read `CLAUDE.md` first for conventions and the file routing table.
 
 The organising idea: the site holds **one body of knowledge** — 27 strata, 131 stations, 527 organisations — and each new section is **a different index on it**, not new content.
 
@@ -40,7 +40,7 @@ Against the acceptance conditions it set itself:
 - **Every site resolves to a station** — checked in `check-data.mjs`; 56 sites, 0 unresolved.
 - **Circles are true to the ground, asserted** — twice over. `ringRadiusError()` holds every vertex of every ring to one part in 10⁹, and a second assertion checks the drawn aspect matches 1/cos(latitude) rather than 1, so the map cannot quietly be cheated back into screen-space circles.
 - **Spruce Pine and Hsinchu one click from their findings** — `wrong-quartz` and the new `logic-fits-in-a-city` carry `atlas` targets, and the smoke test clicks the button and checks where it lands.
-- **No library, no tiles, no runtime network call** — `src/lib/projection.js` is 150 lines and the coastline is a checked-in path string.
+- **No library, no tiles, no runtime network call** — `src/lib/projection.js` is 131 lines and the coastline is a checked-in path string.
 
 Two things beyond the brief, both because a test asked for them:
 
@@ -112,23 +112,6 @@ Three things beyond the brief:
 
 ---
 
-## Phase 7 — Multipliers
-
-Cheap, and each lifts everything above it. Can be done in any order, or interleaved.
-
-| Item | Effort | Files |
-|---|---|---|
-| **Glossary** — ~400 terms, hover any acronym anywhere | weekend | `data/static/glossary.json`, `src/core/glossary.js`, CSS |
-| **Deep links** — `/s/hbm`, `/l/8`, `/rul/reticle` | half a day | `src/core/router.js` only |
-| **⌘K palette** — jump to any station, org, stratum or object | 1–2 days | `src/core/palette.js`, CSS |
-| **Generated OG images** — one per station and view, at build time | 1 day | `.github/workflows/deploy.yml`, `scripts/og.mjs` (satori + resvg) |
-| **Print stylesheet** | half a day | `src/styles/app.css` |
-| **Multiple entrances** — five curated paths through the same corpus | 1 day | `data/static/paths.json`, `src/views/tour.js` |
-
-Deep links are the highest value per hour of the six — they make everything else shareable, and touch exactly one 21-line file.
-
----
-
 ## Phase 7 — Money *(partly shipped — the unpriced half)*
 
 PLAN.md's phase 1 and most of its phase 2. The tab sits **between Web and Ruler**; Index stayed where it is rather than being absorbed, because removing a tab people may have bookmarked is the one subtractive change this project has avoided making.
@@ -145,18 +128,70 @@ PLAN.md's phase 1 and most of its phase 2. The tab sits **between Web and Ruler*
 
 **No prices.** The ingest job has never been run against the live endpoints. Rather than seed the repo with figures typed from memory — which would have broken the rule every other view is built on — the page renders the spine and says so. `npm test` asserts that with nothing ingested every metric returns null rather than zero, that a null formats as a dash, and that the market-cap axis is disabled until data exists.
 
-**Turning it on:** run `node scripts/ingest/run.mjs --dry` to prove the plumbing, then the same without `--dry`, then uncomment the `schedule` block in `.github/workflows/ingest.yml`.
+**Turning it on — done, 13 Aug 2026.** The `schedule` block is live: weekdays at 22:30 UTC, after the US close. A manual run from the Actions tab still defaults to `--dry`.
+
+Three things had to be fixed first, and only one of them was visible from reading the file:
+
+- **The Action could never have committed anything.** `git add data/live data/history` names a directory that has never existed, and `git add` on a missing pathspec is a fatal error rather than a no-op — so every run that fetched successfully would have died at the last step with nothing to show for it. `data/history/` now exists with a README, and the step creates it anyway for older checkouts.
+- **No `npm ci` before `npm run check`.** It happened to work because `check-data.mjs` imports nothing but `node:` builtins. That is luck, not design, and the first validation that needed a dependency would have failed in production.
+- **A blind `git push`.** The ingest pushes to `main`, which triggers the deploy; a run that collided with a hand commit would have failed and lost the day's snapshot. It now rebases and retries three times. The snapshot is append-only, so a rebase cannot conflict with hand edits.
+
+**The history format changed.** The snapshot was going to be the whole quote object — around 50 KB a day, a hundred megabytes over a few years, most of it recoverable from `quotes.json` anyway. It is now the close and the implied market cap and nothing else, about 5 KB a day. **Stale quotes are omitted rather than repeated**: `quotes.json` keeps yesterday's price and flags it, but writing that under today's date in a series would fabricate a data point, and a series is exactly where that lie is hardest to see a year on. A failed ticker leaves a gap. `check-data.mjs` holds every snapshot to its filename, its date, positive prices, and a cap that has a close to belong to.
+
+The **History charts** row below needs about sixty of these files. Counting from the first live run, that is roughly December 2026.
 
 ### What the spine already found
 
 Six organisations appeared in the corpus twice under different names — Tokyo Electron and TEL, Arm and Arm Holdings, Cadence and Cadence Design Systems, Amkor and Amkor Technology, KLA and KLA Corporation, SoftBank and SoftBank Group. Every aggregate would have double-counted them. The corpus is 527 organisations, not 533, and `check-data.mjs` now fails if two names ever claim one ticker.
 
-### Still to do, in PLAN.md's order
+---
 
-- **Phase 2 remainder** — company dossiers reusing the sheet component, the computed Chokepoint Score shown beside the hand-set pips, Screener v1 with the financial columns.
-- **Phase 3** — per-edge coupling coefficients, which the Faults page still lacks.
-- **Phase 4** — `flows.json`, circularity ratio, and the Depth Curve. The Depth Curve's x-axis already exists: `depthOf()` in `metrics.js`.
-- **Phase 5** — command palette, density mode, history charts once ~60 trading days have accumulated, print stylesheet.
+## What is left — split by whether it needs prices
+
+Everything below is optional. The site is complete as an argument without any of it. What matters is the split: **five of these need no market data at all** and could be built tomorrow, and the rest are blocked on a decision you have not made yet — whether to switch the ingest job on.
+
+### Buildable now, no prices required
+
+| Item | Why it is worth it | Effort | Files |
+|---|---|---|---|
+| **Fragility-adjusted exposure** ⭐ | *"NVIDIA's production passes through six single-source nodes."* One computed sentence per company, from `cone()` and the criticality pips. The most quotable thing on this list and it needs nothing new. | half a day | `src/lib/metrics.js`, `src/views/sheet.js` |
+| **Computed Chokepoint Score** | Replace nothing. Compute concentration × substitutability × geographic spread × qualification lead-time — all four inputs already exist in `companies.json`, `counterfactuals.json`, `atlas.json` and `timeline.json` — and show it *beside* the hand-set pips. Where they disagree is the interesting part, and showing the disagreement is what makes the method believable. | 1–2 days | `src/lib/metrics.js`, `data/static/stations.json` (nothing removed) |
+| **Deep links** — `/s/hbm`, `/l/8`, `/atl/hsinchu`, `/fault/taiwan` | Highest value per hour on the whole roadmap. Makes everything shareable and touches one 25-line file. | half a day | `src/core/router.js` |
+| **Per-edge coupling** | The one thing PLAN.md specified that Faults still lacks. Every dependency is currently present or absent; a coefficient per edge would let damage decay with depth instead of percolating naively. | 2 days, mostly curation | `data/static/edges.json`, `src/views/faults.js` |
+| **Glossary** — ~400 terms, hover any acronym anywhere | Cheap, lifts every view at once, and this corpus is dense with jargon. | weekend | `data/static/glossary.json`, `src/core/glossary.js` |
+
+### Needs the ingest job switched on
+
+| Item | Why it is worth it | Effort | Files |
+|---|---|---|---|
+| **The heat map** ⭐⭐ | See below. The screenshot that travels. | 2 days | `src/views/money.js`, CSS |
+| **Company dossiers** | Click a name anywhere, get the sheet component with its stations, its upstream cone, its exposure and its numbers. The sheet already exists; this is mostly wiring. | 1–2 days | `src/views/sheet.js`, `src/views/money.js` |
+| **Screener v1** | `depth ≤ 9 AND chokepoint ≥ 2 AND EV/S < 8`. No other screener has `depth` or `chokepoint` as a column, because no other screener has the graph. Sits inside Money; Index stays as it is. | 2–3 days | new `src/views/screener.js` |
+| **The Depth Curve** | x = stack depth, y = EV/Sales, bubble = market cap. The x-axis already exists — `depthOf()` in `metrics.js`. Answers in one image whether the market pays a premium for proximity to the token or to the physics. | 1 day | `src/views/money.js` |
+| **Circulation** — `flows.json`, circularity ratio | Who pays whom, which of them hold equity in each other, and the literal loops drawn as loops. The most contested question in this trade and nobody publishes the number. Large curation. | 1 week+ | `data/static/flows.json`, new view |
+| **Value density** — $/GW, $/wafer start, $/HBM stack | Requires a hand-curated `physical.json`. The curation is the moat; the arithmetic is trivial. | 3 days | `data/static/physical.json` |
+| **History charts** | Needs ~60 trading days of committed snapshots to exist first. Then "market cap of the Patterning layer over a year" is a chart nobody else can draw. | 1 day, after 3 months of commits | `data/history/`, `src/views/money.js` |
+
+### ⭐⭐ The heat map — the strongest remaining idea
+
+A treemap of the AI trade, **grouped by position in the production chain instead of by sector**. Every finance site has a heat map; all of them group by GICS. None of them can group by *depth in the physical stack*, because none of them has the graph.
+
+- **Cell size** = attributed market cap, so a company at nineteen stations is split across them exactly as it is on the Money page
+- **Cell colour** = the day's move, `--ok` green through `--mag` magenta, no new colours needed
+- **Grouping** = the 27 strata, in Descent order, so the reader is looking at the same column a fourth time
+- **The insight it produces** that no other heat map can: *the whole of Patterning is eight companies and it is greener than Application, which is fifty-two* — layer-level co-movement, visible instantly
+
+Three things make it specifically good here rather than generically nice:
+
+1. **It reuses everything.** `companies.json` for the cells, `metrics.js` for the attribution, `quotes.json` for the colour. No new curation at all, which is unusual on this list.
+2. **It is the natural landing view once prices exist.** The current bar column answers "where is the money"; the heat map answers "what is the money doing", and the two share an axis.
+3. **It is the screenshot.** PLAN.md hoped the Depth Curve would travel. A stack-grouped heat map travels further, because people already know how to read one — the novelty is entirely in the grouping, which is exactly where this project's asset is.
+
+**Watch for:** a treemap makes small cells illegible, and the deep strata are small in capital and large in importance — the Lithosphere layer that everything rests on will be a sliver. Consider a size toggle (market cap · station count · equal) so the physical significance is not silently erased by the financial one. That toggle *is* the argument, and it is the same one the Money page already makes with its two attribution bases.
+
+### Instrument polish, whenever
+
+Command palette (⌘K) · density mode · print stylesheet · generated OG images per station and scenario · CSV export · multiple curated entrances through the corpus.
 
 ---
 

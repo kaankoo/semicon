@@ -1,57 +1,71 @@
 # Working on Sand to Sentence
 
-Read this file, then read **only what the routing table below tells you to**. The corpus is 590 KB; opening it whole burns the session for nothing.
+Read this file, then read **only what the routing table tells you to**. The corpus is 648 KB and `stations.json` alone is 8,887 lines; opening things speculatively burns the session for nothing.
 
 ---
 
 ## What this is
 
-A static, dependency-free site mapping the AI economy as 27 physical strata → 131 stations → 527 organisations, plus derived views (Ruler, Atlas, Lag, Faults, Money, Cascade, Method). Hand-curated knowledge is the asset; the code is thin.
+A static, dependency-free site mapping the AI economy as 27 physical strata → 131 stations → 527 organisations, seen through eight lenses: **Descent · Web · Money · Ruler · Atlas · Lag · Faults · Cascade**, with **Method** and **Index** outside the tab group. Hand-curated knowledge is the asset; the code is thin.
 
 **Live:** GitHub Pages from `main`, public repo `kaankoo/semicon`. Deploys on push, gated on `npm test`.
 
 ```bash
 npm run dev      # http://localhost:5173 — ES modules need HTTP, file:// will not work
-npm test         # check-data + smoke — run before every commit
+npm test         # check-data + smoke — 200 assertions. Run before every commit
 npm run peek -- hbm          # one station, without opening stations.json
 npm run peek -- --ids        # all 131 ids
 npm run peek -- --find euv   # search names, taglines and prose
 npm run peek -- --org ASML   # every station an org appears at
 npm run peek -- --stratum 9  # a whole stratum
+node scripts/ingest/run.mjs --dry   # market ingest, plumbing only, fetches nothing
 ```
 
 ---
 
 ## Hard rules
 
-1. **Never rewrite the homepage.** The Descent (`#v-strata`) is the front door and stays as it is. New work is additive — a new tab, or depth inside an existing sheet. Evolutionary, not revolutionary. This is the user's standing instruction.
-2. **Views never import each other.** Each registers its public actions on `app` (`src/core/app.js`) and calls `app.<action>()` for anything owned elsewhere. The module graph stays acyclic. Adding a view must not touch another view.
-3. **Never read `data/static/stations.json` whole.** 8,887 lines. Use `npm run peek`.
-4. **Guarantees go in tests, not in care.** If a property matters — the Cascade's arithmetic reconciling, the Ruler's scale being true — assert it in `scripts/smoke.mjs` so it cannot silently rot.
-5. **Every claim carries a source and a vintage.** New data files need a `source` and get validated in `scripts/check-data.mjs`. Judgement is labelled as judgement.
+1. **Never rewrite the homepage.** The Descent (`#v-strata`) is the front door and stays as it is. New work is additive — a new tab, or depth inside an existing sheet. Evolutionary, not revolutionary. Standing instruction.
+2. **Views never import each other.** Each registers its actions on `app` (`src/core/app.js`) and calls `app.<action>()` for anything owned elsewhere. Shared logic goes in `src/lib/`, which views may import. The module graph stays acyclic.
+3. **Never read `stations.json` whole.** Use `npm run peek`.
+4. **Guarantees go in tests, not in care.** If a property matters, assert it in `scripts/smoke.mjs` or `scripts/check-data.mjs` so it cannot silently rot.
+5. **Every claim carries a source and a vintage.** Judgement is labelled as judgement. **Never invent a figure** — if it is not derivable from something committed, it renders as a dash.
 6. **Run `npm test` before committing.** CI runs it too; a red build blocks the deploy.
 
 ---
 
-## Architecture
+## Files that are finished — do not open
 
-```
-index.html            markup shell only — 10 view sections, no logic
-src/main.js           boot: loadData → loadNotes → init each view → initRouter
-src/core/app.js       shared state + late-bound action registry   ← read this first
-src/core/data.js      loads strata/stations/edges, builds byId, byL, UP, DN
-src/core/router.js    view switching (#v-strata #v-web #v-mny #v-rul #v-atl #v-tml #v-flt #v-cas #v-mth #v-idx)
-src/core/notes.js     "against the grain" findings, indexed by station/stratum/step
-src/lib/cascade.js    the unit-conversion arithmetic + fmt + reconcile
-src/lib/graph.js      cone / coneOfAll / hops over the dependency edges
-src/lib/metrics.js    attribution, layer totals, HHI, coverage — returns null, never 0
-src/lib/glyphs.js     15 procedural SVG shapes for the Ruler
-src/lib/projection.js equirectangular projection, geodesic rings, graticule
-src/views/*.js        descent web money ruler atlas timeline faults cascade method sheet table tour
-src/styles/app.css    one stylesheet, sectioned by banner comment
-```
+These are done. They are listed so you can skip them, not so you can read them. Touch only if the symptom in the triage table below points here explicitly.
 
-Boot order matters only in that every view registers before `initRouter`. `initRuler`, `initAtlas`, `initTimeline`, `initMoney`, `initFaults`, `initCascade` and `initMethod` are `await`ed because they fetch their own data.
+| File | Why it is settled |
+|---|---|
+| `src/core/app.js` · `data.js` · `router.js` | 49 / 59 / 25 lines. Only ever gain 2–4 lines when a view is added. |
+| `src/views/descent.js` · `sheet.js` · `tour.js` · `table.js` | The homepage and its furniture. Frozen by hard rule 1. |
+| `src/views/web.js` | Stable since Phase 0. Last touched to import `cone()` from `lib/graph.js`. |
+| `src/lib/cascade.js` · `glyphs.js` · `projection.js` · `graph.js` · `metrics.js` | Pure, no DOM, fully asserted. Read only for the bug classes named below. |
+| `src/views/ruler.js` · `atlas.js` · `timeline.js` · `faults.js` · `cascade.js` · `method.js` | Each is complete against its brief. Content changes go in that view's JSON, never in the JS. |
+| `scripts/dev.mjs` · `peek.mjs` · `parity.mjs` | Tooling. Unchanged for four phases. |
+| `data/static/strata.json` · `edges.json` | Only touched when adding a station. |
+| `data/static/world.json` | **Generated.** 1 line, 57 KB. Never hand-edit — regenerate with `scripts/world.mjs`. |
+| `data/live/*.json` · `data/history/*.json` | **Generated** by the ingest job, which is live on a weekday cron. Never hand-edit; `data/history` is append-only and one file per trading day. |
+
+**The corollary:** almost every content change is a JSON edit, and almost every new feature is a new view plus the six-file wiring recipe below. If you find yourself editing a finished view's JS, check you are not doing something the data could do.
+
+---
+
+## Adding a view — the recipe, unchanged for four phases
+
+1. `data/static/<thing>.json` — the corpus, with `meta` carrying sources, definitions and caveats
+2. `src/views/<thing>.js` — exports `init<Thing>()`, registers `app.<thing>Fit` / `app.<thing>GoTo`
+3. `index.html` — nav button + `<section class="view" id="v-xxx">`, **additive only**
+4. `src/main.js` — import and `await init<Thing>()`
+5. `src/core/router.js` — one line, the fit hook
+6. `src/core/app.js` — two lines, the action stubs
+7. `src/styles/app.css` — append a banner section, claim a new prefix
+8. `scripts/check-data.mjs` + `scripts/smoke.mjs` — validation is mandatory, not optional
+9. `data/static/method.json` — a provenance entry and, if it has one, a limit
+10. `data/static/notes.json` — a finding, if the view earned one
 
 ---
 
@@ -59,60 +73,60 @@ Boot order matters only in that every view registers before `initRouter`. `initR
 
 | Task | Read (in order) | Never open |
 |---|---|---|
-| **Any change at all** | this file, `src/core/app.js` (42 lines) | — |
-| Bug in the Cascade | `src/views/cascade.js`, `src/lib/cascade.js`, `data/static/cascade.json` | stations.json |
-| Cascade number looks wrong | `data/static/cascade.json` only — every parameter is there with its derivation | the JS |
-| Bug in the Ruler | `src/views/ruler.js`, `data/static/ruler.json`; glyph problems → `src/lib/glyphs.js` | stations.json |
-| Bug in the Atlas | `src/views/atlas.js`, `data/static/atlas.json` | stations.json, world.json |
-| A circle is the wrong size, or a site is in the wrong place | `data/static/atlas.json` only — `lat`, `lon` and `radiusKm` are the whole story | the JS |
-| Projection, geodesic or wrapping problem | `src/lib/projection.js` (150 lines, pure functions, no DOM) | — |
-| Coastline looks wrong or the file is too big | `scripts/world.mjs`, then regenerate — never hand-edit `world.json` | world.json |
-| Bug in the Lag chart | `src/views/timeline.js`, `data/static/timeline.json` | stations.json |
-| A bar is the wrong length, or in the wrong place | `data/static/timeline.json` only — `invented`, `shipped` and `stratum` are the whole story | the JS |
-| A date is disputed | `data/static/timeline.json` — every event cites the paper or patent, and `confidence` says how firm it is | — |
-| Bug in the Faults page | `src/views/faults.js`, `data/static/counterfactuals.json` | stations.json |
-| A blast radius looks wrong | `data/static/edges.json` — reach is the graph, not the view. Check the edges before the JS | the JS |
-| A reroute or dead-end is disputed | `data/static/counterfactuals.json` — every one is individually argued and sourced | — |
-| Traversal problem in Web or Faults | `src/lib/graph.js` (40 lines, pure, no DOM) | — |
-| Bug in the Money page | `src/views/money.js`, `src/lib/metrics.js` | stations.json |
+| **Any change at all** | this file, `src/core/app.js` (49 lines) | — |
+| **Content is wrong anywhere** | that view's JSON in `data/static/` — the JS almost never holds a fact | the JS |
+| Cascade number looks wrong | `data/static/cascade.json` — every parameter has its derivation | the JS |
+| Bug in the Cascade | `src/views/cascade.js`, `src/lib/cascade.js` | stations.json |
+| A Ruler object is the wrong size | `data/static/ruler.json` (`m` is the whole story) | the JS |
+| Bug in the Ruler | `src/views/ruler.js`; glyph problems → `src/lib/glyphs.js` | stations.json |
+| A circle is the wrong size, or a site is misplaced | `data/static/atlas.json` — `lat`, `lon`, `radiusKm` | the JS |
+| Bug in the Atlas | `src/views/atlas.js` | stations.json, world.json |
+| Projection, geodesic or wrapping problem | `src/lib/projection.js` (131 lines, pure) | — |
+| Coastline wrong, or the file is too big | `scripts/world.mjs`, then regenerate | world.json |
+| A Lag bar is the wrong length or in the wrong place | `data/static/timeline.json` — `invented`, `shipped`, `stratum` | the JS |
+| A date is disputed | `data/static/timeline.json` — each event cites its paper; `confidence` says how firm | — |
+| Bug in the Lag chart | `src/views/timeline.js` | stations.json |
+| A blast radius looks wrong | `data/static/edges.json` — reach is the graph, not the view | the JS |
+| A reroute or dead-end is disputed | `data/static/counterfactuals.json` — each is individually argued | — |
+| Bug in the Faults page | `src/views/faults.js` | stations.json |
+| Traversal problem in Web or Faults | `src/lib/graph.js` (48 lines, pure) | — |
 | A layer total looks wrong | `data/static/companies.json` — attribution weights are the whole story | the JS |
-| A ticker is wrong or missing | `data/static/companies.json`; CIKs are never hand-typed, the ingest resolves them | — |
-| Prices are stale or absent | `data/live/meta.json` says which source failed and why | the views |
-| Bug in the dependency web | `src/views/web.js`, `data/static/edges.json` | stations.json |
-| Bug in the descent / cards / rail | `src/views/descent.js` | stations.json |
-| Bug in a station sheet | `src/views/sheet.js`, then `npm run peek -- <id>` | stations.json |
-| Bug in search / index table | `src/views/table.js` | stations.json |
-| Bug in the Method page | `src/views/method.js`, `data/static/method.json` | stations.json |
-| Wrong tab opens / nav broken | `src/core/router.js` (21 lines), nav block at `index.html:20-29` | — |
-| A finding shows in the wrong place | `src/core/notes.js`, `data/static/notes.json` | — |
+| A ticker is wrong or missing | `data/static/companies.json`. CIKs are never hand-typed — the ingest resolves them | — |
+| Prices stale or absent | `data/live/meta.json` names the source that failed and why | the views |
+| A day is missing from the history | correct if the source failed — a stale price is never written under today's date. `data/live/meta.json` says which | `data/history/*` |
+| Bug in the Money page | `src/views/money.js`, `src/lib/metrics.js` | stations.json |
+| Ingest broken | `scripts/ingest/run.mjs`, then `--dry` | — |
+| Edit station prose or companies | `npm run peek -- <id>` then a targeted `Edit` | the whole file |
+| Add a station | `stations.json` (append), `edges.json`, `companies.json`, then `npm test` | — |
+| A finding shows in the wrong place | `data/static/notes.json` | — |
 | A finding's cross-view button goes nowhere | `src/core/notes.js` `wireNotes()` — one block per target view | — |
-| Edit station prose or companies | `npm run peek -- <id>` then a targeted `Edit` on stations.json | the whole file |
-| Add a station | `data/static/stations.json` (append), `data/static/edges.json`, then `npm test` | — |
-| Styling | `src/styles/app.css` — grep the section banner, do not read 1001 lines | — |
-| A test fails | `scripts/smoke.mjs` section markers below | — |
-| Adding a data file | `scripts/check-data.mjs` — validation is mandatory, not optional | — |
+| Method page missing an entry | `data/static/method.json` — the page is generated, so the data is the bug | the JS |
+| Wrong tab opens / nav broken | `src/core/router.js` (25 lines), nav at `index.html:20-30` | — |
+| Styling | `src/styles/app.css` — grep the banner, never read 1,001 lines | — |
+| A test fails | `scripts/smoke.mjs` — section markers below | — |
+| Adding a data file | `scripts/check-data.mjs` — validation is mandatory | — |
 
 ### Finding things inside the big files
 
-`src/styles/app.css` (1001 lines) is sectioned. Grep for the banner, then read ±40 lines:
+`src/styles/app.css` (1,001 lines). Grep the banner, read ±40 lines:
 
-| Section | Banner to grep | ~line | Class prefixes |
+| Section | Grep | ~line | Prefix |
 |---|---|---|---|
-| Base, palette, bar, rail, hero, cards, sheet, tour, web, index | `---------- <name> ----------` | 1–386 | `.bar .rail .hero .core .sec .card .sheet .blk .co .web .idx .tbl .tour` |
+| Base, bar, rail, hero, cards, sheet, tour, web, index | `---------- <name> ----------` | 1–386 | `.bar .rail .hero .core .sec .card .sheet .co .web .idx .tbl .tour` |
 | Cascade | `   CASCADE` | 387 | `.cas` |
 | Against the grain | `   AGAINST THE GRAIN` | 493 | `.grain .grainline` |
-| Method | `   METHOD` | 537 | `.mth .mthlink` |
+| Method | `   METHOD` | 537 | `.mth` |
 | Ruler | `   RULER` | 621 | `.rul` |
 | Atlas | `   ATLAS` | 692 | `.atl` |
 | Lag | `   LAG` | 767 | `.tml` |
 | Faults | `   FAULTS` | 837 | `.flt` |
 | Money | `   MONEY` | 929 | `.mny` |
 
-`scripts/smoke.mjs` sections: `---- behaviour ----` · `---------- cascade ----------` · `---------- against the grain ----------` · `---------- method ----------` · `---------- ruler ----------` · `---------- atlas ----------` · `---------- lag ----------` · `---------- faults ----------` · `---------- money ----------` · `---- report ----`.
+`scripts/smoke.mjs` (877 ln) sections: `---- behaviour ----` · `cascade` · `against the grain` · `method` · `ruler` · `atlas` · `lag` · `faults` · `money` · `---- report ----`.
 
-`scripts/check-data.mjs` sections: `---- strata/stations/edges/organisations/cascade/notes/method/ruler/atlas/timeline/counterfactuals/companies ----`.
+`scripts/check-data.mjs` sections: `---- strata / stations / edges / organisations / cascade / notes / method / ruler / atlas / timeline / counterfactuals / companies / history ----`.
 
-`index.html` (405 lines) — grep `============ ` for the view sections. Safe to read whole.
+`index.html` (405 ln) — view sections at 44, 70, 91, 124, 153, 185, 226, 260, 291, 352. Safe to read whole.
 
 ---
 
@@ -120,41 +134,40 @@ Boot order matters only in that every view registers before `initRouter`. `initR
 
 | File | Size | What it holds | Validated by |
 |---|---|---|---|
-| `strata.json` | 163 ln | 27 layers: `{n,t,c,a}` | strata block |
-| `stations.json` | **8,887 ln** | 131 stations: `{i,L,n,s,w,h[],k[][],c,x,co[][]}` | stations block |
-| `edges.json` | 605 ln | 356 dependency edges, `id → [upstream ids]` | edges block |
-| `cascade.json` | 157 ln | assumptions, constants (value/lo/hi/derivation/source), chain, branches | cascade block |
-| `ruler.json` | 155 ln | 36 objects: `{id,m,glyph,label,sub,precision,station,note}` | ruler block |
-| `atlas.json` | 320 ln | 56 sites: `{id,lat,lon,label,place,kind,radiusKm,stations[],precision,regime,risk,note,source}` | atlas block |
-| `world.json` | **generated** | coastline + boundaries as two path strings in lon/lat, 56 KB | atlas block |
-| `timeline.json` | 379 ln | 70 capabilities: `{id,stratum,station,label,invented,shipped,waitedFor,confidence,note,source}` | timeline block |
-| `counterfactuals.json` | 178 ln | 8 scenarios: `{id,title,removes[],essay,leadTimeYears,precedent,reroutes[],deadEnds[]}` | counterfactuals block |
-| `companies.json` | **3,721 ln** | 283 companies: `{name,kind,ticker,parent,parentShare,stations[],attribution,attributionBasis}` | companies block |
-| `live/*.json` | **generated** | quotes, fundamentals, changelog, meta. Absent until the ingest job is switched on | companies block |
-| `notes.json` | 148 ln | 9 findings, each naming stations/strata/cascadeStep/ruler/atlas/timeline | notes block |
-| `method.json` | 139 ln | provenance by kind, reading definitions, known limits | method block |
+| `strata.json` | 163 ln | 27 layers `{n,t,c,a}` | strata block |
+| `stations.json` | **8,887 ln** | 131 stations `{i,L,n,s,w,h[],k[][],c,x,co[][]}` | stations block |
+| `edges.json` | 605 ln | 356 dependency edges, `id → [upstream]` | edges block |
+| `companies.json` | **3,721 ln** | 283 companies `{name,kind,ticker,parent,parentShare,stations[],attribution,attributionBasis}` | companies block |
+| `cascade.json` | 157 ln | assumptions, constants, chain, branches | cascade block |
+| `ruler.json` | 155 ln | 36 objects `{id,m,glyph,label,precision,station,note}` | ruler block |
+| `atlas.json` | 365 ln | 56 sites `{id,lat,lon,kind,radiusKm,stations[],precision,regime,risk,source}` | atlas block |
+| `timeline.json` | 379 ln | 70 capabilities `{id,stratum,station,invented,shipped,waitedFor,confidence,source}` | timeline block |
+| `counterfactuals.json` | 178 ln | 8 scenarios `{id,removes[],essay,leadTimeYears,precedent,reroutes[],deadEnds[]}` | counterfactuals block |
+| `notes.json` | 148 ln | 9 findings, each naming stations/strata/cascadeStep/ruler/atlas/timeline/faults | notes block |
+| `method.json` | 230 ln | provenance by kind, reading definitions, known limits | method block |
+| `world.json` | 1 ln, 57 KB | **generated** coastline + boundaries | atlas block |
+| `live/*.json` | — | **generated** quotes, fundamentals, changelog, meta | companies block |
+| `history/*.json` | ~5 KB/day | **generated** one file per trading day, `{asOf,close,cap}` | history block |
 
-Station record shape — `i` id, `L` stratum, `n` name, `s` tagline, `w` what it is, `h[]` mechanism bullets, `k[][]` key figures, `c` criticality 0–3, `x` chokepoint prose, `co[][]` `[name, role, domain, jurisdiction]`.
+Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it is · `h[]` mechanism · `k[][]` key figures · `c` criticality 0–3 · `x` chokepoint prose · `co[][]` `[name, role, domain, jurisdiction]`.
 
 ---
 
 ## Conventions
 
-- **No framework, no build step, no dependencies at runtime.** ES modules, raw SVG, template strings. jsdom is dev-only.
-- **CSS** is BEM-ish with a two-to-five letter view prefix (`.cas__row`, `.rul__panel`, `.mth__tbl`). New views claim a new prefix. Design tokens are the `:root` block at the top; do not introduce new colours — `--ok` is up, `--mag` is down.
+- **No framework, no build step, no runtime dependency.** ES modules, raw SVG, template strings. jsdom is dev-only; the ingest job's deps are all built-in `fetch`.
+- **CSS** is BEM-ish with a two-to-five letter view prefix. New views claim a new prefix. Design tokens are the `:root` block; introduce no new colours — `--ok` is up, `--mag` is down.
 - **Numbers** use `font-variant-numeric: tabular-nums` and the mono face.
 - **Charts** are hand-drawn SVG. No chart library — the house style is a lab notebook, not a dashboard.
-- **Prose** is British spelling, en-dashes, no exclamation marks. Match the existing register.
-- **Commits** explain *why*, not what. First line under 60 chars, then a paragraph or two of reasoning.
+- **Prose** is British spelling, en-dashes, no exclamation marks.
+- **Commits** explain *why*. First line under 60 chars, then a paragraph or two.
 
----
+### Patterns worth copying
 
-## Where the plans live
-
-- **`ROADMAP.md`** — shipped phases and what comes next, with a file manifest per phase. **Start here.**
-- `IDEAS.md` — the non-financial expansion thinking (Cascade and Ruler came from it; Atlas and Time Machine remain)
-- `PLAN.md` — the MONEY section, unstarted
-- `README.md` — the public-facing description
+- **A headline claim is arithmetic, never a typed sentence.** The Atlas's 170 km², the Lag's medians, the Faults comparison. Each is computed at render and reconciled by a smoke assertion, so it cannot go stale silently.
+- **Prose in JSON is held to the corpus too.** `check-data.mjs` recomputes the numbers stated in `notes.json` findings and fails if the sentence has drifted.
+- **Derived and declared are never blended.** Faults draws graph reach and hand-written judgement in different colours and counts the unclassified remainder out loud.
+- **Absent data renders as a dash.** `metrics.js` returns null, never 0.
 
 ---
 
@@ -162,28 +175,33 @@ Station record shape — `i` id, `L` stratum, `n` name, `s` tagline, `w` what it
 
 | Symptom | Look here first | Then |
 |---|---|---|
-| Blank page, console shows "Could not load the corpus" | you opened `file://` — use `npm run dev` | — |
-| One view is blank, others fine | that view's `init*()` threw — check the console; boot is sequential so a throw stops everything after it | `src/main.js` boot order |
-| A view renders but is stale after resize | the fit hook in `src/core/router.js` | the view's `size()` |
-| Clicking a station chip does nothing | `wireNotes()` / the view's own `wire()` — chips are re-wired after every re-render | `src/core/notes.js` |
-| A number is wrong in the Cascade | `data/static/cascade.json` — the constant and its `derivation` | `src/lib/cascade.js` only if the chain shape is wrong |
-| Cascade operator disagrees with the values | it cannot — `reconcile()` would fail. Run `npm test` | `src/lib/cascade.js` `factors` |
-| Ruler object never appears | its `m` may sit outside `meta.span`; `npm run check` catches this | `place()` in `src/views/ruler.js` |
-| Ruler feels empty at some scale | a decade gap — `npm run check` fails above 2 empty decades | `data/static/ruler.json` |
-| Atlas circles invisible or absurdly fat | strokes are counter-scaled in `paint()`, not by `vector-effect`. At k=2000 an unscaled 1.2-unit stroke is 2,400 px | `src/views/atlas.js` `paint()` |
-| An Atlas circle vanishes after flying somewhere | the camera left [-180,180); rings are drawn once, the coastline three times | `clampCam()` in `src/views/atlas.js` |
-| Atlas rings render black or unstyled | `syncLayers()` sets fill and stroke per path — check it is querying the group the rings actually live in | `src/views/atlas.js` `syncLayers()` |
-| A country is missing from the map | small islands below the area floor are dropped by design; sites still plot correctly | `scripts/world.mjs` `MIN_AREA` |
-| Coastline has streaks across the Pacific | a ring crossing the antimeridian was not split | `unwrap()` in `scripts/world.mjs` |
-| A Lag bar has no right-hand end | that is correct — it has not shipped. `confidence` must be `open` or the build fails | `data/static/timeline.json` |
-| A Lag bar runs off the left edge | it was demonstrated before 1947; the panel gives the true year | `meta.span` in `timeline.json` |
-| The Lag headline disagrees with the chart | it cannot — `stats()` computes it and the smoke test reconciles both | `stats()` in `src/views/timeline.js` |
-| `check-data` complains a stratum "never lights" | every entry it has is unshipped, so the scrubber would imply nothing there works | add a shipped event to that stratum |
-| A finding appears on the wrong station | `data/static/notes.json` `stations[]` | `src/core/notes.js` indexing |
-| Method page missing an entry | `data/static/method.json` — it is generated, so the data is the bug | `src/views/method.js` |
+| Blank page, "Could not load the corpus" | you opened `file://` — use `npm run dev` | — |
+| One view blank, others fine | that view's `init*()` threw; boot is sequential so everything after it stops | console, then `src/main.js` |
+| A view is stale after resize | the fit hook in `src/core/router.js` | the view's `size()` |
+| Clicking a chip does nothing | chips are re-wired after every re-render | `wireNotes()` in `src/core/notes.js` |
+| Cascade operator disagrees with the values | it cannot — `reconcile()` would fail. Run `npm test` | `src/lib/cascade.js` |
+| Ruler object never appears | its `m` sits outside `meta.span` | `place()` in `ruler.js` |
+| Atlas circles invisible or absurdly fat | strokes are counter-scaled in `paint()`, not by `vector-effect` | `atlas.js` `paint()` |
+| An Atlas circle vanishes after flying somewhere | camera left [-180,180); rings are drawn once, coastline three times | `clampCam()` |
+| A country is missing from the map | small islands below the area floor are dropped by design | `world.mjs` `MIN_AREA` |
+| A Lag bar has no right-hand end | correct — it has not shipped. `confidence` must be `open` | `timeline.json` |
+| A Lag bar runs off the left edge | demonstrated before 1947; the panel gives the true year | `meta.span` |
+| `check-data` says a stratum "never lights" | all its entries are unshipped | add a shipped event |
+| Faults claims all of a blast radius | the unclassified remainder is required | `counterfactuals.json` |
+| Money shows dashes everywhere | correct — no prices are committed | `data/live/meta.json` |
+| A layer total looks too small | coverage. The hairline under each bar is how much of the layer is in the spine | `companies.json` |
+| Two names claim one ticker | a duplicate organisation in `stations.json` | fix the name, regenerate |
 | Search finds nothing | the `q` field built in `initTable()` | `src/views/table.js` |
-| Tour skips a stratum | `src/views/tour.js`, `app.go()` in `src/views/descent.js` | — |
-| Style leaks between views | a prefix collision — every view owns a prefix | `src/styles/app.css` |
+| Style leaks between views | a prefix collision | `src/styles/app.css` |
 | CI red, local green | `npm ci` vs `npm install`, or a file not committed | `.github/workflows/deploy.yml` |
 
 **First move for any bug: `npm test`.** 200 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
+
+---
+
+## Where the plans live
+
+- **`ROADMAP.md`** — what shipped, what each phase actually landed against its brief, and what is next. **Start here.**
+- `PLAN.md` — the MONEY section as originally specified; the header records what shipped and what departed from it
+- `IDEAS.md` — the original non-financial thinking. Almost entirely shipped; kept for the reasoning
+- `README.md` — the public-facing description

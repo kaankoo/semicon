@@ -114,9 +114,30 @@ is("strata view hidden", D.getElementById("v-strata").classList.contains("on"), 
 app.trace("gpu");
 is("trace sets HUD title", D.getElementById("hudT").textContent, app.byId.gpu.n);
 atLeast("trace lights upstream nodes", D.querySelectorAll(".nodeg.up").length, 20);
+is("a pinned trace enables Clear trace", D.getElementById("webClear").disabled, false);
 app.clearTrace();
 is("clearTrace resets HUD", D.getElementById("hudT").textContent, "The dependency web");
 is("clearTrace unlights nodes", D.querySelectorAll(".nodeg.dim").length, 0);
+is("Clear trace is flat with nothing pinned", D.getElementById("webClear").disabled, true);
+
+/* the panel and the controls share one column, so the graph keeps both
+   edges. If either escapes back out of .webside the view silently loses
+   width again, which is the thing this was changed to stop. */
+is("web chrome is one column", D.querySelectorAll(".webside > .webhud, .webside > .webtools").length, 2);
+is("no chrome outside the column", D.querySelectorAll(".web > .webhud, .web > .webtools").length, 0);
+
+/* clicking a node must pin its cone as well as open the station —
+   otherwise the mapping dies with the hover and closing the sheet leaves
+   nothing behind, which is what made Clear trace meaningless */
+D.querySelector('.nodeg[data-id="gpu"]')
+ .dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+is("clicking a node opens the station", D.getElementById("shN").textContent, app.byId.gpu.n);
+is("clicking a node pins the cone", D.querySelectorAll(".nodeg.lit").length, 1);
+app.closeSheet();
+is("the pinned cone survives closing the sheet", D.querySelectorAll(".nodeg.lit").length, 1);
+is("and Clear trace now has something to clear", D.getElementById("webClear").disabled, false);
+app.clearTrace();
+is("released", D.querySelectorAll(".nodeg.lit").length, 0);
 
 app.show("idx");
 const q = D.getElementById("q");

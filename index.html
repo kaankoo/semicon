@@ -18,7 +18,7 @@
   <div class="bar__t">Sand to Sentence <span>— the machine-intelligence stack</span></div>
   <div class="bar__sp"></div>
   <div class="navs" role="tablist">
-    <button role="tab" aria-selected="true" data-view="strata">Cross-section</button>
+    <button role="tab" aria-selected="true" data-view="strata">Descent</button>
     <button role="tab" aria-selected="false" data-view="web">Web</button>
     <button role="tab" aria-selected="false" data-view="mny">Money</button>
     <button role="tab" aria-selected="false" data-view="rul">Ruler</button>
@@ -71,19 +71,23 @@
   <section class="view" id="v-web">
     <div class="web">
       <svg id="webSvg"></svg>
-      <div class="webhud">
-        <h4 id="hudT">The dependency web</h4>
-        <p id="hudP">Every station, stacked by depth. Hover a node to light its supply cone; click to open it. Drag to pan, scroll to zoom.</p>
-        <div class="lg">
-          <span><i style="background:#3FDCD2"></i>what it needs (upstream)</span>
-          <span><i style="background:#E3A83E"></i>what it feeds (downstream)</span>
-          <span style="color:#4C5A7C">zoom in to read names</span>
+      <!-- panel and controls sit together on one side so the graph keeps
+           both edges; the deep strata run wide and need the room -->
+      <div class="webside">
+        <div class="webhud">
+          <h4 id="hudT">The dependency web</h4>
+          <p id="hudP">Every station, stacked by depth. Hover a node to light its supply cone; click to pin it and open the station. Drag to pan, scroll to zoom.</p>
+          <div class="lg">
+            <span><i style="background:#3FDCD2"></i>what it needs (upstream)</span>
+            <span><i style="background:#E3A83E"></i>what it feeds (downstream)</span>
+            <span style="color:#4C5A7C">zoom in to read names</span>
+          </div>
         </div>
-      </div>
-      <div class="webtools">
-        <button class="btn" id="webReset">Fit whole stack</button>
-        <button class="btn" id="webWide">Zoom in to read</button>
-        <button class="btn" id="webClear">Clear trace</button>
+        <div class="webtools">
+          <button class="btn" id="webReset">Fit whole stack</button>
+          <button class="btn" id="webWide">Zoom in to read</button>
+          <button class="btn" id="webClear" disabled>Clear trace</button>
+        </div>
       </div>
     </div>
   </section>

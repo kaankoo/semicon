@@ -516,6 +516,37 @@ Object.entries(tickers).forEach(([t, who]) => {
     });
   }
 }
+
+/* ---- history ----
+   The daily closes accumulate one file per trading day and are the only
+   thing on the site that cannot be regenerated. A file whose name and
+   asOf disagree would silently move a point on a chart, so both are
+   checked, and a stale price must never appear here at all. */
+{
+  const H = path.join(D, "../history");
+  if (fs.existsSync(H)) {
+    const files = fs.readdirSync(H).filter(f => f.endsWith(".json"));
+    let points = 0;
+    files.forEach(f => {
+      if (!/^\d{4}-\d{2}-\d{2}\.json$/.test(f))
+        return problems.push(`data/history/${f} is not named YYYY-MM-DD.json`);
+      const S = JSON.parse(fs.readFileSync(path.join(H, f), "utf8"));
+      const day = f.slice(0, -5);
+      if (S.asOf !== day) problems.push(`data/history/${f} says asOf ${S.asOf} — a snapshot must be dated by its filename`);
+      if (!S.close || !Object.keys(S.close).length) problems.push(`data/history/${f} carries no closes`);
+      Object.entries(S.close || {}).forEach(([t, p]) => {
+        if (!(p > 0)) problems.push(`history ${day} has close ${p} for ${t}`);
+        points++;
+      });
+      Object.entries(S.cap || {}).forEach(([t, c]) => {
+        if (!(c > 0)) problems.push(`history ${day} has market cap ${c} for ${t}`);
+        if (!(t in (S.close || {}))) problems.push(`history ${day} caps ${t} without a close for it`);
+      });
+      if (S.quotes) problems.push(`data/history/${f} uses the old full-quote shape — history holds close and cap only`);
+    });
+    if (files.length) ok.push(`${files.length} daily snapshot${files.length > 1 ? "s" : ""}, ${points} closes`);
+  }
+}
 ok.push(`${Object.keys(CO.companies).length} companies in the spine`);
 
 /* ---- report ---- */
