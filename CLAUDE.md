@@ -12,7 +12,7 @@ A static, dependency-free site mapping the AI economy as 27 physical strata → 
 
 ```bash
 npm run dev      # http://localhost:5173 — ES modules need HTTP, file:// will not work
-npm test         # check-data + smoke — 258 assertions. Run before every commit
+npm test         # check-data + smoke — 260 assertions. Run before every commit
 npm run peek -- hbm          # one station, without opening stations.json
 npm run peek -- --ids        # all 131 ids
 npm run peek -- --find euv   # search names, taglines and prose
@@ -198,7 +198,8 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 | Clicking a chip does nothing | chips are re-wired after every re-render | `wireNotes()` in `src/core/notes.js` |
 | Cascade operator disagrees with the values | it cannot — `reconcile()` would fail. Run `npm test` | `src/lib/cascade.js` |
 | Ruler object never appears | its `m` sits outside `meta.span` | `place()` in `ruler.js` |
-| Ruler objects pile on one line | `LANES` / `SPREAD` / `SETTLE` at the top of `ruler.js` — five tracks, tapering to centre as a shape fills the stage | the CSS |
+| **Ruler objects sit on top of each other** | `PX_DECADE / REF` at the top of `ruler.js`. It must clear **4.13**, or every object is drawn inside its neighbour and no amount of vertical stagger will fix it — the shapes grow with 10^Δ and the gap only with Δ. Asserted | `LANES`, the CSS |
+| Ruler objects pile vertically | `LANES` / `SPREAD` / `SETTLE` — five tracks, tapering to centre as a shape fills the stage. These carry clusters closer than ~0.25 decades, which spacing cannot | the CSS |
 | A Ruler label is missing or written over another | the rung ladder in `paint()` — labels are placed against each other, then clamped inside the stage | `ruler.json` |
 | Zoom only works over a shape, or the page scrolls instead | the wheel is bound to `.rul__stage`, not `#rulSvg`. **An SVG only hit-tests where it has painted** | the CSS |
 | Atlas circles invisible or absurdly fat | strokes are counter-scaled in `paint()`, not by `vector-effect` | `atlas.js` `paint()` |
@@ -216,7 +217,7 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 | Style leaks between views | a prefix collision | `src/styles/app.css` |
 | CI red, local green | `npm ci` vs `npm install`, or a file not committed | `.github/workflows/deploy.yml` |
 
-**First move for any bug: `npm test`.** 258 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
+**First move for any bug: `npm test`.** 260 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
 
 ---
 

@@ -13,10 +13,45 @@ import { app } from "../core/app.js";
 import { drawGlyph } from "../lib/glyphs.js";
 
 const NS = "http://www.w3.org/2000/svg";
-const PX_DECADE = 300;   // horizontal pixels per power of ten
-const REF = 190;         // pixels an object measures when centred
+
+/* Spacing, and the one ratio that decides whether this view works.
+
+   Two things fight. An object Δ decades along is drawn 10^Δ times the
+   size of this one — that is the whole claim of the page and it is not
+   negotiable — while the gap between them on screen is only Δ × the
+   pixels-per-decade. So the shapes grow exponentially with Δ and the
+   spacing grows linearly, and past some Δ the neighbour always wins.
+
+   Setting them back to back means Δ·PX_DECADE ≥ (REF/2)(1 + 10^Δ), or
+
+       PX_DECADE / REF ≥ (1 + 10^Δ) / 2Δ
+
+   which bottoms out at 4.13 around Δ = 0.57 and climbs steeply either
+   side. The corpus averages half a decade between neighbours, so 4.13
+   is the floor worth clearing. It used to be 300/190 = 1.6 — a third of
+   what it needed — which is why everything sat on top of everything
+   else however far apart the vertical tracks were pulled. No amount of
+   stagger fixes a horizontal ratio that is out by a factor of three.
+
+   4.31 here, which sets neighbours between about 0.45 and 0.7 decades
+   apart properly back to back. Closer pairs than that still overlap and
+   always will: three entries sit between 500 µm and 800 µm, and
+   separating those would need a ratio near 6.5 and put barely one
+   decade on the stage. The tracks are what carry those clusters.
+
+   The cost is paid where it should be — about 2.4 decades across the
+   stage instead of 5, so five or six objects at a time rather than a
+   crowd. That is the right trade for a ruler whose job is comparing two
+   or three things properly, not a contact sheet.                     */
+const PX_DECADE = 560;   // horizontal pixels per power of ten
+const REF = 130;         // pixels an object measures when centred
 const MIN_PX = 1.1;      // below this it is not worth drawing
-const MAX_PX = 1500;     // above this it has swallowed the screen
+/* An object much above the camera scale is a wash of colour across the
+   whole stage with its neighbours somewhere underneath it. It fades
+   from 0.55 of this and is gone at it — which at REF 130 means nothing
+   more than about 0.9 decades above the camera is drawn at all. That is
+   the same trade as the spacing above, made at the other end. */
+const MAX_PX = 1000;
 
 /* Vertical stacking.
 
@@ -37,6 +72,7 @@ const MAX_PX = 1500;     // above this it has swallowed the screen
 const LANES = 5;
 const SPREAD = 0.88;     // share of the stage the tracks span
 const SETTLE = 1.9;      // stage-heights at which a shape is fully recentred
+const WHEEL_PX = 0.48;   // pixels of travel per wheel unit
 
 /* SI ladder for the readout */
 const SI = [
@@ -156,7 +192,9 @@ function paint() {
     /* labels only once the object is big enough to be worth naming */
     const half = Math.max(p.px, 6) / 2;
     const named = p.px > 26;
-    if (named || p.px > 5) {
+    /* an object whose centre has left the stage gets no label — a
+       centred anchor would leave half a word hanging over the edge */
+    if ((named || p.px > 5) && p.x > 24 && p.x < W - 24) {
       /* rough box: the name sets the width, at ~6.6px per character */
       const w = (named ? o.label.length * 6.6 : metres(o.m).length * 6) / 2 + 6;
       const x0 = p.x - w, x1 = p.x + w;
@@ -230,6 +268,10 @@ function focus(id) {
 /* ---------- the sweep ---------- */
 
 const SWEEP_LABEL = "Sweep lattice → Earth";
+/* both rates are in pixels of travel, not decades, so widening the
+   ruler does not silently make the wheel and the sweep feel twice as
+   fast — what the reader perceives is the ground moving under them */
+const SWEEP_PX = 5.4;    // per frame — the full journey in about 28 s
 
 /* The journey the page describes, taken end to end. The camera moves at
    a constant rate in decades, which on a log ruler is a constant rate of
@@ -243,7 +285,7 @@ function sweep() {
   const [lo, hi] = D.meta.span;
   if (z >= hi - 0.05) { z = target = lo; }
   document.getElementById("rulPlay").textContent = "Stop";
-  const perFrame = (hi - lo) / (app.RM ? 90 : 1500);   // ~25 s at 60 fps
+  const perFrame = app.RM ? (hi - lo) / 90 : SWEEP_PX / PX_DECADE;
   const step = () => {
     /* a sweep running behind another tab is a repaint nobody is reading */
     if (!document.getElementById("v-rul").classList.contains("on")) { endSweep(); return; }
@@ -324,7 +366,7 @@ export async function initRuler() {
     const d = (Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX);
     endSweep();
     if (raf) { cancelAnimationFrame(raf); raf = null; }
-    z = target = clamp(z + d * 0.0016);
+    z = target = clamp(z + d * WHEEL_PX / PX_DECADE);
     paint();
   }, { passive: false });
 
@@ -354,6 +396,10 @@ export async function initRuler() {
   });
 
   addEventListener("resize", () => { if (document.getElementById("v-rul").classList.contains("on")) size(); });
+
+  /* the footer states this number; it is written from the constant so
+     the sentence cannot disagree with the drawing */
+  document.getElementById("rulPxDecade").textContent = PX_DECADE;
 
   app.rulerGoTo = focus;
   app.rulerFit = size;

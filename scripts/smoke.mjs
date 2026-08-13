@@ -357,6 +357,29 @@ app.closeSheet();
        D.querySelector("#rulSvg").parentElement.className, "rul__stage");
   }
 
+  /* The ratio the whole view rests on. Two objects Δ decades apart are
+     drawn 10^Δ times each other's size and placed Δ × the pixels-per-
+     decade apart — exponential against linear — so setting them back to
+     back needs PX_DECADE / REF ≥ (1 + 10^Δ) / 2Δ, which bottoms out at
+     4.13 near Δ = 0.57. It was 1.6, and every object sat inside its
+     neighbour however far the vertical tracks were pulled apart.
+     Measured through `place()` rather than read off the constants, so
+     it is the drawing that is asserted and not the arithmetic. */
+  {
+    const ref = place({ lg: 0 }, 0).px;
+    const perDecade = place({ lg: 1 }, 0).x - place({ lg: 0 }, 0).x;
+    checks.push({ label: "objects are spaced far enough apart to sit side by side",
+                  ok: perDecade / ref >= 4.13,
+                  actual: (perDecade / ref).toFixed(2) + "×", expected: "≥ 4.13× (the floor)" });
+
+    /* and the property itself, at the gap the corpus actually averages */
+    const a = place({ lg: 0 }, 0), b = place({ lg: 0.5 }, 0);
+    const clear = (b.x - a.x) - (a.px + b.px) / 2;
+    checks.push({ label: "…so a half-decade neighbour is beside it, not on top of it",
+                  ok: clear >= 0, actual: Math.round(clear) + "px of daylight",
+                  expected: "0px or more" });
+  }
+
   /* Five lanes across most of the stage, not three within 24px of each
      other. Objects a place apart are three times each other's size on a
      true-scale ruler, so without real vertical separation the view is

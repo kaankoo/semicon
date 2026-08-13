@@ -34,7 +34,7 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | 9 · Layout parity | — | One frame, one measure and one legend pattern across all six chart views. Every `ch` gone from the group, every mark on every chart named beside it, and eighteen assertions so it cannot drift again. |
 | 10 · Ruler usability | — | Zoom over the whole stage rather than over a shape, five tracks instead of three so objects stop covering each other, labels placed against each other and kept inside the frame, and a sweep from the lattice to the Earth. |
 
-**Current test surface:** 258 assertions + corpus validation of 11 data files. `npm test`.
+**Current test surface:** 260 assertions + corpus validation of 11 data files. `npm test`.
 
 ### What Phase 4 actually landed
 
@@ -328,6 +328,18 @@ On a true-scale log ruler the object one place along is about three times the si
 
 **Height therefore encodes nothing, and the legend says so in as many words.** A prominent visual variable that carries no data is the same failure as an unlabelled mark under a bar: the reader will infer an encoding that is not there. This is now a convention in `CLAUDE.md`, not a note about one view.
 
+### …and the tracks were treating a symptom
+
+Stacking helped and did not fix it, because the overlap was never vertical. Two objects Δ decades apart are drawn 10^Δ times each other's size and placed only Δ × `PX_DECADE` apart: the shapes grow exponentially in Δ, the gap grows linearly, and past some Δ the neighbour always wins. Setting them back to back needs
+
+    PX_DECADE / REF ≥ (1 + 10^Δ) / 2Δ
+
+which bottoms out at **4.13** near Δ = 0.57. The corpus averages half a decade between neighbours, and the ratio was **300/190 = 1.6** — a third of what it needed. No amount of vertical stagger fixes that, which is why the first attempt only half-worked.
+
+Now **560/130 = 4.31**, which sets neighbours between about 0.45 and 0.7 decades apart properly back to back. `MAX_PX` came down from 1500 to 1000 at the same time, because an object far above the camera scale is a wash of colour across the stage with its neighbours somewhere underneath it. Both are asserted through `place()` rather than read off the constants, so it is the drawing that is held and not the arithmetic.
+
+The cost is paid where it should be: **about 2.4 decades across the stage instead of 5**, so five or six objects at a time rather than a crowd. That is the right trade for a ruler whose job is comparing two or three things properly. The wheel and the sweep are now expressed in **pixels of travel rather than decades**, so widening the ruler did not silently double how fast the ground moves, and the footer's pixels-per-decade figure is written from the constant rather than typed — it had been stating 300 while the code said otherwise would have gone unnoticed.
+
 ### Labels were placed against their own shape and nothing else
 
 Lanes stop the shapes piling up. They do not stop two *labels* landing on one line, because a label sits a shape-height from its lane and two shapes of similar size on adjacent lanes put their names in the same band — which is how two names came to be written over each other at the small end of the ruler. Worse, `cy − half − 15` for a 480px shape on a 560px stage is *above the stage*: the label was not overlapping, it was gone.
@@ -346,6 +358,7 @@ Each label now takes the first rung — clear above, clear below, a rank further
 
 - The label solver is greedy and runs in draw order, so the smallest visible object claims its slot first. The focal object — the one the reader is looking at — has no priority.
 - `SPREAD` and `SETTLE` are tuned by eye against a 560px stage. Nothing asserts they still separate the objects at a much shorter viewport.
+- **Objects closer than about 0.25 decades still overlap, and always will.** Three entries sit between 500 µm and 800 µm; back-to-back spacing there would need a ratio near 6.5, which would put barely one decade on the stage. The lanes are what carry those clusters, and the labels stay legible because they are solved against each other.
 
 ---
 
