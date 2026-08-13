@@ -33,7 +33,11 @@ const argv = process.argv.slice(2);
 const DRY = argv.includes("--dry");
 const ONLY = (argv.find(a => a.startsWith("--only=")) || "").split("=")[1]?.split(",").filter(Boolean);
 
-const UA = "sand-to-sentence/1.0 (static site corpus; contact via github.com/kaankoo/semicon)";
+/* The SEC's fair-access policy wants an application name and a working
+   email address, and refuses anything else with a 403 — a URL is not
+   enough, which is what the first live run discovered. Yahoo and Stooq
+   do not care, so one string serves all three. */
+const UA = "sand-to-sentence/1.0 (github.com/kaankoo/semicon; sidisposablemail@gmail.com)";
 const today = new Date().toISOString().slice(0, 10);
 
 const read = f => JSON.parse(fs.readFileSync(f, "utf8"));
@@ -119,20 +123,37 @@ async function cikMap() {
  *  rather than a workaround. */
 async function edgarFacts(cik) {
   const j = await get(`https://data.sec.gov/api/xbrl/companyfacts/CIK${cik}.json`);
-  const pick = (tag, unit = "USD") => {
-    const f = j?.facts?.["us-gaap"]?.[tag]?.units?.[unit];
+
+  /* companyfacts splits its facts across namespaces: `us-gaap` holds the
+     financial statements, `dei` holds entity metadata including the
+     cover-page share count. Reading a dei tag out of us-gaap returns
+     null forever, silently — which is why the market cap was null for
+     every filer and not only the ones EDGAR refused. */
+  const pick = (tag, unit = "USD", ns = "us-gaap") => {
+    const f = j?.facts?.[ns]?.[tag]?.units?.[unit];
     if (!f) return null;
     const annual = f.filter(x => x.form === "10-K" && x.fp === "FY").sort((a, b) => (a.end < b.end ? 1 : -1));
     return annual[0]?.val ?? null;
   };
+
+  /* Shares outstanding wants the most recent count rather than the
+     annual one. A market cap computed from a share count twelve months
+     old is wrong by every buyback and issuance since, and this is the
+     one figure here that multiplies a live price. */
+  const latest = (tag, unit, ns) => {
+    const f = j?.facts?.[ns]?.[tag]?.units?.[unit];
+    if (!f) return null;
+    return f.slice().sort((a, b) => (a.end < b.end ? 1 : -1))[0]?.val ?? null;
+  };
+
   return {
     revenue: pick("RevenueFromContractWithCustomerExcludingAssessedTax") ?? pick("Revenues"),
     grossProfit: pick("GrossProfit"),
     operatingIncome: pick("OperatingIncomeLoss"),
     capex: pick("PaymentsToAcquirePropertyPlantAndEquipment"),
     cash: pick("CashAndCashEquivalentsAtCarryingValue"),
-    shares: pick("CommonStockSharesOutstanding", "shares") ??
-            pick("EntityCommonStockSharesOutstanding", "shares"),
+    shares: latest("EntityCommonStockSharesOutstanding", "shares", "dei") ??
+            latest("CommonStockSharesOutstanding", "shares", "us-gaap"),
     source: "edgar"
   };
 }

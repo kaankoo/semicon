@@ -37,13 +37,21 @@ let cov = {}, metric = "companies", basis = "declared";
 let W = 1200, chartW = 900;
 
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+/* A price and a market cap are two different facts, and the site has
+   already been in a state where it held one and not the other: the first
+   live run fetched 168 prices and zero caps, because a cap is only ever
+   price × shares and the shares come from a source that refused us. With
+   the two conflated, the page opened on a market-cap axis in which every
+   bar was null — priced-looking and empty, the worst of both. */
 const has = () => !!(quotes && Object.keys(quotes).length);
+const hasCaps = () => !!(quotes && Object.values(quotes).some(q => q.marketCap > 0));
+const capCount = () => (quotes ? Object.values(quotes).filter(q => q.marketCap > 0).length : 0);
 
 /* ---------- what each row is worth ---------- */
 
 function series() {
   const out = {};
-  if (metric === "mcap" && has()) {
+  if (metric === "mcap" && hasCaps()) {
     const t = layerTotals(SP.companies, app.S, quotes, { basis: basis === "even" ? "even" : undefined });
     app.L.forEach(l => { out[l.n] = t.byStratum[l.n] || 0; });
     return { values: out, fmt: usd, label: "aggregate market capitalisation" };
@@ -82,7 +90,7 @@ function paint() {
     const v = values[l.n] || 0;
     const w = Math.max(1, (v / max) * chartW);
     const c = cov[l.n] || { share: 0, curated: 0, corpus: 0 };
-    const hh = metric === "mcap" && has()
+    const hh = metric === "mcap" && hasCaps()
       ? stratumHHI(SP.companies, app.S, quotes, l.n, { basis: basis === "even" ? "even" : undefined })
       : null;
 
@@ -115,7 +123,7 @@ function detail(n) {
   const c = cov[n] || { curated: 0, corpus: 0, share: 0 };
   const k = kindsAt(n);
   const { values, fmt } = series();
-  const hh = metric === "mcap" && has()
+  const hh = metric === "mcap" && hasCaps()
     ? stratumHHI(SP.companies, app.S, quotes, n, { basis: basis === "even" ? "even" : undefined }) : null;
 
   const names = Object.values(SP.companies)
@@ -173,12 +181,19 @@ function status() {
   }
 
   const stale = Object.values(quotes).filter(q => q.stale).length;
-  el.className = `mny__status${stale ? " mny__status--stale" : ""}`;
+  const caps = capCount();
+  el.className = `mny__status${stale || !caps ? " mny__status--stale" : ""}`;
   el.innerHTML = `
     <p class="mny__sk">Priced ${esc(live.asOf)}</p>
     <p><b>${Object.keys(quotes).length}</b> of ${listed} listed names carry a price.
        ${stale ? `<b class="mny__staleb">${stale} are stale</b> and are showing the last value that was fetched,
-        not a current one — the run that should have refreshed them failed and said so.` : "Every one of them is from the latest run."}</p>`;
+        not a current one — the run that should have refreshed them failed and said so.` : "Every one of them is from the latest run."}</p>
+    ${caps
+      ? `<p><b>${caps}</b> of them carry a share count as well, which is what a market cap needs. The rest
+         are priced but not valued — the market-cap axis is a lower bound over ${caps} names, not ${Object.keys(quotes).length}.</p>`
+      : `<p><b class="mny__staleb">None carry a market cap.</b> A cap is price × shares outstanding, and no
+         share count is committed, so the market-cap axis stays disabled rather than drawing an empty chart.
+         A price on its own says what one share costs and nothing about what the company is worth.</p>`}`;
 }
 
 /* ---------- init ---------- */
@@ -199,12 +214,14 @@ export async function initMoney() {
   } catch { quotes = null; }
 
   cov = coverage(SP.companies, app.S, app.L);
-  metric = has() ? "mcap" : "companies";
+  metric = hasCaps() ? "mcap" : "companies";
 
   svg = document.getElementById("mnySvg");
 
   document.getElementById("mnyMetric").innerHTML = `
-    <button data-metric="mcap" ${has() ? "" : "disabled title='No market data is committed'"}>Market cap</button>
+    <button data-metric="mcap" ${hasCaps() ? "" : `disabled title='${has()
+      ? "Prices are committed but no share counts are, so no market cap can be computed"
+      : "No market data is committed"}'`}>Market cap</button>
     <button data-metric="companies">Companies</button>`;
   document.querySelectorAll("#mnyMetric button").forEach(b =>
     b.addEventListener("click", () => { if (b.disabled) return; metric = b.dataset.metric; paint(); }));
@@ -223,7 +240,7 @@ export async function initMoney() {
   /* the Method page states the vintage of the market data, and this is
      the only view that knows it. Published rather than imported, so the
      two never depend on each other's load order beyond main.js's. */
-  app.priced = has() ? { asOf: live?.asOf ?? null, n: Object.keys(quotes).length } : null;
+  app.priced = has() ? { asOf: live?.asOf ?? null, n: Object.keys(quotes).length, caps: capCount() } : null;
 
   status();
   size();

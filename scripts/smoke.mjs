@@ -832,13 +832,31 @@ app.closeSheet();
   /* the page must say so rather than quietly showing an empty chart */
   {
     const t = D.getElementById("mnyStatus").textContent.replace(/\s+/g, " ");
-    const quoted = fs.existsSync(path.join(ROOT, "data/live/quotes.json")) &&
-      Object.keys(JSON.parse(fs.readFileSync(path.join(ROOT, "data/live/quotes.json"), "utf8")).quotes || {}).length;
+    const quotedFile = fs.existsSync(path.join(ROOT, "data/live/quotes.json"))
+      ? JSON.parse(fs.readFileSync(path.join(ROOT, "data/live/quotes.json"), "utf8")).quotes || {}
+      : null;
+    const quoted = quotedFile ? Object.keys(quotedFile).length : 0;
     checks.push({ label: "the empty state is stated, not implied",
                   ok: quoted ? /Priced/.test(t) : /No market data is committed/.test(t),
                   actual: t.slice(0, 52) + "…", expected: quoted ? "a priced stamp" : "an explicit notice" });
-    is("the market-cap axis is disabled until it exists",
-       !!D.querySelector('#mnyMetric [data-metric="mcap"]').disabled, !quoted);
+    /* A price and a market cap are different facts, and the first live
+       run landed 168 of the first and none of the second — a cap is
+       price × shares, and the share count comes from EDGAR. Keyed on
+       `quoted` this assertion went green while the page opened on a
+       market-cap axis where every bar was null. The axis must follow the
+       caps, and the status must name the gap rather than let a priced
+       stamp imply a valuation. */
+    const capped = quotedFile
+      ? Object.values(quotedFile).filter(q => q.marketCap > 0).length : 0;
+    is("the market-cap axis follows the caps, not the prices",
+       !!D.querySelector('#mnyMetric [data-metric="mcap"]').disabled, !capped);
+    is("…and the default axis is one that can actually be drawn",
+       D.getElementById("mnyAxis").textContent.includes("market capitalisation"), !!capped);
+    if (quoted && !capped)
+      is("priced but unvalued is stated in as many words",
+         /None carry a market cap/.test(t), true);
+    is("app.priced reports caps separately from prices",
+       app.priced ? app.priced.caps : 0, capped);
   }
 
   /* a company at nineteen stations must not be counted nineteen times */
