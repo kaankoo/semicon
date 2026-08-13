@@ -164,10 +164,9 @@ function status() {
          <b>${listed}</b> of them with a primary listing — and nothing has been priced. This page is
          showing the spine itself, which is a real chart and not a placeholder: how many companies each
          layer has, and how much of each layer the spine actually covers.</p>
-      <p>Prices arrive when the ingest Action runs. It is written and switched off, because it has never
-         been run against the live endpoints and turning it on is a decision rather than a default:</p>
-      <pre>node scripts/ingest/run.mjs --dry     <span>prove the plumbing, fetch nothing</span>
-node scripts/ingest/run.mjs           <span>fetch, write data/live/, commit</span></pre>
+      <p>Prices arrive on their own. The ingest Action is scheduled for weekday evenings after the US
+         close, and the first run it completes will commit a snapshot and replace this notice — nobody
+         has to do anything for that to happen. Until one lands, there is nothing here to show.</p>
       <p>No figure on this page will ever be typed by hand. Where a number is not derivable from something
          committed, it stays a dash.</p>`;
     return;
@@ -192,8 +191,9 @@ export async function initMoney() {
   if (!rs.ok) throw new Error(`Could not load companies.json (${rs.status})`);
   SP = await rs.json();
 
-  /* the live file is allowed not to exist — that is the normal state of
-     a repository where the Action has never been switched on */
+  /* the live file is allowed not to exist, and to exist holding nothing:
+     between switching the cron on and its first successful run, an empty
+     quotes.json is the honest state rather than an error */
   try {
     if (rq && rq.ok) { live = await rq.json(); quotes = live.quotes || {}; }
   } catch { quotes = null; }
@@ -220,6 +220,10 @@ export async function initMoney() {
   app.moneyFit = size;
   app.spine = SP;
   app.quotes = quotes;
+  /* the Method page states the vintage of the market data, and this is
+     the only view that knows it. Published rather than imported, so the
+     two never depend on each other's load order beyond main.js's. */
+  app.priced = has() ? { asOf: live?.asOf ?? null, n: Object.keys(quotes).length } : null;
 
   status();
   size();

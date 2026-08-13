@@ -140,6 +140,10 @@ Three things had to be fixed first, and only one of them was visible from readin
 
 The **History charts** row below needs about sixty of these files. Counting from the first live run, that is roughly December 2026.
 
+**The Method page no longer states the ingest's condition — it reads it.** The entry carried a hand-typed vintage of `not yet run`, which would have been sitting there months after the first snapshot landed. It now carries a `live` block with a priced and an unpriced branch, resolved at render from what the Money view loaded, and the vintage becomes the date of the last committed snapshot. `check-data.mjs` fails if a `live` entry is missing a branch, or if its prose asserts a state the resolver is supposed to determine. Same rule as the Atlas's Milan comparison and the Lag's medians, applied to a fact about the repository rather than about the world.
+
+**A test would have blocked the deploy on the morning it started working.** `the overlay counts companies without pricing them` asserted that the Faults capital overlay shows no currency figure — true in an unpriced repository, and false the moment a snapshot exists. Since `deploy.yml` gates on `npm test`, the first successful ingest would have pushed a commit that failed CI, and the site would have stopped deploying the day the pipeline started working. The assertion now branches on `app.priced`; the enduring invariant is that a total never *replaces* the count. **The suite is run against a synthetic priced snapshot as well as the real unpriced one, and passes in both** — worth repeating for any test written against the absence of data.
+
 ### What the spine already found
 
 Six organisations appeared in the corpus twice under different names — Tokyo Electron and TEL, Arm and Arm Holdings, Cadence and Cadence Design Systems, Amkor and Amkor Technology, KLA and KLA Corporation, SoftBank and SoftBank Group. Every aggregate would have double-counted them. The corpus is 527 organisations, not 533, and `check-data.mjs` now fails if two names ever claim one ticker.

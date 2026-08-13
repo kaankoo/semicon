@@ -127,6 +127,16 @@ MT.provenance.forEach(p => {
   ["class", "who", "detail", "vintage"].forEach(f => {
     if (!p[f]) problems.push(`provenance "${p.class}" is missing "${f}"`);
   });
+  /* a `live` entry states the condition of its own source at render
+     rather than in prose. Both branches must exist, or the page would
+     silently drop the sentence in whichever state was not written. */
+  if (p.live) {
+    ["unpriced", "priced"].forEach(f => {
+      if (!p.live[f]) problems.push(`provenance "${p.class}" has a live block with no "${f}" branch`);
+    });
+    if (/\bnever been run\b|\bat the time of writing\b/.test(p.detail))
+      problems.push(`provenance "${p.class}" resolves its state at render, so its detail must not also assert one`);
+  }
 });
 MT.limits.forEach(l => { if (!l.title || !l.body) problems.push("a limitation is incomplete"); });
 if (!MT.corrections.repo) problems.push("method.json has no corrections repo");

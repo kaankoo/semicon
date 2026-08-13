@@ -16,9 +16,9 @@
      node scripts/ingest/run.mjs --dry      # fetch nothing, prove the plumbing
      node scripts/ingest/run.mjs --only=AAPL,NVDA
 
-   It has never been run at the time of writing. `--dry` is what CI
-   exercises on every push so the plumbing cannot rot while the live
-   run is switched off. */
+   Live on a weekday cron since 13 Aug 2026. `--dry` is what CI
+   exercises on every push, so the plumbing cannot rot even in a week
+   where every endpoint happens to answer. */
 
 import fs from "node:fs";
 import path from "node:path";

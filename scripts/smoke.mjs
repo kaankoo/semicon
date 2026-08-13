@@ -266,6 +266,33 @@ app.closeSheet();
   is("ledger reflects the live corpus",
      D.querySelector("#mthLedger .mth__p b")?.textContent, first[1].label);
 
+  /* The vintage of the market data is the one claim on this page that
+     changes without anybody editing anything. A hand-typed "not yet run"
+     would still be sitting here months after the first snapshot landed,
+     so the resolver is driven both ways rather than the sentence trusted. */
+  {
+    const { resolveLive } = await import(pathToFileURL(path.join(ROOT, "src/views/method.js")).href);
+    const mkt = MT.provenance.find(p => p.class === "Market prices and fundamentals");
+    is("the market entry defers to the live data", !!mkt.live, true);
+
+    const off = resolveLive(mkt, null);
+    const on = resolveLive(mkt, { asOf: "2026-08-14", n: 171 });
+    is("unpriced, the vintage says so", off.vintage, "not yet run");
+    is("unpriced, the detail names the gap", off.detail.includes("not yet landed a snapshot"), true);
+    is("priced, the vintage is the snapshot date", on.vintage, "2026-08-14");
+    is("priced, the caveat is gone", on.detail.includes("not yet landed"), false);
+    is("an entry with no live block is passed through",
+       resolveLive(MT.provenance.find(p => !p.live), null).vintage,
+       MT.provenance.find(p => !p.live).vintage);
+
+    /* and the rendered page must be showing whichever state is true now */
+    const card = [...D.querySelectorAll("#mthProv .mth__pv")]
+      .find(e => e.querySelector("b")?.textContent === mkt.class);
+    is("the page renders the resolved vintage, not the raw one",
+       card.querySelector(".mth__vt").textContent,
+       resolveLive(mkt, app.priced).vintage);
+  }
+
   /* an inline flag must navigate here and find its target */
   app.show("cas");
   const flag = D.querySelector("#v-cas .grainline");
@@ -875,10 +902,21 @@ app.closeSheet();
     if (btn) {
       btn.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
       const t = D.getElementById("fltCount").textContent.replace(/\s+/g, " ");
-      checks.push({ label: "the overlay counts companies without pricing them",
-                    ok: /listed and/.test(t) && !/\$/.test(t),
-                    actual: t.slice(t.indexOf("listed") - 12, t.indexOf("listed") + 30) || t.slice(-60),
-                    expected: "a count, and no currency figure" });
+      /* The enduring invariant is that the count is always there — a
+         total must never replace it. A currency figure beside it is
+         correct once prices exist and a fabrication before, so the
+         assertion has to know which world it is in. Written as an
+         unconditional "no currency figure" it went green in an unpriced
+         repository and would have turned red on the morning of the first
+         successful ingest — and a red build blocks the deploy, so the
+         site would have stopped shipping the day it started working. */
+      const priced = !!app.priced;
+      checks.push({ label: priced ? "the overlay prices the blast radius and still counts it"
+                                  : "the overlay counts companies without pricing them",
+                    ok: /listed and/.test(t) && (priced || !/\$/.test(t)),
+                    actual: t.slice(Math.max(0, t.indexOf("listed") - 12), t.indexOf("listed") + 30) || t.slice(-60),
+                    expected: priced ? "a count, kept alongside the total"
+                                     : "a count, and no currency figure" });
       btn.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
     }
   }

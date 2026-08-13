@@ -128,7 +128,11 @@
       "class": "Market prices and fundamentals",
       "kind": "cited",
       "who": "Yahoo Finance · Stooq · SEC EDGAR · ECB via Frankfurter",
-      "detail": "Written by a scheduled job into data/live/ and committed, so the site stays static and a failed run degrades to the previous day rather than to an error. Every quote carries the date it was fetched, and a value kept from a previous run is marked stale with the date it went stale — the page shows the badge rather than the number alone. At the time of writing the job has never been run against the live endpoints and no prices are committed, so the Money page shows the spine and says so.",
+      "detail": "Written by a scheduled job into data/live/ and committed, so the site stays static and a failed run degrades to the previous day rather than to an error. The job runs on a weekday cron after the US close. Every quote carries the date it was fetched, and a value kept from a previous run is marked stale with the date it went stale — the page shows the badge rather than the number alone. The daily close is also appended to data/history/, one file per trading day, and a stale price is omitted from it rather than written under today's date.",
+      "live": {
+        "unpriced": "The job has not yet landed a snapshot, so no prices are committed and the Money page shows the spine and says so.",
+        "priced": "The vintage beside this entry is the date of the last snapshot the job committed, not the date this sentence was written."
+      },
       "vintage": "not yet run"
     },
     {

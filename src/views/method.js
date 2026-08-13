@@ -19,6 +19,25 @@ const KIND = {
 
 let M = null, C = null;
 
+/** A provenance entry may carry a `live` block instead of describing the
+ *  state of its own source in prose. The state of the ingest is the one
+ *  thing on this page that changes without anybody editing anything, and
+ *  a hand-typed "not yet run" would still be sitting here months after
+ *  the first snapshot landed. So it is resolved at render from what the
+ *  Money view actually loaded: the sentence and the vintage both follow
+ *  the data, which is the same rule every other claim on the site obeys.
+ *
+ *  Exported so the smoke test can drive it both ways without needing a
+ *  priced repository to exist. */
+export function resolveLive(p, priced) {
+  if (!p.live) return { detail: p.detail, vintage: p.vintage };
+  const on = !!(priced && priced.n > 0);
+  return {
+    detail: `${p.detail} ${on ? p.live.priced : p.live.unpriced}`,
+    vintage: on ? priced.asOf : p.vintage
+  };
+}
+
 function counts() {
   const orgs = new Set();
   app.S.forEach(s => s.co.forEach(c => { if (c[0] !== "—") orgs.add(c[0]); }));
@@ -98,16 +117,18 @@ export async function initMethod() {
         <div class="mth__gh mth__gh--${k}">
           <b>${KIND[k][0]}</b><span>${KIND[k][1]}</span>
         </div>
-        ${rows.map(p => `
+        ${rows.map(p => {
+          const r = resolveLive(p, app.priced);
+          return `
           <div class="mth__pv">
             <div class="mth__pvh">
               <b>${p.class}</b>
               <span class="mth__who">${p.url
                 ? `<a href="${p.url}" target="_blank" rel="noopener">${p.who} ↗</a>` : p.who}</span>
-              <span class="mth__vt">${p.vintage}</span>
+              <span class="mth__vt">${r.vintage}</span>
             </div>
-            <p>${p.detail}</p>
-          </div>`).join("")}
+            <p>${r.detail}</p>
+          </div>`; }).join("")}
       </div>`;
   }).join("");
 

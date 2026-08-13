@@ -20,6 +20,11 @@ export const app = {
   /* ---- environment ---- */
   RM: false,    // prefers-reduced-motion
 
+  /* ---- live market state (populated by views/money) ----
+     null until the ingest Action has landed a snapshot. The Method page
+     reads it to date its own claim rather than asserting one. */
+  priced: null, // { asOf, n } | null
+
   /* ---- helpers (populated by core/data.js) ---- */
   col: () => "#fff",
   lname: () => "",
