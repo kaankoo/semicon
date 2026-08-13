@@ -1,6 +1,6 @@
 # Roadmap
 
-Status as of **13 Aug 2026**. All eight lenses shipped; Money is shipped unpriced. Read `CLAUDE.md` first for conventions and the file routing table.
+Status as of **13 Aug 2026**. Nine lenses shipped. Money was built, shipped unpriced, and replaced by **Moat** — see Phase 8 for why, because the reasoning matters more than the change. Read `CLAUDE.md` first for conventions and the file routing table.
 
 The organising idea: the site holds **one body of knowledge** — 27 strata, 131 stations, 527 organisations — and each new section is **a different index on it**, not new content.
 
@@ -14,7 +14,7 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | Space | Where on Earth does it happen? | ✅ Atlas |
 | Time | When did this become possible? | ✅ Lag |
 | Counterfactual | What breaks if this breaks? | ✅ Faults |
-| Money | What is it worth? | ◐ Money — spine and pipeline shipped, unpriced |
+| Barrier to entry | Who is allowed to do this, and from where? | ✅ Moat |
 
 ---
 
@@ -29,9 +29,10 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | 4 · Atlas | — | 56 sites over 40 jurisdictions, every one anchored to a station. Circles are geodesic, not decorative, and the test proves it two ways. Hand-rolled equirectangular projection; Natural Earth at 56 KB. |
 | 5 · Lag | — | 70 capabilities with two dates each, laid out by stratum. A scrubber from 1947 fills bars as they land and lights the strata behind them. Nothing unfinished is given a date, and the build enforces it. |
 | 6 · Faults | — | 8 scenarios over the dependency graph. Reach is derived, reroutes and dead-ends are declared, and the two are never added together. `cone()` moved to `src/lib/graph.js` so the traversal is shared rather than copied. |
-| 7 · Money | — | The ticker spine — 283 of 527 organisations — plus the ingest job, `metrics.js`, and a Money tab that renders the spine honestly with no prices committed. PLAN.md phases 1 and most of 2. |
+| 7 · Money | `d000983` | The ticker spine — 283 of 527 organisations — plus the ingest job, `metrics.js`, and a Money tab rendering the spine unpriced. **Superseded by Phase 8.** |
+| 8 · Moat | — | Money removed. Jurisdictional concentration per stratum, chokepoint pips beside it, a per-layer roster, and price links out to Yahoo. No page holds a price; the nightly ingest became a weekly link check. |
 
-**Current test surface:** 200 smoke assertions + corpus validation of 12 data files. `npm test`.
+**Current test surface:** 223 assertions + corpus validation of 11 data files. `npm test`.
 
 ### What Phase 4 actually landed
 
@@ -206,6 +207,54 @@ Three things make it specifically good here rather than generically nice:
 ### Instrument polish, whenever
 
 Command palette (⌘K) · density mode · print stylesheet · generated OG images per station and scenario · CSV export · multiple curated entrances through the corpus.
+
+---
+
+## Phase 8 — Moat *(shipped, 13 Aug 2026)* — and why Money was removed
+
+Money is gone. The tab is now **Moat**, the chart measures jurisdictional concentration, and **no page on this site holds a price**. This was not a retreat from a hard problem; the pipeline worked. It is a judgement that the priced version could not be made honest at a cost worth paying.
+
+### The reasoning, in order
+
+**The pipeline was fine.** The first live run fetched 168 of 171 prices and committed a snapshot. What it could not fetch was share counts: a market capitalisation is price × shares, and the only free source of share counts — SEC EDGAR — covers US filers.
+
+**The gap was not random, and that is what killed it.** 65 of the 171 listed organisations trade in Taipei, Tokyo, Seoul, Frankfurt, Amsterdam or Paris. Sorted by stratum, the foreign share runs: Feedstock 83%, Substrate 67%, Patterning 64%, Process 60%, Memory 58%, Package 57%. The US-dominated layers are Model, Agency and Application. So a market-cap chart built on EDGAR alone would have drawn **the deep physical strata as near-empty and the shallow software strata as enormous — the precise inverse of this site's argument, in this site's own colours, under this site's own coverage hairlines.** Incomplete would have been survivable. Systematically wrong in the direction of the thesis was not.
+
+**Closing the gap required a maintenance commitment that was not available.** 65 share counts, refreshed quarterly. An hour to seed, twenty minutes a quarter — cheap, and still a standing obligation. A page that depends on someone remembering is a page that will eventually lie, and this one would have lied about the most important thing on the site.
+
+### What replaced it, and the trap avoided on the way
+
+The obvious substitute was to plot company counts per stratum. **That would have been a chart of the editing.** Every station in this corpus names between five and eight organisations, because roughly six is what makes a station legible — so a per-layer count is roughly stations-per-layer × 6. It comes out at 23.0 per stratum across the deepest nine against 21.7 across the shallowest three, and the page renders both figures from the corpus rather than repeating them, so the caveat cannot go stale. Flat, and it would have looked like a measurement. `check-data.mjs` now asserts the 5–9 band, so if the corpus ever stops being evenly curated the caveat on the page fails loudly rather than the chart quietly acquiring meaning.
+
+What does vary is **jurisdiction** — recorded per organisation per station, curated for its own sake years before this chart existed, which is what makes it safe to plot.
+
+### The finding
+
+**Mean jurisdictional HHI: 0.24 across the deepest nine strata, 0.59 across the shallowest nine. The shallow end is 2.4× more concentrated.** Lithosphere spans 17 jurisdictions with no country above 25%; Surface is 93% American across two. The received view — that rock and fab are the dangerous chokepoint and software is global and commoditised — is inverted at the layer level.
+
+It does not contradict Faults, it sharpens it: **a layer can be cosmopolitan in aggregate and single-sourced at every joint that matters.** Patterning spans eight jurisdictions and holds four chokepoint stations. So the chokepoint pips are drawn past the end of each bar and never folded into the index — concentration is arithmetic, pips are judgement, and this site does not blend the two. The panel says so in words on any layer that is both diverse and single-sourced.
+
+### What the reader gets instead of prices
+
+- **A per-stratum roster.** Who works at this depth, with jurisdiction and a lookup — the one view the site genuinely lacked. The Descent shows stations, the Index shows organisations, nothing showed the cast of a layer.
+- **A Price column in the Index.** 283 organisations link out to Yahoo; the other 244 show a dash. Yahoo because the tickers in `companies.json` are already in Yahoo's symbol convention — every other provider would need a hand-maintained symbol map for the 65 foreign listings, which is the burden this change exists to remove.
+
+### What was removed
+
+`valueOf`, `layerTotals`, `stratumHHI`, `capitalAt`, `depthOf` and `usd` are gone from `metrics.js`. The Faults capital overlay is gone — with no prices it was a button labelled "weight by capital" that showed a headcount. `data/live/` and `data/history/` are gone. The nightly ingest is now a **weekly ticker link check** that writes `data/live/tickers.json` and commits no numbers: a dead symbol is the only rot this design can still suffer, and it is now the only thing automated. A smoke assertion fails if any of the priced functions ever reappear.
+
+### Bugs found on the way out
+
+- **41 organisations are recorded against two countries**, and using that string as a bucket key was wrong three ways: `UK/US` became a country of its own, those organisations vanished from the tallies of the countries they are actually in, and the corpus writes `UK/US` sixteen times against `US/UK` twice, so one pair of countries landed in two buckets. Each part now takes half a vote, which needs no judgement about which base is primary and makes the ordering irrelevant. Fixing it moved the headline from 2.2× to 2.4×.
+- **`parent` on a division holds a ticker, not a name.** It reads like a name field. Resolving it as one silently dropped 12 of 38 division links — Google DeepMind, Waymo, Sony Semiconductor, Hitachi Energy — because their parents operate at no station and are not spine rows.
+- **The weekly check now derives its list from `allTickers()`**, the same function the Index links on, so a symbol can never be linked-but-unchecked. Those 12 parent tickers were previously invisible to it.
+- Three tickers failed the live run and remain suspect: `AWE.L`, `PSTG`, `6967.T`. The weekly job will now name them every Monday until they are fixed.
+
+### Standing gaps
+
+- **Jurisdiction is where an organisation is *based*, not where it *operates*.** TSMC is TW throughout, including its Arizona fab. The Atlas holds the operating geography; this page does not, and the two should not be read as the same claim.
+- **16 organisations carry no stated base** and are excluded from the index rather than bucketed. `check-data` fails if that ever exceeds 10%.
+- The index measures spread, not substitutability. Eight countries making the same commodity and eight countries each making one irreplaceable thing score identically.
 
 ---
 

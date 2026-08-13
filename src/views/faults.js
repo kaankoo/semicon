@@ -19,7 +19,6 @@
 
 import { app } from "../core/app.js";
 import { coneOfAll } from "../lib/graph.js";
-import { capitalAt, usd } from "../lib/metrics.js";
 
 const GUTTER = 208;
 const PAD_R = 20;
@@ -34,7 +33,7 @@ const TIER_FILL = {
 };
 
 let D = null, faults = [], svg = null;
-let current = null, W = 1200, chartW = 960, capital = false;
+let current = null, W = 1200, chartW = 960;
 
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
@@ -123,26 +122,7 @@ function paint() {
     `<b>${ex.n}</b> of ${app.S.length} stations downstream, across <b>${ex.strata}</b> strata ·
      <em class="flt__k flt__k--reroute">${ex.reroute.size} reroute</em>
      <em class="flt__k flt__k--dead">${ex.dead.size} dead-end</em>
-     <em class="flt__k flt__k--reach">${ex.unclassified} unclassified</em>` + capitalLine(f, ex);
-}
-
-/* ---------- the capital overlay ----------
-   Off by default, and it degrades to a count rather than to a wrong
-   number: with no quotes committed there is no market cap to report,
-   so it reports how many listed and private companies stand in the
-   blast radius, which is true either way. */
-
-function capitalLine(f, ex) {
-  if (!capital) return "";
-  if (!app.spine) return `<span class="flt__cap flt__cap--none">no ticker spine loaded</span>`;
-  const ids = [...ex.reach, ...f.removes];
-  const c = capitalAt(ids, app.spine.companies, app.quotes);
-  const priced = c.value != null && c.value > 0;
-  return `<span class="flt__cap">
-    ${priced ? `<b>${usd(c.value)}</b> of attributed market cap · ` : ""}
-    <b>${c.listed}</b> listed and <b>${c.private}</b> private companies stand in this radius
-    ${priced ? "" : `<em>— no market data is committed, so there is no capital figure to give</em>`}
-  </span>`;
+     <em class="flt__k flt__k--reach">${ex.unclassified} unclassified</em>`;
 }
 
 /* ---------- the panel ---------- */
@@ -254,17 +234,6 @@ export async function initFaults() {
   document.getElementById("fltLegend").innerHTML = (D.meta.tiers || [])
     .map(t => `<span title="${esc(t.note)}"><i class="flt__sw flt__sw--${t.id}"></i>${esc(t.label)}</span>`)
     .join("");
-
-  /* PLAN.md gives the Web an off-by-default "weight by capital" switch.
-     The same switch belongs here, and for the same reason: one page,
-     two readings, nothing lost when it is off. */
-  document.getElementById("fltCapital").innerHTML =
-    `<button data-cap aria-pressed="false" title="Report the listed and private companies standing in the blast radius, and their attributed market cap once prices are committed.">Weight by capital</button>`;
-  document.querySelector("#fltCapital [data-cap]").addEventListener("click", e => {
-    capital = !capital;
-    e.currentTarget.setAttribute("aria-pressed", String(capital));
-    paint();
-  });
 
   addEventListener("resize", () => { if (document.getElementById("v-flt").classList.contains("on")) size(); });
 

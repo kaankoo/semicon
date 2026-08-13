@@ -1,0 +1,8 @@
+{
+  "checked": "2026-08-13",
+  "dry": true,
+  "tickers": 179,
+  "dead": [],
+  "inconclusive": [],
+  "note": "Link health only. This project commits no prices; the Index links out to Yahoo."
+}

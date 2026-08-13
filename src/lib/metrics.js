@@ -1,24 +1,46 @@
 /* ============================================================
-   METRICS — the arithmetic that joins money to the graph.
+   METRICS — the arithmetic behind the Moat.
 
-   Pure functions, no DOM, no fetch. Every one of them takes the corpus
-   and an optional quote table and returns null rather than a number
-   when the quotes are not there. That is the important property: this
-   file is the only place a market-cap figure is ever produced, so if
-   nothing has been ingested there is nowhere for a plausible-looking
-   number to come from.
+   Pure functions, no DOM, no fetch, no network-derived input of any
+   kind. Everything here is computed from the committed corpus, which
+   is the whole point: this was once the file that joined market prices
+   to the graph, and a price is the one fact on this site that can go
+   wrong while nobody is looking. It does not any more.
 
-   The one idea worth stating plainly: a company at nineteen stations
-   must not be counted nineteen times. Every company's market cap is
-   split across its stations by an attribution weight, and the weights
-   sum to one. The default split is even, which involves no judgement
-   and is fully reproducible. A handful of entries carry hand-set
-   weights instead, because an even split would put 5% of NVIDIA in the
-   scheduling layer. Those are labelled `judgement` and `evenWeights`
-   exists so the view can show what the judgement changed.
+   The measure that replaced it. Counting organisations per stratum
+   looks like data and is not: every station in the corpus carries
+   between five and eight named organisations, because that is the
+   editorial policy, so a headcount per layer is roughly
+   stations-per-layer times six. It comes out flat — 23.0 per stratum
+   across the deepest nine against 21.7 across the shallowest three —
+   and a bar chart of it would be measuring the curation rather than
+   the industry. `bandHeadcount` and `curationBand` exist so the page
+   can state those two numbers from the corpus at render instead of
+   repeating them, because a caveat carrying a stale figure is worse
+   than no caveat.
+
+   What does vary is where those organisations sit. Jurisdiction is
+   recorded per organisation per station, it was curated for its own
+   sake rather than to make this chart come out, and the concentration
+   it produces runs the opposite way to the intuition: the deep
+   physical strata draw on many countries, and the shallow software
+   strata are a US monoculture. That is a claim the corpus can defend
+   without ever being refreshed.
+
+   Two honesty rules hold throughout:
+
+   - An organisation is counted once per stratum, however many stations
+     it appears at within it. Otherwise a firm listed at four stations
+     in one layer would quadruple its own country's weight.
+   - Organisations with no stated jurisdiction — 16 of 527 — are
+     excluded from the concentration base rather than bucketed into an
+     "unknown" country, which would read as a 44th jurisdiction and
+     flatten the index. Every result reports how many it left out.
    ============================================================ */
 
-/** The declared weights, or an even split if none are declared. */
+/** The declared attribution weights, or an even split if none are
+ *  declared. Still used by the Moat panel to describe how a company
+ *  that spans nineteen stations is apportioned across them. */
 export function weightsFor(c) {
   if (c.attribution) return c.attribution;
   return evenWeights(c);
@@ -30,50 +52,8 @@ export function evenWeights(c) {
   return w;
 }
 
-/** What a company is worth for aggregation purposes, in whatever unit
- *  the quote table is in. Divisions carry an estimated share of their
- *  parent. Anything without a price returns null — never zero, because
- *  zero would silently drag an average down. */
-export function valueOf(c, quotes) {
-  if (!quotes) return null;
-  if (c.kind === "listed") {
-    const q = quotes[c.ticker];
-    return q && q.marketCap > 0 ? q.marketCap : null;
-  }
-  if (c.kind === "division" && c.parent && c.parentShare != null) {
-    const q = quotes[c.parent];
-    return q && q.marketCap > 0 ? q.marketCap * c.parentShare : null;
-  }
-  return null;   // private, institution, abstract — no market value, by design
-}
-
-/** Aggregate market cap per stratum, with fractional attribution.
- *  Returns { byStratum, byStation, priced, unpriced, total } or null. */
-export function layerTotals(companies, stations, quotes, opts = {}) {
-  if (!quotes) return null;
-  const byId = {};
-  stations.forEach(s => { byId[s.i] = s; });
-  const byStratum = {}, byStation = {};
-  let priced = 0, unpriced = 0, total = 0;
-
-  for (const c of Object.values(companies)) {
-    const v = valueOf(c, quotes);
-    if (v == null) { if (c.kind === "listed" || c.kind === "division") unpriced++; continue; }
-    priced++;
-    total += v;
-    const w = opts.basis === "even" ? evenWeights(c) : weightsFor(c);
-    for (const [st, share] of Object.entries(w)) {
-      const s = byId[st];
-      if (!s) continue;
-      byStation[st] = (byStation[st] || 0) + v * share;
-      byStratum[s.L] = (byStratum[s.L] || 0) + v * share;
-    }
-  }
-  return { byStratum, byStation, priced, unpriced, total };
-}
-
-/** Herfindahl–Hirschman index over a set of values, 0–1. One company
- *  holding everything is 1; ten equal companies is 0.1. */
+/** Herfindahl–Hirschman index over a set of counts, 0–1. One country
+ *  holding everything is 1; ten equal countries is 0.1. */
 export function hhi(values) {
   const v = values.filter(x => x > 0);
   const sum = v.reduce((a, b) => a + b, 0);
@@ -81,36 +61,129 @@ export function hhi(values) {
   return v.reduce((a, b) => a + (b / sum) ** 2, 0);
 }
 
-/** Concentration per stratum, computed on attributed value rather than
- *  on company count — a layer with twenty companies and one of them
- *  holding 90% is not diversified. */
-export function stratumHHI(companies, stations, quotes, stratum, opts = {}) {
-  if (!quotes) return null;
-  const byId = {};
-  stations.forEach(s => { byId[s.i] = s; });
-  const parts = [];
-  for (const c of Object.values(companies)) {
-    const v = valueOf(c, quotes);
-    if (v == null) continue;
-    const w = opts.basis === "even" ? evenWeights(c) : weightsFor(c);
-    let here = 0;
-    for (const [st, share] of Object.entries(w))
-      if (byId[st] && byId[st].L === stratum) here += v * share;
-    if (here > 0) parts.push(here);
-  }
-  return parts.length ? hhi(parts) : null;
+const NAMED = c => c && c[0] && c[0] !== "—";
+const JUR = c => (c[3] && c[3] !== "—" ? c[3] : null);
+
+/** Forty-one organisations are recorded against two countries — `UK/US`,
+ *  `US/FR`, `IE/US`. Three things go wrong if that string is used as a
+ *  bucket key. It becomes a country of its own, so the distinct count
+ *  inflates. It removes those organisations from the tallies of the
+ *  countries they are actually in, so concentration reads lower than it
+ *  is. And `UK/US` appears sixteen times against `US/UK` twice, so the
+ *  same pair of countries lands in two different buckets.
+ *
+ *  Each part gets an equal share instead. That needs no judgement about
+ *  which base is primary — the field's ordering is not consistent
+ *  enough to carry one — it makes the ordering irrelevant, and it is
+ *  the same rule the attribution weights already use: one organisation
+ *  is worth one, however many places it is counted in. */
+export function splitJurisdiction(j) {
+  if (!j) return [];
+  const parts = j.split("/").map(x => x.trim()).filter(Boolean);
+  const w = 1 / parts.length;
+  return parts.map(p => [p, w]);
 }
 
-/** How much of each stratum's cast this spine actually covers. A layer
- *  aggregate at 23% coverage is not comparable to one at 100%, and the
- *  view is required to say so. */
+/** Every organisation named at a stratum, once each, with the
+ *  jurisdiction it was recorded under. The shared basis for everything
+ *  below, exported so a view never re-derives it slightly differently. */
+export function orgsAt(stations, stratum) {
+  const seen = new Map();
+  stations.filter(s => s.L === stratum).forEach(s =>
+    s.co.filter(NAMED).forEach(c => { if (!seen.has(c[0])) seen.set(c[0], JUR(c)); }));
+  return seen;
+}
+
+/** Jurisdictional concentration for one stratum.
+ *
+ *  Returns { orgs, stated, unstated, distinct, top, topShare, hhi,
+ *  tally } — or hhi null where nothing carries a jurisdiction, never 0,
+ *  because a zero would read as perfect diversity rather than as
+ *  silence. */
+export function stratumJurisdictions(stations, stratum) {
+  const orgs = orgsAt(stations, stratum);
+  const tally = {};
+  let stated = 0, unstated = 0, dual = 0;
+  for (const j of orgs.values()) {
+    if (!j) { unstated++; continue; }
+    stated++;
+    const parts = splitJurisdiction(j);
+    if (parts.length > 1) dual++;
+    parts.forEach(([k, w]) => { tally[k] = (tally[k] || 0) + w; });
+  }
+  const ranked = Object.entries(tally).sort((a, b) => b[1] - a[1]);
+  return {
+    orgs: orgs.size,
+    stated, unstated, dual,
+    distinct: ranked.length,
+    top: ranked.length ? ranked[0][0] : null,
+    topShare: stated ? ranked[0][1] / stated : null,
+    hhi: stated ? hhi(Object.values(tally)) : null,
+    tally
+  };
+}
+
+/** The same, for every stratum, keyed by stratum number. */
+export function jurisdictionsByStratum(stations, strata) {
+  const out = {};
+  strata.forEach(l => { out[l.n] = stratumJurisdictions(stations, l.n); });
+  return out;
+}
+
+/** The headline the page is built on, computed rather than typed: mean
+ *  concentration across a band of strata. `deep` and `shallow` are
+ *  inclusive ranges. Returns nulls rather than NaN on an empty band. */
+export function bandConcentration(stations, strata, lo, hi) {
+  const rows = strata.filter(l => l.n >= lo && l.n <= hi)
+    .map(l => stratumJurisdictions(stations, l.n))
+    .filter(r => r.hhi != null);
+  if (!rows.length) return { hhi: null, distinct: null, strata: 0 };
+  return {
+    hhi: rows.reduce((a, r) => a + r.hhi, 0) / rows.length,
+    distinct: rows.reduce((a, r) => a + r.distinct, 0) / rows.length,
+    strata: rows.length
+  };
+}
+
+/** Mean distinct organisations per stratum across a band — the number
+ *  the page would be plotting if it plotted a headcount. Exported so
+ *  the footer's "and here is why we do not" sentence is arithmetic
+ *  rather than a figure someone typed once and stopped checking. */
+export function bandHeadcount(stations, strata, lo, hi) {
+  const band = strata.filter(l => l.n >= lo && l.n <= hi);
+  if (!band.length) return null;
+  const total = band.reduce((a, l) => a + orgsAt(stations, l.n).size, 0);
+  return total / band.length;
+}
+
+/** The spread of organisations-per-station across the whole corpus.
+ *  Returns { lo, hi }. If these ever come apart, the claim that a
+ *  headcount measures the editing stops being true and the Moat page
+ *  needs rewriting rather than quietly becoming meaningful. */
+export function curationBand(stations) {
+  const per = stations.map(s =>
+    new Set(s.co.filter(NAMED).map(c => c[0])).size);
+  return { lo: Math.min(...per), hi: Math.max(...per) };
+}
+
+/** Chokepoint stations per stratum, from the hand-set criticality
+ *  pips. Drawn beside the bars rather than folded into them: the
+ *  concentration is arithmetic and the pips are judgement, and this
+ *  site does not blend the two. */
+export function chokepointsAt(stations, stratum) {
+  return stations.filter(s => s.L === stratum && s.c >= 3).length;
+}
+
+/** How much of each stratum's cast the ticker spine covers. Retained
+ *  because the Index links prices for the organisations in the spine
+ *  and nothing for the rest, and the Moat panel says which is which. */
 export function coverage(companies, stations, strata) {
   const curated = new Set(Object.values(companies).map(c => c.name));
   const out = {};
   strata.forEach(l => {
     const all = new Set(), done = new Set();
     stations.filter(s => s.L === l.n).forEach(s => s.co.forEach(x => {
-      if (x[0] === "—") return;
+      if (!NAMED(x)) return;
       all.add(x[0]);
       if (curated.has(x[0])) done.add(x[0]);
     }));
@@ -119,62 +192,13 @@ export function coverage(companies, stations, strata) {
   return out;
 }
 
-/** Everything with a price sitting at any of these stations, and what
- *  it is worth attributed to them. Used by the Faults overlay to put a
- *  number on a blast radius. */
-export function capitalAt(stationIds, companies, quotes, opts = {}) {
-  const want = new Set(stationIds);
-  const names = [], byName = {};
-  let value = 0, listed = 0, privateCount = 0, priced = 0;
-  for (const c of Object.values(companies)) {
-    if (!c.stations.some(s => want.has(s))) continue;
-    /* who stands here is a property of the spine and needs no prices —
-       only what they are worth does */
-    if (c.kind === "private") privateCount++;
-    if (c.kind === "listed" || c.kind === "division") listed++;
-    const v = valueOf(c, quotes);
-    if (v == null) continue;
-    priced++;
-    const w = opts.basis === "even" ? evenWeights(c) : weightsFor(c);
-    let here = 0;
-    for (const [st, share] of Object.entries(w)) if (want.has(st)) here += v * share;
-    if (here > 0) { value += here; byName[c.name] = here; names.push(c.name); }
-  }
-  names.sort((a, b) => byName[b] - byName[a]);
-  return {
-    value: priced ? value : null,
-    listed, private: privateCount, priced,
-    top: names.slice(0, 20), byName
-  };
-}
-
-/** How deep in the stack a company sits, weighted the same way its
- *  value is. The x-axis of the Depth Curve, when that arrives. */
-export function depthOf(c, stations) {
-  const byId = {};
-  stations.forEach(s => { byId[s.i] = s; });
-  const w = weightsFor(c);
-  let d = 0, n = 0;
-  for (const [st, share] of Object.entries(w)) {
-    if (!byId[st]) continue;
-    d += byId[st].L * share; n += share;
-  }
-  return n ? d / n : null;
-}
-
 /* ---------- formatting ---------- */
-
-/** Money, at the magnitude a reader can hold. Never invents precision:
- *  a null stays a dash. */
-export function usd(v) {
-  if (v == null || !isFinite(v)) return "—";
-  const a = Math.abs(v);
-  if (a >= 1e12) return `$${(v / 1e12).toFixed(2)}tn`;
-  if (a >= 1e9) return `$${(v / 1e9).toFixed(a >= 1e10 ? 0 : 1)}bn`;
-  if (a >= 1e6) return `$${(v / 1e6).toFixed(0)}m`;
-  return `$${Math.round(v)}`;
-}
 
 export function pct(v, digits = 0) {
   return v == null || !isFinite(v) ? "—" : `${(v * 100).toFixed(digits)}%`;
+}
+
+/** An index to two places, or a dash. Never 0 for absent. */
+export function idx(v) {
+  return v == null || !isFinite(v) ? "—" : v.toFixed(2);
 }

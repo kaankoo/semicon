@@ -1,279 +1,110 @@
-/* Ingest — the only thing on this project that touches a network.
+/* Ticker health check — the only thing on this project that touches a
+   network, and it no longer brings anything back.
 
-   Runs in a GitHub Action on weekday evenings, writes data/live/*.json,
-   and commits the result. The site then stays entirely static: no
-   worker in the request path, nothing to 500, and every commit is a
-   dated snapshot that accumulates into a time series nobody else has.
+   This file used to fetch prices, fundamentals and FX every weekday and
+   commit a snapshot. It worked. It was removed anyway, because a market
+   capitalisation needs a share count as well as a price, the only free
+   source of share counts covers US filers, and 65 of the 171 listed
+   organisations here are listed in Taipei, Tokyo, Seoul, Frankfurt,
+   Amsterdam or Paris — concentrated in exactly the deep strata the site
+   exists to argue about. A market-cap chart built on US filings alone
+   would have drawn the physical base as near-worthless: the inverse of
+   the argument, rendered in the site's own colours.
 
-   The rule this file exists to enforce: NEVER SHIP A SILENT STALE
-   NUMBER. If a source fails, yesterday's value is kept, the failure is
-   written to meta.json with the reason, and the view puts a staleness
-   badge on the figure. A wrong number that looks fresh is worse than
-   no number, and this whole section is only worth having if that is
-   true in the code rather than in the README.
+   So the site stopped holding prices. The Index links out to Yahoo
+   instead, and the only thing left worth automating is asking whether
+   those links still resolve. A ticker dies quietly — an acquisition, a
+   delisting, a symbol change — and a dead link is the one kind of rot
+   this design can still suffer.
 
-     node scripts/ingest/run.mjs            # full run
+   It writes no prices and commits no numbers. It writes a list of
+   tickers that did not answer, which is a maintenance to-do rather
+   than a fact about the world, and it runs weekly because that is how
+   often a symbol changes.
+
+     node scripts/ingest/run.mjs            # check every ticker
      node scripts/ingest/run.mjs --dry      # fetch nothing, prove the plumbing
-     node scripts/ingest/run.mjs --only=AAPL,NVDA
-
-   Live on a weekday cron since 13 Aug 2026. `--dry` is what CI
-   exercises on every push, so the plumbing cannot rot even in a week
-   where every endpoint happens to answer. */
+     node scripts/ingest/run.mjs --only=NVDA,2330.TW                          */
 
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const STATIC = path.join(ROOT, "data/static");
 const LIVE = path.join(ROOT, "data/live");
-const HISTORY = path.join(ROOT, "data/history");
 
 const argv = process.argv.slice(2);
 const DRY = argv.includes("--dry");
 const ONLY = (argv.find(a => a.startsWith("--only=")) || "").split("=")[1]?.split(",").filter(Boolean);
 
-/* The SEC's fair-access policy wants an application name and a working
-   email address, and refuses anything else with a 403 — a URL is not
-   enough, which is what the first live run discovered. Yahoo and Stooq
-   do not care, so one string serves all three. */
 const UA = "sand-to-sentence/1.0 (github.com/kaankoo/semicon; sidisposablemail@gmail.com)";
 const today = new Date().toISOString().slice(0, 10);
 
 const read = f => JSON.parse(fs.readFileSync(f, "utf8"));
-const readIf = f => (fs.existsSync(f) ? read(f) : null);
 const write = (f, o) => {
   fs.mkdirSync(path.dirname(f), { recursive: true });
-  fs.writeFileSync(f, JSON.stringify(o, null, f.endsWith("meta.json") ? 2 : 0) + "\n");
+  fs.writeFileSync(f, JSON.stringify(o, null, 2) + "\n");
 };
-
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const meta = { ran: new Date().toISOString(), dry: DRY, sources: {}, failures: [], kept: 0 };
 
-/* ---------- fetch with a budget ---------- */
-
-async function get(url, { json = true, retries = 2 } = {}) {
-  for (let i = 0; i <= retries; i++) {
-    try {
-      const r = await fetch(url, { headers: { "User-Agent": UA, Accept: json ? "application/json" : "text/csv" } });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      return json ? await r.json() : await r.text();
-    } catch (e) {
-      if (i === retries) throw e;
-      await sleep(400 * (i + 1));
-    }
-  }
+/** Does this symbol still resolve? Yahoo's v8 chart endpoint answers
+ *  without auth and 404s on a symbol it does not know, which is exactly
+ *  and only the question being asked. The response body is discarded —
+ *  nothing fetched here is ever written to the corpus. */
+async function resolves(ticker) {
+  const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=5d&interval=1d`;
+  const r = await fetch(u, { headers: { "User-Agent": UA, Accept: "application/json" } });
+  if (r.status === 404) return { ok: false, why: "unknown symbol" };
+  if (!r.ok) return { ok: null, why: `HTTP ${r.status}` };   // null = inconclusive, not a failure
+  const j = await r.json().catch(() => null);
+  return j?.chart?.result?.[0] ? { ok: true } : { ok: false, why: "no result" };
 }
-
-/* ---------- sources ---------- */
-
-/** Yahoo's v8 chart endpoint. The v7 quote endpoint returns 401; v8
- *  still answers, one request per ticker, and gives us the previous
- *  close and enough metadata to derive a market cap where shares
- *  outstanding is known. Unofficial, hence the Stooq fallback. */
-async function yahoo(ticker) {
-  const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}` +
-            `?range=1y&interval=1d`;
-  const j = await get(u);
-  const r = j?.chart?.result?.[0];
-  if (!r) throw new Error("no result");
-  const m = r.meta || {};
-  const closes = (r.indicators?.quote?.[0]?.close || []).filter(x => x != null);
-  const last = m.regularMarketPrice ?? closes.at(-1);
-  if (last == null) throw new Error("no price");
-  const back = n => (closes.length > n ? closes.at(-1 - n) : null);
-  const chg = p => (p == null ? null : +((last - p) / p).toFixed(6));
-  return {
-    price: last,
-    currency: m.currency || null,
-    marketCap: null,                        // filled by shares × price where known
-    prevClose: m.chartPreviousClose ?? back(1),
-    d1: chg(m.chartPreviousClose ?? back(1)),
-    m1: chg(back(21)),
-    y1: chg(back(251)),
-    hi52: m.fiftyTwoWeekHigh ?? (closes.length ? Math.max(...closes) : null),
-    lo52: m.fiftyTwoWeekLow ?? (closes.length ? Math.min(...closes) : null),
-    source: "yahoo"
-  };
-}
-
-/** Stooq's CSV. Fewer fields, no auth, and it answers when Yahoo does
- *  not. Symbols differ — US tickers take a `.us` suffix. */
-async function stooq(ticker) {
-  const sym = /^[A-Z.]+$/.test(ticker) ? `${ticker.toLowerCase()}.us` : ticker.toLowerCase();
-  const csv = await get(`https://stooq.com/q/l/?s=${encodeURIComponent(sym)}&f=sd2t2ohlcv&h&e=csv`, { json: false });
-  const row = csv.trim().split("\n")[1]?.split(",");
-  if (!row || row[6] === "N/D") throw new Error("no data");
-  return { price: +row[6], currency: null, marketCap: null, source: "stooq" };
-}
-
-/** The SEC's own ticker → CIK map. This is why companies.json leaves
- *  `cik` null: a hand-typed CIK is a silent wrong answer, and the
- *  authoritative mapping is one request away. */
-async function cikMap() {
-  const j = await get("https://www.sec.gov/files/company_tickers.json");
-  const out = {};
-  for (const v of Object.values(j)) out[v.ticker] = String(v.cik_str).padStart(10, "0");
-  return out;
-}
-
-/** XBRL company facts. Authoritative, free, and rate-limited to ten a
- *  second — hence the sleep. US filers only; everything else is
- *  hand-curated quarterly, which PLAN.md is right to call the moat
- *  rather than a workaround. */
-async function edgarFacts(cik) {
-  const j = await get(`https://data.sec.gov/api/xbrl/companyfacts/CIK${cik}.json`);
-
-  /* companyfacts splits its facts across namespaces: `us-gaap` holds the
-     financial statements, `dei` holds entity metadata including the
-     cover-page share count. Reading a dei tag out of us-gaap returns
-     null forever, silently — which is why the market cap was null for
-     every filer and not only the ones EDGAR refused. */
-  const pick = (tag, unit = "USD", ns = "us-gaap") => {
-    const f = j?.facts?.[ns]?.[tag]?.units?.[unit];
-    if (!f) return null;
-    const annual = f.filter(x => x.form === "10-K" && x.fp === "FY").sort((a, b) => (a.end < b.end ? 1 : -1));
-    return annual[0]?.val ?? null;
-  };
-
-  /* Shares outstanding wants the most recent count rather than the
-     annual one. A market cap computed from a share count twelve months
-     old is wrong by every buyback and issuance since, and this is the
-     one figure here that multiplies a live price. */
-  const latest = (tag, unit, ns) => {
-    const f = j?.facts?.[ns]?.[tag]?.units?.[unit];
-    if (!f) return null;
-    return f.slice().sort((a, b) => (a.end < b.end ? 1 : -1))[0]?.val ?? null;
-  };
-
-  return {
-    revenue: pick("RevenueFromContractWithCustomerExcludingAssessedTax") ?? pick("Revenues"),
-    grossProfit: pick("GrossProfit"),
-    operatingIncome: pick("OperatingIncomeLoss"),
-    capex: pick("PaymentsToAcquirePropertyPlantAndEquipment"),
-    cash: pick("CashAndCashEquivalentsAtCarryingValue"),
-    shares: latest("EntityCommonStockSharesOutstanding", "shares", "dei") ??
-            latest("CommonStockSharesOutstanding", "shares", "us-gaap"),
-    source: "edgar"
-  };
-}
-
-/** Everything to USD. The ECB's rates by way of Frankfurter — free,
- *  no key, and the reference set most people would check against. */
-async function fx() {
-  const j = await get("https://api.frankfurter.app/latest?from=USD");
-  return { base: "USD", rates: j.rates, date: j.date };
-}
-
-/* ---------- run ---------- */
 
 async function main() {
   const spine = read(path.join(STATIC, "companies.json"));
-  const listed = Object.entries(spine.companies)
-    .filter(([, c]) => c.kind === "listed" && c.ticker)
-    .filter(([, c]) => !ONLY || ONLY.includes(c.ticker));
+  /* the same list the Index renders, from the same function, so a
+     symbol can never be linked-but-unchecked. That matters most for
+     the twelve division parents — Alphabet, Hitachi, Sony — which are
+     live links and are not spine rows of their own. */
+  const { allTickers } = await import(pathToFileURL(path.join(ROOT, "src/lib/tickers.js")).href);
+  const listed = allTickers(spine.companies)
+    .filter(t => !ONLY || ONLY.includes(t))
+    .map(t => [t, { ticker: t, name: Object.values(spine.companies).find(c => c.ticker === t)?.name || t }]);
 
-  const prevQuotes = readIf(path.join(LIVE, "quotes.json"))?.quotes || {};
-  const quotes = {}, fundamentals = {};
+  const out = {
+    checked: today,
+    dry: DRY,
+    tickers: listed.length,
+    dead: [],            // resolved to nothing — the Index link is broken
+    inconclusive: [],     // rate-limited or transient; not a finding
+    note: "Link health only. This project commits no prices; the Index links out to Yahoo."
+  };
 
   if (DRY) {
-    console.log(`  dry run — ${listed.length} listed tickers in the spine, nothing fetched`);
-    meta.sources.yahoo = "skipped (dry)";
-    meta.sources.edgar = "skipped (dry)";
-    meta.sources.fx = "skipped (dry)";
+    console.log(`  dry run — ${listed.length} tickers in the spine, nothing fetched`);
   } else {
-    /* --- FX first, because everything downstream is normalised by it --- */
-    try { meta.fx = await fx(); meta.sources.fx = "ok"; }
-    catch (e) { meta.sources.fx = `failed: ${e.message}`; meta.failures.push("fx"); }
-
-    /* --- prices, Yahoo with a Stooq fallback --- */
-    let ok = 0, fell = 0;
-    for (const [id, c] of listed) {
-      let q = null;
-      try { q = await yahoo(c.ticker); ok++; }
-      catch {
-        try { q = await stooq(c.ticker); fell++; }
-        catch (e) { meta.failures.push(`${c.ticker}: ${e.message}`); }
+    for (const [, c] of listed) {
+      try {
+        const r = await resolves(c.ticker);
+        if (r.ok === false) out.dead.push({ ticker: c.ticker, name: c.name, why: r.why });
+        else if (r.ok === null) out.inconclusive.push({ ticker: c.ticker, why: r.why });
+      } catch (e) {
+        out.inconclusive.push({ ticker: c.ticker, why: e.message });
       }
-      if (q) quotes[c.ticker] = q;
-      else if (prevQuotes[c.ticker]) {
-        /* keep yesterday, and say so — this is the whole point */
-        quotes[c.ticker] = { ...prevQuotes[c.ticker], stale: true, staleSince: prevQuotes[c.ticker].staleSince || today };
-        meta.kept++;
-      }
-      await sleep(120);
-    }
-    meta.sources.yahoo = `${ok} ok, ${fell} via stooq, ${meta.failures.length} failed`;
-
-    /* --- US fundamentals from EDGAR, and shares outstanding so a
-           market cap can be computed rather than taken on faith --- */
-    try {
-      const map = await cikMap();
-      let n = 0;
-      for (const [id, c] of listed) {
-        const cik = map[c.ticker];
-        if (!cik) continue;
-        try {
-          const f = await edgarFacts(cik);
-          fundamentals[c.ticker] = { ...f, cik };
-          if (f.shares && quotes[c.ticker]?.price)
-            quotes[c.ticker].marketCap = f.shares * quotes[c.ticker].price;
-          n++;
-        } catch (e) { meta.failures.push(`edgar ${c.ticker}: ${e.message}`); }
-        await sleep(110);                       // ≤10 req/s, as SEC asks
-      }
-      meta.sources.edgar = `${n} filers`;
-    } catch (e) {
-      meta.sources.edgar = `failed: ${e.message}`;
-      meta.failures.push("edgar");
+      await sleep(150);
     }
   }
 
-  /* --- what changed since yesterday --- */
-  const changelog = [];
-  for (const [t, q] of Object.entries(quotes)) {
-    const p = prevQuotes[t];
-    if (p && p.price && q.price && Math.abs(q.price / p.price - 1) > 0.08)
-      changelog.push({ ticker: t, move: +(q.price / p.price - 1).toFixed(4) });
+  write(path.join(LIVE, "tickers.json"), out);
+
+  console.log(`\n  ${DRY ? "dry run complete" : "checked " + listed.length + " tickers"} — ` +
+              `${out.dead.length} dead, ${out.inconclusive.length} inconclusive\n`);
+  if (out.dead.length) {
+    console.log("  these Index links point at nothing and need a corrected ticker:\n");
+    out.dead.forEach(d => console.log(`    ${d.ticker.padEnd(12)} ${d.name} — ${d.why}`));
+    console.log("");
   }
-  changelog.sort((a, b) => Math.abs(b.move) - Math.abs(a.move));
-
-  /* a dry run says so in every file it writes, so an empty quotes.json
-     can never be read as "we looked and the market was empty" */
-  const stamp = DRY ? { asOf: today, dry: true, note: "Dry run — nothing was fetched." } : { asOf: today };
-  write(path.join(LIVE, "quotes.json"), { ...stamp, quotes });
-  write(path.join(LIVE, "fundamentals.json"), { ...stamp, fundamentals });
-  write(path.join(LIVE, "changelog.json"), { ...stamp, moves: changelog.slice(0, 20) });
-  write(path.join(LIVE, "meta.json"), meta);
-
-  /* --- the daily close, appended ---
-     One file per trading day, deliberately lean: a ticker, its close and
-     its market cap, and nothing else. About 5 KB a day, so a year of
-     commits is a megabyte rather than a hundred.
-
-     A stale quote is omitted rather than repeated. Writing yesterday's
-     price under today's date would fabricate a data point, and a history
-     series is exactly where that lie would be hardest to see later. A
-     ticker that failed simply has a gap, which is honest and which any
-     chart can draw as a break. */
-  if (!DRY) {
-    const close = {}, cap = {};
-    for (const [t, q] of Object.entries(quotes)) {
-      if (q.stale) continue;
-      if (q.price != null) close[t] = q.price;
-      if (q.marketCap != null) cap[t] = Math.round(q.marketCap);
-    }
-    if (Object.keys(close).length) {
-      write(path.join(HISTORY, `${today}.json`), { asOf: today, close, cap });
-      meta.history = { asOf: today, closes: Object.keys(close).length, omittedStale: meta.kept };
-    }
-    write(path.join(LIVE, "meta.json"), meta);
-  }
-
-  console.log(`\n  ${DRY ? "dry run complete" : "ingest complete"} — ` +
-              `${Object.keys(quotes).length} quotes, ${Object.keys(fundamentals).length} filers, ` +
-              `${meta.kept} kept from yesterday, ${meta.failures.length} failures\n`);
-  if (meta.failures.length) console.log("  failures written to data/live/meta.json\n");
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

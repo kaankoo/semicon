@@ -1,0 +1,74 @@
+name: tickers
+
+# Link health, weekly. This job used to fetch prices every weekday and
+# commit them; it does not any more, because the site no longer holds a
+# price anywhere. The Index links out to Yahoo instead, and the only
+# thing left worth automating is asking whether those links still
+# resolve — a ticker dies quietly when a company is acquired, delisted
+# or renamed, and a dead link is the one kind of rot this design can
+# still suffer.
+#
+# It commits no numbers. It writes data/live/tickers.json, which is a
+# maintenance to-do rather than a fact about the world.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: "Dry run — exercise the plumbing, fetch nothing"
+        type: boolean
+        default: true
+  schedule:
+    - cron: "30 6 * * 1"        # Mondays, 06:30 UTC
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tickers
+  cancel-in-progress: false
+
+jobs:
+  tickers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check every ticker still resolves
+        run: node scripts/ingest/run.mjs ${{ inputs.dry && '--dry' || '' }}
+
+      - name: Validate the corpus is still sound
+        run: npm run check
+
+      - name: Commit the report
+        run: |
+          git config user.name  "tickers"
+          git config user.email "tickers@users.noreply.github.com"
+          git add data/live
+          if git diff --staged --quiet; then
+            echo "nothing moved"
+          else
+            git commit -m "data: ticker link check $(date -u +%Y-%m-%d)"
+            # main may have moved while we were checking; the report is
+            # a single regenerated file so a rebase cannot conflict.
+            for i in 1 2 3; do
+              git pull --rebase --autostash origin main && git push && exit 0
+              sleep 5
+            done
+            echo "could not push after three attempts" >&2
+            exit 1
+          fi
+
+      - name: Fail loudly if any link is dead
+        run: |
+          n=$(node -e "console.log(require('./data/live/tickers.json').dead.length)")
+          if [ "$n" != "0" ]; then
+            echo "::warning::$n ticker(s) in the Index no longer resolve — see data/live/tickers.json"
+          fi

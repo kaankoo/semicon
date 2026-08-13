@@ -266,33 +266,6 @@ app.closeSheet();
   is("ledger reflects the live corpus",
      D.querySelector("#mthLedger .mth__p b")?.textContent, first[1].label);
 
-  /* The vintage of the market data is the one claim on this page that
-     changes without anybody editing anything. A hand-typed "not yet run"
-     would still be sitting here months after the first snapshot landed,
-     so the resolver is driven both ways rather than the sentence trusted. */
-  {
-    const { resolveLive } = await import(pathToFileURL(path.join(ROOT, "src/views/method.js")).href);
-    const mkt = MT.provenance.find(p => p.class === "Market prices and fundamentals");
-    is("the market entry defers to the live data", !!mkt.live, true);
-
-    const off = resolveLive(mkt, null);
-    const on = resolveLive(mkt, { asOf: "2026-08-14", n: 171 });
-    is("unpriced, the vintage says so", off.vintage, "not yet run");
-    is("unpriced, the detail names the gap", off.detail.includes("not yet landed a snapshot"), true);
-    is("priced, the vintage is the snapshot date", on.vintage, "2026-08-14");
-    is("priced, the caveat is gone", on.detail.includes("not yet landed"), false);
-    is("an entry with no live block is passed through",
-       resolveLive(MT.provenance.find(p => !p.live), null).vintage,
-       MT.provenance.find(p => !p.live).vintage);
-
-    /* and the rendered page must be showing whichever state is true now */
-    const card = [...D.querySelectorAll("#mthProv .mth__pv")]
-      .find(e => e.querySelector("b")?.textContent === mkt.class);
-    is("the page renders the resolved vintage, not the raw one",
-       card.querySelector(".mth__vt").textContent,
-       resolveLive(mkt, app.priced).vintage);
-  }
-
   /* an inline flag must navigate here and find its target */
   app.show("cas");
   const flag = D.querySelector("#v-cas .grainline");
@@ -798,65 +771,107 @@ app.closeSheet();
   }
 }
 
-/* ---------- money ---------- */
+/* ---------- moat ---------- */
 {
   const SP = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/companies.json"), "utf8"));
   const M = await import(pathToFileURL(path.join(ROOT, "src/lib/metrics.js")).href);
+  const T = await import(pathToFileURL(path.join(ROOT, "src/lib/tickers.js")).href);
 
-  app.show("mny");
-  is("money view active", D.getElementById("v-mny").classList.contains("on"), true);
-  is("every stratum is a bar", D.querySelectorAll("#mnySvg .mny__r").length, app.L.length);
-  atLeast("panel populated", D.getElementById("mnyPanel").textContent.trim().length, 200);
-  atLeast("axes offered", D.querySelectorAll("#mnyMetric button").length, 2);
-  atLeast("bases offered", D.querySelectorAll("#mnyBasis button").length, 2);
+  app.show("moat");
+  is("moat view active", D.getElementById("v-moat").classList.contains("on"), true);
+  is("every stratum is a bar", D.querySelectorAll("#moatSvg .moat__r").length, app.L.length);
+  atLeast("panel populated", D.getElementById("moatPanel").textContent.trim().length, 200);
+  atLeast("axes offered", D.querySelectorAll("#moatMetric button").length, 2);
+  atLeast("bases offered", D.querySelectorAll("#moatBasis button").length, 2);
 
-  /* the one property this whole section stands on: with nothing
-     ingested, nothing may produce a figure */
+  /* THE REASON THIS PAGE DOES NOT PLOT A HEADCOUNT.
+     Every station names five to eight organisations because that is the
+     editorial policy, so a count per layer measures the editing. If the
+     corpus ever became unevenly curated the page's caveat would be
+     false and the chart's premise would need revisiting — so the
+     flatness is asserted rather than assumed. */
   {
-    const empty = M.layerTotals(SP.companies, app.S, null);
-    const noVal = M.valueOf(Object.values(SP.companies).find(c => c.kind === "listed"), null);
-    const cap = M.capitalAt(["gpu"], SP.companies, null);
-    checks.push({ label: "no data means no number, never a zero",
-                  ok: empty === null && noVal === null && cap.value === null,
-                  actual: `layerTotals ${empty}, valueOf ${noVal}, capitalAt ${cap.value}`,
-                  expected: "null throughout" });
-    checks.push({ label: "…but who stands there is still countable",
-                  ok: cap.listed > 0 && cap.priced === 0,
-                  actual: `${cap.listed} listed and ${cap.private} private at the GPU station, 0 priced`,
-                  expected: "a cast without a valuation" });
-    is("…and a null formats as a dash", M.usd(null), "—");
-    is("…including a private company with a price table", M.valueOf(
-      Object.values(SP.companies).find(c => c.kind === "private"), { X: { marketCap: 1e12 } }), null);
+    const named = c => c && c[0] && c[0] !== "—";
+    const per = app.S.map(x => new Set(x.co.filter(named).map(c => c[0])).size);
+    const band = Math.min(...per) >= 3 && Math.max(...per) <= 9;
+    const countAt = n => {
+      const seen = new Set();
+      app.S.filter(x => x.L === n).forEach(x => x.co.filter(named).forEach(c => seen.add(c[0])));
+      return seen.size;
+    };
+    const deep = [1,2,3,4,5,6,7,8,9].reduce((a, n) => a + countAt(n), 0) / 9;
+    const shallow = [25,26,27].reduce((a, n) => a + countAt(n), 0) / 3;
+    checks.push({ label: "the corpus is evenly curated, so a headcount would be flat",
+                  ok: band && Math.abs(deep - shallow) < 4,
+                  actual: `${Math.min(...per)}–${Math.max(...per)} orgs per station; ` +
+                          `${deep.toFixed(1)} per deep stratum vs ${shallow.toFixed(1)} shallow`,
+                  expected: "an even hand, and no gradient to plot" });
   }
 
-  /* the page must say so rather than quietly showing an empty chart */
+  /* what the page plots instead, and the direction of the finding */
   {
-    const t = D.getElementById("mnyStatus").textContent.replace(/\s+/g, " ");
-    const quotedFile = fs.existsSync(path.join(ROOT, "data/live/quotes.json"))
-      ? JSON.parse(fs.readFileSync(path.join(ROOT, "data/live/quotes.json"), "utf8")).quotes || {}
-      : null;
-    const quoted = quotedFile ? Object.keys(quotedFile).length : 0;
-    checks.push({ label: "the empty state is stated, not implied",
-                  ok: quoted ? /Priced/.test(t) : /No market data is committed/.test(t),
-                  actual: t.slice(0, 52) + "…", expected: quoted ? "a priced stamp" : "an explicit notice" });
-    /* A price and a market cap are different facts, and the first live
-       run landed 168 of the first and none of the second — a cap is
-       price × shares, and the share count comes from EDGAR. Keyed on
-       `quoted` this assertion went green while the page opened on a
-       market-cap axis where every bar was null. The axis must follow the
-       caps, and the status must name the gap rather than let a priced
-       stamp imply a valuation. */
-    const capped = quotedFile
-      ? Object.values(quotedFile).filter(q => q.marketCap > 0).length : 0;
-    is("the market-cap axis follows the caps, not the prices",
-       !!D.querySelector('#mnyMetric [data-metric="mcap"]').disabled, !capped);
-    is("…and the default axis is one that can actually be drawn",
-       D.getElementById("mnyAxis").textContent.includes("market capitalisation"), !!capped);
-    if (quoted && !capped)
-      is("priced but unvalued is stated in as many words",
-         /None carry a market cap/.test(t), true);
-    is("app.priced reports caps separately from prices",
-       app.priced ? app.priced.caps : 0, capped);
+    const J = M.jurisdictionsByStratum(app.S, app.L);
+    is("every stratum yields a reading", app.L.every(l => J[l.n].hhi != null), true);
+    const deep = M.bandConcentration(app.S, app.L, 1, 9);
+    const shallow = M.bandConcentration(app.S, app.L, 19, 27);
+    checks.push({ label: "the shallow strata are the concentrated ones",
+                  ok: shallow.hhi > deep.hhi * 1.5,
+                  actual: `deep ${deep.hhi.toFixed(2)} vs shallow ${shallow.hhi.toFixed(2)} — ` +
+                          `${(shallow.hhi / deep.hhi).toFixed(1)}×`,
+                  expected: "the inverse of the intuition, and by a clear margin" });
+
+    /* the headline is arithmetic, so the rendered sentence must equal
+       what the corpus computes rather than what somebody typed */
+    const t = D.getElementById("moatStatus").textContent.replace(/\s+/g, " ");
+    is("the headline ratio is the computed one",
+       t.includes(`${(shallow.hhi / deep.hhi).toFixed(1)}×`), true);
+
+    /* an organisation at four stations in one layer must not vote four
+       times for its own country */
+    const l5 = M.stratumJurisdictions(app.S, 5);
+    const rawRows = app.S.filter(x => x.L === 5).reduce((a, x) => a + x.co.length, 0);
+    checks.push({ label: "an organisation counts once per stratum",
+                  ok: l5.orgs < rawRows,
+                  actual: `${l5.orgs} distinct organisations from ${rawRows} station rows at Patterning`,
+                  expected: "deduplicated" });
+    is("…and unstated bases are excluded, not bucketed",
+       l5.stated + l5.unstated, l5.orgs);
+
+    /* 41 organisations are recorded against two countries. Used as a
+       bucket key the string becomes a country of its own, drops those
+       organisations from the tallies of the countries they are in, and
+       splits one pair across two keys — `UK/US` sixteen times against
+       `US/UK` twice. Half a vote each fixes all three and needs no
+       judgement about which base is primary. */
+    is("a dual base splits, rather than inventing a country",
+       M.splitJurisdiction("UK/US").map(([k, w]) => `${k}:${w}`).join(","), "UK:0.5,US:0.5");
+    checks.push({ label: "…so the ordering of a dual base cannot matter",
+                  ok: JSON.stringify(M.splitJurisdiction("UK/US").map(x => x[1])) ===
+                      JSON.stringify(M.splitJurisdiction("US/UK").map(x => x[1])),
+                  actual: "UK/US and US/UK weigh the same", expected: "order-independent" });
+    const compound = new Set();
+    app.S.forEach(x => x.co.forEach(c => { if (c[3] && c[3].includes("/")) compound.add(c[3]); }));
+    checks.push({ label: "…and no compound value survives into a tally",
+                  ok: app.L.every(l => Object.keys(M.stratumJurisdictions(app.S, l.n).tally)
+                        .every(k => !k.includes("/"))),
+                  actual: `${compound.size} compound values in the corpus, 0 in any tally`,
+                  expected: "every bucket is one country" });
+    is("the index behaves", Math.abs(M.hhi([1,1,1,1]) - 0.25) < 1e-12 && M.hhi([1]) === 1, true);
+    is("absent stays a dash, never zero", M.idx(null), "—");
+  }
+
+  /* concentration is arithmetic and the pips are judgement; the page
+     must draw both and never add them together */
+  {
+    const chk = M.chokepointsAt(app.S, 5);
+    const J5 = M.stratumJurisdictions(app.S, 5);
+    checks.push({ label: "a layer can be diverse and single-sourced at once",
+                  ok: chk >= 2 && J5.distinct >= 5,
+                  actual: `Patterning spans ${J5.distinct} jurisdictions and holds ${chk} chokepoints`,
+                  expected: "the tension the page exists to show" });
+    app.moatGoTo(5);
+    is("…and the panel says so out loud",
+       /single-sourced at the joints/.test(D.getElementById("moatPanel").textContent), true);
   }
 
   /* a company at nineteen stations must not be counted nineteen times */
@@ -869,7 +884,6 @@ app.closeSheet();
     checks.push({ label: "every company's weights partition one", ok: bad.length === 0,
                   actual: bad.length ? bad.slice(0, 3).join(", ") : `${Object.keys(SP.companies).length} companies`,
                   expected: "all sum to 1 across all their stations" });
-
     const nv = SP.companies["nvidia"];
     checks.push({ label: "…and the even split really is even",
                   ok: Math.abs(M.evenWeights(nv).gpu - 1 / nv.stations.length) < 1e-12,
@@ -879,27 +893,6 @@ app.closeSheet();
                   actual: `gpu ${(M.weightsFor(nv).gpu * 100).toFixed(0)}% declared vs ` +
                           `${(M.evenWeights(nv).gpu * 100).toFixed(0)}% even`,
                   expected: "judgement moved it" });
-  }
-
-  /* with a synthetic price table the arithmetic must reconcile exactly —
-     this is the only place in the suite that invents a number, and it
-     is invented so the maths can be checked, never rendered */
-  {
-    const fake = {}; let listed = 0;
-    for (const c of Object.values(SP.companies))
-      if (c.kind === "listed") { fake[c.ticker] = { marketCap: 1e9 }; listed++; }
-    const t = M.layerTotals(SP.companies, app.S, fake);
-    const summed = Object.values(t.byStratum).reduce((a, b) => a + b, 0);
-    checks.push({ label: "attribution conserves value", ok: Math.abs(summed - t.total) / t.total < 1e-9,
-                  actual: `${(summed / 1e9).toFixed(3)}bn across strata vs ${(t.total / 1e9).toFixed(3)}bn total`,
-                  expected: "the same, to floating point" });
-    checks.push({ label: "…and divisions add their parent's share, not all of it",
-                  ok: t.total > listed * 1e9 && t.total < (listed + 40) * 1e9,
-                  actual: `${listed} listed at $1bn plus division shares = ${(t.total / 1e9).toFixed(1)}bn`,
-                  expected: "listed total plus fractional divisions" });
-    const h = M.hhi([1, 1, 1, 1]);
-    checks.push({ label: "the concentration index behaves", ok: Math.abs(h - 0.25) < 1e-12 && M.hhi([1]) === 1,
-                  actual: `four equal → ${h}, one alone → ${M.hhi([1])}`, expected: "0.25 and 1" });
   }
 
   /* coverage must be the corpus's, and honest about the thin layers */
@@ -912,32 +905,59 @@ app.closeSheet();
                   expected: "all 27, Node complete" });
   }
 
-  /* the Faults overlay must degrade to a count, never to a fake total */
+  /* NOTHING ON THIS SITE HOLDS A PRICE. That is the property the whole
+     redesign bought, and it is the one a future session is most likely
+     to undo by accident. */
   {
-    app.show("flt");
-    const btn = D.querySelector("#fltCapital [data-cap]");
-    is("faults offers the capital overlay", !!btn, true);
-    if (btn) {
-      btn.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
-      const t = D.getElementById("fltCount").textContent.replace(/\s+/g, " ");
-      /* The enduring invariant is that the count is always there — a
-         total must never replace it. A currency figure beside it is
-         correct once prices exist and a fabrication before, so the
-         assertion has to know which world it is in. Written as an
-         unconditional "no currency figure" it went green in an unpriced
-         repository and would have turned red on the morning of the first
-         successful ingest — and a red build blocks the deploy, so the
-         site would have stopped shipping the day it started working. */
-      const priced = !!app.priced;
-      checks.push({ label: priced ? "the overlay prices the blast radius and still counts it"
-                                  : "the overlay counts companies without pricing them",
-                    ok: /listed and/.test(t) && (priced || !/\$/.test(t)),
-                    actual: t.slice(Math.max(0, t.indexOf("listed") - 12), t.indexOf("listed") + 30) || t.slice(-60),
-                    expected: priced ? "a count, kept alongside the total"
-                                     : "a count, and no currency figure" });
-      btn.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
-    }
+    const priced = ["valueOf", "layerTotals", "capitalAt", "usd", "stratumHHI"]
+      .filter(k => typeof M[k] === "function");
+    checks.push({ label: "the priced machinery is gone, not dormant", ok: priced.length === 0,
+                  actual: priced.length ? priced.join(", ") + " still exported" : "no valuation code remains",
+                  expected: "removed" });
+    is("no market data file is committed",
+       fs.existsSync(path.join(ROOT, "data/live/quotes.json")) ||
+       fs.existsSync(path.join(ROOT, "data/history")), false);
   }
+}
+
+/* ---------- the price links ---------- */
+{
+  const SP = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/companies.json"), "utf8"));
+  const T = await import(pathToFileURL(path.join(ROOT, "src/lib/tickers.js")).href);
+
+  is("NVIDIA links to its own symbol", T.lookupFor("NVIDIA", app.byName).ticker, "NVDA");
+  is("a foreign listing keeps its suffix", T.lookupFor("TSMC", app.byName).ticker, "2330.TW");
+  is("a private company offers nothing", T.lookupFor("OpenAI", app.byName), null);
+  is("an unknown name offers nothing", T.lookupFor("Not A Company", app.byName), null);
+
+  /* `parent` holds a ticker, not a name — twelve divisions name a
+     parent that is not a spine row, and reading it as a name silently
+     dropped all twelve links */
+  {
+    const dm = T.lookupFor("Google DeepMind", app.byName);
+    checks.push({ label: "a division links to its listed parent",
+                  ok: dm && dm.ticker === "GOOGL" && dm.via,
+                  actual: dm ? `${dm.ticker} via ${dm.via}` : "no link",
+                  expected: "GOOGL, and said to be the parent" });
+  }
+
+  is("every linked symbol is checked by the weekly job",
+     T.allTickers(SP.companies).length >= 170, true);
+
+  app.show("idx");
+  const cells = [...D.querySelectorAll("#tb .cq")];
+  const links = cells.filter(c => c.querySelector("a"));
+  atLeast("the Index renders a price column", cells.length, 100);
+  atLeast("…with real links in it", links.length, 20);
+  checks.push({ label: "every price link points at the quote host",
+                ok: links.every(c => c.querySelector("a").getAttribute("href")
+                     .startsWith("https://finance.yahoo.com/quote/")),
+                actual: links[0]?.querySelector("a").getAttribute("href") || "none",
+                expected: "an external lookup, not a held number" });
+  checks.push({ label: "…and an unlisted organisation gets a dash, not a zero",
+                ok: cells.some(c => c.textContent.trim() === "—"),
+                actual: `${cells.length - links.length} of ${cells.length} rows unlinked`,
+                expected: "absent renders as absent" });
 }
 
 /* ---- report ---- */

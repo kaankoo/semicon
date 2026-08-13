@@ -4,6 +4,7 @@
    ============================================================ */
 
 import { app } from "../core/app.js";
+import { lookupFor } from "../lib/tickers.js";
 
 const GROUPS = [
   ["Everything", 1, 27], ["Earth & materials", 1, 3], ["Design & fab", 4, 7], ["Memory & packaging", 8, 9],
@@ -25,6 +26,11 @@ function renderTable() {
        <td class="cr">${r.r}</td>
        <td class="hcol"><span class="tag" style="--c:${col(r.s.L)}">${pad(r.s.L)} ${r.s.n}</span></td>
        <td class="hcol flagx">${r.b || ""}</td>
+       <td class="hcol cq">${r.k
+         ? `<a href="${r.k.url}" target="_blank" rel="noopener" title="${
+             r.k.via ? `No listing of its own — this is its parent, ${r.k.via}` : `Look up ${r.k.ticker}`
+           }">${r.k.ticker}${r.k.via ? " ↗*" : " ↗"}</a>`
+         : `<span class="cq--none" title="No market listing — private, a division with no listed parent, or an institution">—</span>`}</td>
      </tr>`).join("");
   document.querySelectorAll("#tb tr").forEach(tr => tr.addEventListener("click", e => {
     if (e.target.closest("a")) return;
@@ -39,8 +45,12 @@ export function initTable() {
   const { S, lname } = app;
 
   ROWS = [];
+  /* the price link is resolved once here rather than per render: the
+     table re-renders on every keystroke, and 527 lookups per keystroke
+     is work for nothing. This site holds no prices — the column points
+     at a source that maintains them. */
   S.forEach(s => s.co.forEach(c => ROWS.push({
-    n: c[0], r: c[1], d: c[2], b: c[3], s: s,
+    n: c[0], r: c[1], d: c[2], b: c[3], s: s, k: lookupFor(c[0], app.byName),
     q: (c[0] + " " + c[1] + " " + s.n + " " + s.s + " " + lname(s.L)).toLowerCase()
   })));
 

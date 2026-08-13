@@ -127,16 +127,6 @@ MT.provenance.forEach(p => {
   ["class", "who", "detail", "vintage"].forEach(f => {
     if (!p[f]) problems.push(`provenance "${p.class}" is missing "${f}"`);
   });
-  /* a `live` entry states the condition of its own source at render
-     rather than in prose. Both branches must exist, or the page would
-     silently drop the sentence in whichever state was not written. */
-  if (p.live) {
-    ["unpriced", "priced"].forEach(f => {
-      if (!p.live[f]) problems.push(`provenance "${p.class}" has a live block with no "${f}" branch`);
-    });
-    if (/\bnever been run\b|\bat the time of writing\b/.test(p.detail))
-      problems.push(`provenance "${p.class}" resolves its state at render, so its detail must not also assert one`);
-  }
 });
 MT.limits.forEach(l => { if (!l.title || !l.body) problems.push("a limitation is incomplete"); });
 if (!MT.corrections.repo) problems.push("method.json has no corrections repo");
@@ -512,49 +502,84 @@ Object.entries(tickers).forEach(([t, who]) => {
                                 gap.slice(0, 5).join(", "));
 }
 
-/* live data is optional — but if it is there it must be shaped right,
-   and it must never be committed without a date */
+/* ---- jurisdiction ----
+   The Moat page is built on this field, so it has to be sound. The
+   important assertion is the first one: the reason that page plots
+   concentration rather than a headcount is that the corpus names five
+   to seven organisations per station by editorial policy. If that ever
+   stopped being true, the argument on the page would need rewriting
+   rather than the chart quietly becoming meaningful. */
 {
-  const q = path.join(D, "../live/quotes.json");
-  if (fs.existsSync(q)) {
-    const Q = JSON.parse(fs.readFileSync(q, "utf8"));
-    if (!Q.asOf) problems.push("data/live/quotes.json has no asOf date — a number with no vintage is not a number");
-    Object.entries(Q.quotes || {}).forEach(([t, v]) => {
-      if (v.marketCap != null && !(v.marketCap > 0)) problems.push(`quote ${t} has market cap ${v.marketCap}`);
-      if (v.price != null && !(v.price > 0)) problems.push(`quote ${t} has price ${v.price}`);
-      if (v.stale && !v.staleSince) problems.push(`quote ${t} is stale without saying since when`);
-    });
-  }
+  const named = c => c && c[0] && c[0] !== "—";
+  const perStation = S.map(x => new Set(x.co.filter(named).map(c => c[0])).size);
+  const lo = Math.min(...perStation), hi = Math.max(...perStation);
+  if (lo < 3 || hi > 9)
+    problems.push(`stations name between ${lo} and ${hi} organisations, so the Moat page's ` +
+                  `"five to eight, by editorial policy" caveat no longer describes this corpus`);
+
+  const jur = new Map();
+  S.forEach(x => x.co.filter(named).forEach(c => {
+    if (!jur.has(c[0])) jur.set(c[0], new Set());
+    if (c[3] && c[3] !== "—") jur.get(c[0]).add(c[3]);
+  }));
+  const split = [...jur].filter(([, v]) => v.size > 1);
+  if (split.length)
+    problems.push(`${split.length} organisations are recorded under more than one jurisdiction, ` +
+                  `so the Moat index would place one company in two countries: ` +
+                  split.slice(0, 4).map(([k]) => k).join(", "));
+
+  const unstated = [...jur].filter(([, v]) => !v.size).length;
+  if (unstated / jur.size > 0.1)
+    problems.push(`${unstated} of ${jur.size} organisations have no stated jurisdiction, ` +
+                  `too many to quietly exclude from the Moat index`);
+
+  const blind = L.filter(l => !S.some(x => x.L === l.n &&
+    x.co.some(c => named(c) && c[3] && c[3] !== "—")));
+  if (blind.length) problems.push(`stratum ${blind[0].n} has no organisation with a stated base, so its bar is blank`);
+
+  ok.push(`${jur.size} organisations, ${lo}-${hi} per station, ${unstated} without a base`);
 }
 
-/* ---- history ----
-   The daily closes accumulate one file per trading day and are the only
-   thing on the site that cannot be regenerated. A file whose name and
-   asOf disagree would silently move a point on a chart, so both are
-   checked, and a stale price must never appear here at all. */
+/* ---- ticker links ----
+   The Index links out rather than holding a price, so the failure mode
+   is a dead link rather than a stale number. */
 {
-  const H = path.join(D, "../history");
-  if (fs.existsSync(H)) {
-    const files = fs.readdirSync(H).filter(f => f.endsWith(".json"));
-    let points = 0;
-    files.forEach(f => {
-      if (!/^\d{4}-\d{2}-\d{2}\.json$/.test(f))
-        return problems.push(`data/history/${f} is not named YYYY-MM-DD.json`);
-      const S = JSON.parse(fs.readFileSync(path.join(H, f), "utf8"));
-      const day = f.slice(0, -5);
-      if (S.asOf !== day) problems.push(`data/history/${f} says asOf ${S.asOf} — a snapshot must be dated by its filename`);
-      if (!S.close || !Object.keys(S.close).length) problems.push(`data/history/${f} carries no closes`);
-      Object.entries(S.close || {}).forEach(([t, p]) => {
-        if (!(p > 0)) problems.push(`history ${day} has close ${p} for ${t}`);
-        points++;
-      });
-      Object.entries(S.cap || {}).forEach(([t, c]) => {
-        if (!(c > 0)) problems.push(`history ${day} has market cap ${c} for ${t}`);
-        if (!(t in (S.close || {}))) problems.push(`history ${day} caps ${t} without a close for it`);
-      });
-      if (S.quotes) problems.push(`data/history/${f} uses the old full-quote shape — history holds close and cap only`);
-    });
-    if (files.length) ok.push(`${files.length} daily snapshot${files.length > 1 ? "s" : ""}, ${points} closes`);
+  /* `parent` on a division holds a ticker, not a name. Twelve of the 38
+     name a parent that operates at no station here — Alphabet, Hitachi,
+     Sony, Hyundai, Atlas Copco — so requiring a spine row would have
+     broken twelve working links. What must hold is that every division
+     names a parent at all, since a division with none has no price to
+     point at and no way to say so. */
+  const divisions = Object.values(CO.companies).filter(c => c.kind === "division");
+  const parentless = divisions.filter(c => !c.parent);
+  if (parentless.length)
+    problems.push(`${parentless.length} divisions name no parent, so their price link resolves to ` +
+                  `nothing: ` + parentless.slice(0, 3).map(c => c.name).join(", "));
+
+  const symbols = new Set();
+  Object.values(CO.companies).forEach(c => {
+    if (c.kind === "listed" && c.ticker) symbols.add(c.ticker);
+    if (c.kind === "division" && c.parent) symbols.add(c.parent);
+  });
+  if (symbols.size < 100)
+    problems.push(`only ${symbols.size} symbols are linkable; the Index price column would be mostly empty`);
+
+  /* the join is what makes the column work: a rename in stations.json
+     that stops matching companies.json empties the column silently */
+  const spineNames = new Set(Object.values(CO.companies).map(c => c.name));
+  const matched = new Set();
+  S.forEach(x => x.co.forEach(c => { if (c[0] && c[0] !== "—" && spineNames.has(c[0])) matched.add(c[0]); }));
+  if (matched.size < spineNames.size * 0.9)
+    problems.push(`only ${matched.size} of ${spineNames.size} spine names appear in stations.json — ` +
+                  `the Index price column is joined on name and would be losing rows`);
+  ok.push(`${symbols.size} symbols, ${matched.size} organisations linkable`);
+
+  const t = path.join(D, "../live/tickers.json");
+  if (fs.existsSync(t)) {
+    const T = JSON.parse(fs.readFileSync(t, "utf8"));
+    if (!T.checked) problems.push("data/live/tickers.json has no check date");
+    if (T.quotes || T.close)
+      problems.push("data/live/tickers.json holds market data, and this project commits no prices");
   }
 }
 ok.push(`${Object.keys(CO.companies).length} companies in the spine`);

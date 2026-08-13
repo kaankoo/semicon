@@ -6,19 +6,19 @@ Read this file, then read **only what the routing table tells you to**. The corp
 
 ## What this is
 
-A static, dependency-free site mapping the AI economy as 27 physical strata → 131 stations → 527 organisations, seen through eight lenses: **Descent · Web · Money · Ruler · Atlas · Lag · Faults · Cascade**, with **Method** and **Index** outside the tab group. Hand-curated knowledge is the asset; the code is thin.
+A static, dependency-free site mapping the AI economy as 27 physical strata → 131 stations → 527 organisations, seen through eight lenses: **Descent · Web · Moat · Ruler · Atlas · Lag · Faults · Cascade**, with **Method** and **Index** outside the tab group. Hand-curated knowledge is the asset; the code is thin.
 
 **Live:** GitHub Pages from `main`, public repo `kaankoo/semicon`. Deploys on push, gated on `npm test`.
 
 ```bash
 npm run dev      # http://localhost:5173 — ES modules need HTTP, file:// will not work
-npm test         # check-data + smoke — 200 assertions. Run before every commit
+npm test         # check-data + smoke — 223 assertions. Run before every commit
 npm run peek -- hbm          # one station, without opening stations.json
 npm run peek -- --ids        # all 131 ids
 npm run peek -- --find euv   # search names, taglines and prose
 npm run peek -- --org ASML   # every station an org appears at
 npm run peek -- --stratum 9  # a whole stratum
-node scripts/ingest/run.mjs --dry   # market ingest, plumbing only, fetches nothing
+node scripts/ingest/run.mjs --dry   # ticker link check, plumbing only, fetches nothing
 ```
 
 ---
@@ -30,7 +30,8 @@ node scripts/ingest/run.mjs --dry   # market ingest, plumbing only, fetches noth
 3. **Never read `stations.json` whole.** Use `npm run peek`.
 4. **Guarantees go in tests, not in care.** If a property matters, assert it in `scripts/smoke.mjs` or `scripts/check-data.mjs` so it cannot silently rot.
 5. **Every claim carries a source and a vintage.** Judgement is labelled as judgement. **Never invent a figure** — if it is not derivable from something committed, it renders as a dash.
-6. **Run `npm test` before committing.** CI runs it too; a red build blocks the deploy.
+6. **No page holds a price.** A priced Money page was built, shipped, and removed — see ROADMAP for the reasoning. The Index links out to Yahoo instead. Do not reintroduce a committed market figure without reading why the last one was taken out; a smoke assertion fails if `valueOf`, `layerTotals`, `capitalAt` or `usd` ever reappear in `metrics.js`.
+7. **Run `npm test` before committing.** CI runs it too; a red build blocks the deploy.
 
 ---
 
@@ -43,12 +44,12 @@ These are done. They are listed so you can skip them, not so you can read them. 
 | `src/core/app.js` · `data.js` · `router.js` | 49 / 59 / 25 lines. Only ever gain 2–4 lines when a view is added. |
 | `src/views/descent.js` · `sheet.js` · `tour.js` · `table.js` | The homepage and its furniture. Frozen by hard rule 1. |
 | `src/views/web.js` | Stable since Phase 0. Last touched to import `cone()` from `lib/graph.js`. |
-| `src/lib/cascade.js` · `glyphs.js` · `projection.js` · `graph.js` · `metrics.js` | Pure, no DOM, fully asserted. Read only for the bug classes named below. |
-| `src/views/ruler.js` · `atlas.js` · `timeline.js` · `faults.js` · `cascade.js` · `method.js` | Each is complete against its brief. Content changes go in that view's JSON, never in the JS. |
+| `src/lib/cascade.js` · `glyphs.js` · `projection.js` · `graph.js` · `metrics.js` · `tickers.js` | Pure, no DOM, fully asserted. Read only for the bug classes named below. |
+| `src/views/ruler.js` · `atlas.js` · `timeline.js` · `faults.js` · `cascade.js` · `method.js` · `moat.js` | Each is complete against its brief. Content changes go in that view's JSON, never in the JS. |
 | `scripts/dev.mjs` · `peek.mjs` · `parity.mjs` | Tooling. Unchanged for four phases. |
 | `data/static/strata.json` · `edges.json` | Only touched when adding a station. |
 | `data/static/world.json` | **Generated.** 1 line, 57 KB. Never hand-edit — regenerate with `scripts/world.mjs`. |
-| `data/live/*.json` · `data/history/*.json` | **Generated** by the ingest job, which is live on a weekday cron. Never hand-edit; `data/history` is append-only and one file per trading day. |
+| `data/live/tickers.json` | **Generated** by the weekly link check. A maintenance to-do, not a fact about the world. Never hand-edit. |
 
 **The corollary:** almost every content change is a JSON edit, and almost every new feature is a new view plus the six-file wiring recipe below. If you find yourself editing a finished view's JS, check you are not doing something the data could do.
 
@@ -90,12 +91,13 @@ These are done. They are listed so you can skip them, not so you can read them. 
 | A reroute or dead-end is disputed | `data/static/counterfactuals.json` — each is individually argued | — |
 | Bug in the Faults page | `src/views/faults.js` | stations.json |
 | Traversal problem in Web or Faults | `src/lib/graph.js` (48 lines, pure) | — |
-| A layer total looks wrong | `data/static/companies.json` — attribution weights are the whole story | the JS |
-| A ticker is wrong or missing | `data/static/companies.json`. CIKs are never hand-typed — the ingest resolves them | — |
-| Prices stale or absent | `data/live/meta.json` names the source that failed and why | the views |
-| A day is missing from the history | correct if the source failed — a stale price is never written under today's date. `data/live/meta.json` says which | `data/history/*` |
-| Bug in the Money page | `src/views/money.js`, `src/lib/metrics.js` | stations.json |
-| Ingest broken | `scripts/ingest/run.mjs`, then `--dry` | — |
+| An attribution weight looks wrong | `data/static/companies.json` — the weights are the whole story | the JS |
+| A ticker is wrong or missing | `data/static/companies.json`. Note `parent` on a division holds a **ticker**, not a name | — |
+| An Index price link is dead | `data/live/tickers.json` — the weekly job lists every symbol that stopped resolving | the views |
+| Bug in the Moat page | `src/views/moat.js`, `src/lib/metrics.js` | stations.json |
+| A Moat bar looks wrong | the `co[][3]` jurisdiction field in `stations.json` — the bar is arithmetic over it | the JS |
+| A price link is wrong | `src/lib/tickers.js` (60 lines, pure) | — |
+| Link check broken | `scripts/ingest/run.mjs`, then `--dry` | — |
 | Edit station prose or companies | `npm run peek -- <id>` then a targeted `Edit` | the whole file |
 | Add a station | `stations.json` (append), `edges.json`, `companies.json`, then `npm test` | — |
 | A finding shows in the wrong place | `data/static/notes.json` | — |
@@ -120,11 +122,11 @@ These are done. They are listed so you can skip them, not so you can read them. 
 | Atlas | `   ATLAS` | 692 | `.atl` |
 | Lag | `   LAG` | 767 | `.tml` |
 | Faults | `   FAULTS` | 837 | `.flt` |
-| Money | `   MONEY` | 929 | `.mny` |
+| Moat | `   MOAT` | 929 | `.moat` |
 
-`scripts/smoke.mjs` (877 ln) sections: `---- behaviour ----` · `cascade` · `against the grain` · `method` · `ruler` · `atlas` · `lag` · `faults` · `money` · `---- report ----`.
+`scripts/smoke.mjs` sections: `---- behaviour ----` · `cascade` · `against the grain` · `method` · `ruler` · `atlas` · `lag` · `faults` · `moat` · `the price links` · `---- report ----`.
 
-`scripts/check-data.mjs` sections: `---- strata / stations / edges / organisations / cascade / notes / method / ruler / atlas / timeline / counterfactuals / companies / history ----`.
+`scripts/check-data.mjs` sections: `---- strata / stations / edges / organisations / cascade / notes / method / ruler / atlas / timeline / counterfactuals / companies / jurisdiction / ticker links ----`.
 
 `index.html` (405 ln) — view sections at 44, 70, 91, 124, 153, 185, 226, 260, 291, 352. Safe to read whole.
 
@@ -146,8 +148,7 @@ These are done. They are listed so you can skip them, not so you can read them. 
 | `notes.json` | 148 ln | 9 findings, each naming stations/strata/cascadeStep/ruler/atlas/timeline/faults | notes block |
 | `method.json` | 230 ln | provenance by kind, reading definitions, known limits | method block |
 | `world.json` | 1 ln, 57 KB | **generated** coastline + boundaries | atlas block |
-| `live/*.json` | — | **generated** quotes, fundamentals, changelog, meta | companies block |
-| `history/*.json` | ~5 KB/day | **generated** one file per trading day, `{asOf,close,cap}` | history block |
+| `live/tickers.json` | — | **generated** weekly link check, `{checked,dead[],inconclusive[]}` | ticker links block |
 
 Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it is · `h[]` mechanism · `k[][]` key figures · `c` criticality 0–3 · `x` chokepoint prose · `co[][]` `[name, role, domain, jurisdiction]`.
 
@@ -155,7 +156,7 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 
 ## Conventions
 
-- **No framework, no build step, no runtime dependency.** ES modules, raw SVG, template strings. jsdom is dev-only; the ingest job's deps are all built-in `fetch`.
+- **No framework, no build step, no runtime dependency.** ES modules, raw SVG, template strings. jsdom is dev-only; the link check uses built-in `fetch` and writes no numbers. **No page on this site holds a price** — the Index links out instead, so nothing rendered can go stale.
 - **CSS** is BEM-ish with a two-to-five letter view prefix. New views claim a new prefix. Design tokens are the `:root` block; introduce no new colours — `--ok` is up, `--mag` is down.
 - **Numbers** use `font-variant-numeric: tabular-nums` and the mono face.
 - **Charts** are hand-drawn SVG. No chart library — the house style is a lab notebook, not a dashboard.
@@ -188,7 +189,8 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 | A Lag bar runs off the left edge | demonstrated before 1947; the panel gives the true year | `meta.span` |
 | `check-data` says a stratum "never lights" | all its entries are unshipped | add a shipped event |
 | Faults claims all of a blast radius | the unclassified remainder is required | `counterfactuals.json` |
-| Money shows dashes everywhere | correct — no prices are committed | `data/live/meta.json` |
+| A Moat bar is missing | that stratum has no organisation with a stated jurisdiction — `check-data` fails on this | `metrics.js` |
+| An Index price cell is a dash | correct — the organisation is private, or a division with no listed parent | `companies.json` |
 | A layer total looks too small | coverage. The hairline under each bar is how much of the layer is in the spine | `companies.json` |
 | Two names claim one ticker | a duplicate organisation in `stations.json` | fix the name, regenerate |
 | Search finds nothing | the `q` field built in `initTable()` | `src/views/table.js` |
@@ -202,6 +204,6 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 ## Where the plans live
 
 - **`ROADMAP.md`** — what shipped, what each phase actually landed against its brief, and what is next. **Start here.**
-- `PLAN.md` — the MONEY section as originally specified; the header records what shipped and what departed from it
+- `PLAN.md` — the MONEY section as originally specified. **Superseded**: the priced page was built, shipped unpriced, then replaced by Moat. ROADMAP records why
 - `IDEAS.md` — the original non-financial thinking. Almost entirely shipped; kept for the reasoning
 - `README.md` — the public-facing description

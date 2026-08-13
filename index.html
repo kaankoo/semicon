@@ -20,7 +20,7 @@
   <div class="navs" role="tablist">
     <button role="tab" aria-selected="true" data-view="strata">Descent</button>
     <button role="tab" aria-selected="false" data-view="web">Web</button>
-    <button role="tab" aria-selected="false" data-view="mny">Money</button>
+    <button role="tab" aria-selected="false" data-view="moat">Moat</button>
     <button role="tab" aria-selected="false" data-view="rul">Ruler</button>
     <button role="tab" aria-selected="false" data-view="atl">Atlas</button>
     <button role="tab" aria-selected="false" data-view="tml">Lag</button>
@@ -92,35 +92,36 @@
     </div>
   </section>
 
-  <!-- ============ MONEY ============ -->
-  <section class="view" id="v-mny">
-    <div class="mny">
+  <!-- ============ MOAT ============ -->
+  <section class="view" id="v-moat">
+    <div class="moat">
       <div class="atl__hud">
-        <p class="eyebrow">The same column, re-weighted</p>
-        <h2 class="rul__h">Where the money <em>actually sits.</em></h2>
-        <p class="rul__i">You have already walked down this column once, sized by how many stations each layer holds. Here it is again, sized by capital. Recognition and rearrangement teach more than either does alone — and every figure is derived from something committed, or it is a dash.</p>
+        <p class="eyebrow">The same column, by who stands in it</p>
+        <h2 class="rul__h">Where the barrier <em>actually is.</em></h2>
+        <p class="rul__i">You have walked down this column by depth, by size, by place and by time. Here it is again, sized by how much of each layer's cast sits in one country. Everything on this page is computed from the corpus at render — nothing is fetched, so nothing can go stale.</p>
       </div>
 
-      <div class="mny__status" id="mnyStatus"></div>
+      <div class="moat__status" id="moatStatus"></div>
 
-      <div class="mny__ctl">
-        <div class="atl__layers" id="mnyMetric" role="group" aria-label="Axis"></div>
-        <div class="atl__layers" id="mnyBasis" role="group" aria-label="Attribution basis"></div>
-        <p class="mny__axis" id="mnyAxis"></p>
+      <div class="moat__ctl">
+        <div class="atl__layers" id="moatMetric" role="group" aria-label="Axis"></div>
+        <div class="atl__layers" id="moatBasis" role="group" aria-label="Attribution basis"></div>
+        <p class="moat__axis" id="moatAxis"></p>
       </div>
 
-      <div class="mny__stage">
-        <svg id="mnySvg" aria-label="The 27 strata sized by aggregate capital"></svg>
+      <div class="moat__stage">
+        <svg id="moatSvg" aria-label="The 27 strata sized by jurisdictional concentration"></svg>
       </div>
 
-      <aside class="atl__panel mny__panel" id="mnyPanel"></aside>
+      <aside class="atl__panel moat__panel" id="moatPanel"></aside>
 
       <footer class="foot">
         <h5>How to read this</h5>
-        <p>Bar length is the layer's total. Bar <b>saturation</b> is concentration — the Herfindahl index computed on attributed value, so a layer where one company holds most of it reads darker than one where twenty share it evenly. The hairline beneath each bar is <b>coverage</b>: how much of the layer's cast is in the ticker spine at all. A long bar over a short hairline is a lower bound wearing a confident face, and the panel says so out loud below 60%.</p>
-        <p style="margin-top:14px">A company at nineteen stations must not be counted nineteen times. Every one is split across its stations by weights that sum to one. The default is an <b>even split</b> — no judgement, fully reproducible. Thirteen entries carry <b>hand-set weights</b> instead, because an even split would put five per cent of NVIDIA in the scheduling layer; each says why, and the toggle above shows you exactly how much that judgement moved the answer. None of them are segment disclosures.</p>
-        <p style="margin-top:14px">Private companies have <b>no market value here at all</b>. They are counted in the cast and excluded from every total, because mixing a two-year-old private mark with a live public price produces a number that means nothing. Divisions carry an estimated share of their listed parent, flagged as an estimate. Attributing a parent's whole market cap to a division is wrong; attributing zero is also wrong.</p>
-        <p style="margin-top:14px"><b>Nothing here is investment advice.</b> No recommendations, no price targets, no view on any security. Sources, formulas and known weaknesses are on <b>Method</b>.</p>
+        <p>Bar length is <b>jurisdictional concentration</b> — the Herfindahl index over the countries the layer's organisations are based in, where 1 is every one of them in the same place. Longer means more concentrated, which on this page means a deeper moat. The magenta pips past the end of each bar are <b>chokepoint stations</b>: places the corpus marks as a single point of failure. The hairline beneath each bar is how much of the layer's cast carries a market listing at all.</p>
+        <p class="moat__head" id="moatHead" style="margin-top:14px"></p>
+        <p style="margin-top:14px"><b>A layer can be diverse and still single-sourced.</b> Patterning spans eight jurisdictions and holds four chokepoint stations. The index is about spread; it says nothing about substitutability, and the two come apart exactly where it matters most. That is what the pips are for, and what <b>Faults</b> is for. Concentration is arithmetic; the pips are judgement; they are drawn separately and never added together.</p>
+        <p style="margin-top:14px">An organisation counts once per layer however many stations it holds there. The 41 recorded against two countries are counted half in each, so <b>UK/US</b> is not a third country and its ordering does not matter; the 16 with no stated base are excluded from the index rather than bucketed as a country of their own. <b>No prices are held anywhere on this site.</b> The price column in the Index links out to a source that maintains them. Sources and known weaknesses are on <b>Method</b>.</p>
+        <p class="moat__attr" id="moatAttr" style="margin-top:14px"></p>
       </footer>
     </div>
   </section>
@@ -242,7 +243,6 @@
 
       <div class="flt__bar">
         <p class="flt__count" id="fltCount"></p>
-        <div class="atl__layers flt__capital" id="fltCapital"></div>
         <div class="atl__legend flt__legend" id="fltLegend"></div>
       </div>
 
@@ -365,8 +365,9 @@
       </div>
       <table class="tbl">
         <thead><tr>
-          <th style="width:26%">Company</th><th style="width:34%">What it does here</th>
-          <th style="width:26%" class="hcol">Station</th><th style="width:14%" class="hcol">Base</th>
+          <th style="width:24%">Company</th><th style="width:31%">What it does here</th>
+          <th style="width:24%" class="hcol">Station</th><th style="width:9%" class="hcol">Base</th>
+          <th style="width:12%" class="hcol">Price</th>
         </tr></thead>
         <tbody id="tb"></tbody>
       </table>

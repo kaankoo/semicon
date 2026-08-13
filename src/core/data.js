@@ -5,6 +5,12 @@
    strata.json    27 layers        L
    stations.json  131 stations     S
    edges.json     dependency graph E
+   companies.json the ticker spine  CO
+
+   The spine is loaded here rather than by a view because two views now
+   need it — Moat for the panel, Index for the price links — and the
+   rule that a view never imports a view would otherwise mean fetching
+   3,721 lines twice.
    ============================================================ */
 
 import { app } from "./app.js";
@@ -18,15 +24,22 @@ async function json(name) {
 }
 
 export async function loadData() {
-  const [L, S, E] = await Promise.all([
+  const [L, S, E, CO] = await Promise.all([
     json("strata.json"),
     json("stations.json"),
-    json("edges.json")
+    json("edges.json"),
+    json("companies.json")
   ]);
 
   app.L = L;
   app.S = S;
   app.E = E;
+  app.spine = CO;
+
+  /* name → the spine entry, so any view can ask whether an organisation
+     named in stations.json is one we hold a ticker for */
+  app.byName = {};
+  Object.values(CO.companies).forEach(c => { app.byName[c.name] = c; });
 
   /* ---- indexes ---- */
   const byId = {}, byL = {};

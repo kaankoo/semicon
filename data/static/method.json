@@ -3,9 +3,7 @@
     "updated": "2026-08-11",
     "vintage": "mid-2026"
   },
-
   "intro": "This site makes a lot of claims. This page says where each kind of claim comes from, which parts are measurement and which are judgement, and where it is most likely to be wrong. Nothing here is hidden behind a methodology PDF — the same JSON files that render the site render this page, so it cannot drift out of date relative to what you are reading.",
-
   "reading": [
     {
       "term": "Stratum",
@@ -28,7 +26,6 @@
       "def": "A company, institute or state body operating at a station. There are 527 across 40+ jurisdictions. Lists are illustrative of who matters at each link — they are not exhaustive, not ranked, and not a market-share estimate."
     }
   ],
-
   "provenance": [
     {
       "class": "The 27 strata and 131 stations",
@@ -114,26 +111,30 @@
       "class": "The ticker spine",
       "kind": "curated",
       "who": "Primary listings and company disclosures",
-      "detail": "283 of the corpus's 527 organisations mapped to a primary listing, a listed parent, or neither. Every multi-station organisation is covered, because that is where attribution matters. CIKs are deliberately left empty and resolved from the SEC's own ticker map at ingest, since a hand-typed CIK is a silent wrong answer. Coverage is uneven and computed per stratum — the Node and Memory layers are complete, the Agency layer is under a quarter — and any layer total is a lower bound rather than a measurement.",
+      "detail": "283 of the corpus's 527 organisations mapped to a primary listing, a listed parent, or neither. Every multi-station organisation is covered. The spine now does two jobs rather than three: it says who is listed, and it supplies the symbol the Index links out on. It no longer feeds a valuation, so the CIK field that existed to resolve SEC filings is unused. Coverage is uneven and computed per stratum — the Node and Memory layers are complete, the Agency layer is under a quarter — and the Moat panel reports it per layer so a sparse price column is never mistaken for an absence of companies.",
       "vintage": "mid-2026"
     },
     {
       "class": "Attribution weights",
       "kind": "judgement",
       "who": "Hand-assigned where declared, otherwise arithmetic",
-      "detail": "A company present at nineteen stations must not be counted nineteen times, so every one is split across its stations by weights summing to one. The default is an even split, which involves no judgement and is fully reproducible. Thirteen entries carry hand-set weights instead, each with a stated reason, because an even split would put five per cent of NVIDIA in the scheduling layer. None of them are segment disclosures and the view shows both bases side by side. Divisions carry an estimated share of a listed parent — an estimate, flagged as one, since attributing a parent's whole market cap to a division is wrong and attributing zero is also wrong.",
+      "detail": "A company present at nineteen stations must not be counted nineteen times, so every one is split across its stations by weights summing to one. The default is an even split, which involves no judgement and is fully reproducible. Thirteen entries carry hand-set weights instead, each with a stated reason, because an even split would put five per cent of NVIDIA in the scheduling layer. None of them are segment disclosures and the Moat page shows both bases side by side. The weights no longer divide a market cap — nothing is divided any more — but the question they answer survives the prices: NVIDIA stands at nineteen stations and is not nineteen companies.",
       "vintage": "mid-2026"
     },
     {
-      "class": "Market prices and fundamentals",
+      "class": "Jurisdictional concentration on the Moat",
+      "kind": "derived",
+      "who": "The corpus itself",
+      "detail": "Every organisation named at a stratum is counted once, however many stations it holds there, and tallied by the jurisdiction recorded against it. The bar is the Herfindahl index over those tallies — 1 would be every organisation in one country. Two handling rules matter. The 41 organisations recorded against two countries are counted half in each: used as a bucket key the string would become a country of its own, drop those organisations from the tallies of the countries they are actually in, and split one pair across two keys, since the corpus writes UK/US sixteen times and US/UK twice. And the 16 entries carrying no stated base are excluded rather than bucketed as unknown, which would read as a 45th jurisdiction and flatten every layer. Nothing is fetched: the figure is recomputed from stations.json at render, so it cannot be stale, and adding an organisation moves it immediately.",
+      "vintage": "recomputed at render"
+    },
+    {
+      "class": "Share prices",
       "kind": "cited",
-      "who": "Yahoo Finance · Stooq · SEC EDGAR · ECB via Frankfurter",
-      "detail": "Written by a scheduled job into data/live/ and committed, so the site stays static and a failed run degrades to the previous day rather than to an error. The job runs on a weekday cron after the US close. Every quote carries the date it was fetched, and a value kept from a previous run is marked stale with the date it went stale — the page shows the badge rather than the number alone. The daily close is also appended to data/history/, one file per trading day, and a stale price is omitted from it rather than written under today's date.",
-      "live": {
-        "unpriced": "The job has not yet landed a snapshot, so no prices are committed and the Money page shows the spine and says so.",
-        "priced": "The vintage beside this entry is the date of the last snapshot the job committed, not the date this sentence was written."
-      },
-      "vintage": "not yet run"
+      "who": "Yahoo Finance, by link",
+      "url": "https://finance.yahoo.com",
+      "detail": "This site holds no prices. The Index carries a Price column that links out to Yahoo for the 174 organisations with a listing to link to; the other 353 show a dash. The reason is not squeamishness about market data — a scheduled job did fetch prices, and it worked. A market capitalisation needs a share count as well as a price, the only free source of share counts covers US filers, and 65 of the 171 listed organisations here trade in Taipei, Tokyo, Seoul, Frankfurt, Amsterdam or Paris, concentrated in the deep strata this site is mostly about. A market-cap chart built on US filings alone would have drawn the physical base as near-worthless and the software layer as enormous — the inverse of the argument, rendered authoritatively. Linking out is the honest version: the reader gets a maintained number and this repository holds nothing that can rot. A weekly job checks the links still resolve and reports any that do not.",
+      "vintage": "live, at the source"
     },
     {
       "class": "Blast radius on the Faults page",
@@ -179,11 +180,14 @@
       "vintage": "—"
     }
   ],
-
   "limits": [
     {
       "title": "Criticality is a judgement, not a measurement",
       "body": "The pips are the most influential and least defensible numbers on the site. They shape which stations look alarming and which look routine. They come from reading, not from data, and a well-informed reader will disagree with several of them."
+    },
+    {
+      "title": "Counting organisations measures the editing, not the industry",
+      "body": "Every station in this corpus names between five and eight organisations. That is an editorial policy — roughly six felt like the right number to make a station legible — and not a finding about how many firms operate at each link. Any chart whose bar length is a count of organisations is therefore reporting how the corpus was written: per stratum it comes out at 23.0 across the deepest nine strata against 21.7 across the shallowest three, which is flat, and would have looked like a measurement. The Moat page uses jurisdiction instead, which was recorded per organisation for its own sake and genuinely varies — and it renders those two figures from the corpus at load rather than repeating them from here, so the caveat cannot go stale while the corpus moves. The same trap applies to any future feature tempted to count entries."
     },
     {
       "title": "Company lists are illustrative",
@@ -198,8 +202,8 @@
       "body": "Water and electricity per wafer come from cross-industry data spanning many nodes. A leading-edge logic fab is plausibly worse than the average and a mature analog fab plausibly better. The chain treats them as one number because a better public one does not exist."
     },
     {
-      "title": "Every layer total is a lower bound",
-      "body": "The ticker spine covers 283 of 527 organisations and the gaps are not evenly spread. Node and Memory are complete; Agency and Thermal are under 40%, because those layers are mostly small private companies. A private company has no market value in any total here by design — mixing a two-year-old private mark with a live public price produces a figure that means nothing — so the missing names would mostly add nothing anyway. Mostly is not the same as nothing, and the coverage hairline under every bar exists so the shortfall is visible rather than assumed away."
+      "title": "Spread across countries is not substitutability",
+      "body": "The Moat index measures how many jurisdictions a layer's organisations sit in and how evenly. It says nothing about whether any of them could replace another. Patterning spans eight jurisdictions and holds four stations the corpus marks as single points of failure; a layer can be cosmopolitan in aggregate and single-sourced at every joint that matters. The chokepoint pips are drawn beside the bars for exactly this reason and are never folded into them, and Faults is where substitutability is actually argued."
     },
     {
       "title": "Attribution across nineteen stations is genuinely ambiguous",
@@ -226,7 +230,6 @@
       "body": "No recommendations, no price targets, no view on any security. The site is built as a map for understanding, not a database of record and not a basis for a trade."
     }
   ],
-
   "corrections": {
     "body": "The corpus is hand-curated and certainly contains errors. Corrections are the single most valuable contribution — a wrong figure, a missing organisation, a dependency that does not actually hold, a chokepoint that has quietly been resolved. Open an issue with a source and it will be fixed and credited.",
     "repo": "https://github.com/kaankoo/semicon"

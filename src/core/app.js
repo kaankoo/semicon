@@ -20,10 +20,11 @@ export const app = {
   /* ---- environment ---- */
   RM: false,    // prefers-reduced-motion
 
-  /* ---- live market state (populated by views/money) ----
-     null until the ingest Action has landed a snapshot. The Method page
-     reads it to date its own claim rather than asserting one. */
-  priced: null, // { asOf, n } | null
+  /* ---- the ticker spine (populated by core/data.js) ----
+     companies.json, plus a name index, so Moat and Index can both ask
+     whether an organisation named in the corpus carries a listing. */
+  spine: null,
+  byName: {},
 
   /* ---- helpers (populated by core/data.js) ---- */
   col: () => "#fff",
@@ -48,7 +49,8 @@ export const app = {
   lagGoTo: () => {},       // views/timeline
   faultsFit: () => {},     // views/faults
   faultsGoTo: () => {},    // views/faults
-  moneyFit: () => {},      // views/money
+  moatFit: () => {},       // views/moat
+  moatGoTo: () => {},      // views/moat
   showNote: () => {},      // views/method
   tourStop: () => {}       // views/tour
 };
