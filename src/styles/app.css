@@ -402,13 +402,16 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 /* ============================================================
    CASCADE
    ============================================================ */
-.cas{max-width:min(1680px,95vw);margin:0 auto;padding:60px 3vw 90px}
-.cas__top{max-width:74ch}
+/* The frame and its padding match the other five chart views exactly, so
+   moving between tabs does not move the page edge. It was 1680px with
+   60px of top padding, which read as a different site above 1768px. */
+.cas{max-width:min(1860px,95vw);margin:0 auto;padding:44px 3vw 80px}
+.cas__top{max-width:none}
 .cas__h{font-family:var(--disp);font-weight:900;font-variation-settings:'wdth' 88;
   font-size:clamp(30px,4.4vw,56px);line-height:.98;letter-spacing:-.026em;margin:0}
 .cas__h em{font-style:normal;background:var(--iri);-webkit-background-clip:text;background-clip:text;color:transparent;
   font-variation-settings:'wdth' 118}
-.cas__intro{font-size:16.5px;color:var(--ash2);margin:20px 0 0;font-weight:300;line-height:1.66;max-width:66ch}
+.cas__intro{font-size:16.5px;color:var(--ash2);margin:20px 0 0;font-weight:300;line-height:1.66;max-width:1100px}
 .cas__intro b{color:var(--qz);font-weight:500}
 .cas__lead{margin:24px 0 0;padding:14px 0 0;border-top:1px solid var(--line);
   font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;color:var(--ash);line-height:2.1}
@@ -460,7 +463,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .cas__how{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#5D6B8C;transition:.16s}
 .cas__how:hover{color:var(--pls)}
 .cas__src{margin-top:11px;padding:12px 14px;background:var(--ox);border:1px solid var(--line);
-  border-left:2px solid var(--brs);border-radius:0 8px 8px 0;max-width:70ch}
+  border-left:2px solid var(--brs);border-radius:0 8px 8px 0;max-width:1100px}
 .cas__src p{margin:0;font-size:13.5px;color:var(--ash2);font-weight:300;line-height:1.6}
 .cas__cite{margin-top:9px!important;font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--ash)}
 .cas__cite a{color:var(--pls);text-decoration:none}
@@ -637,12 +640,18 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
    RULER
    ============================================================ */
 .rul{max-width:min(1860px,95vw);margin:0 auto;padding:44px 3vw 80px}
-.rul__hud{max-width:66ch;padding:0 2vw}
+/* the hud is the title block and spans the frame; its own padding would
+   indent it from the chart below it, which is what made the page read as
+   a narrow column pinned left. Only the body copy below is measured. */
+.rul__hud{max-width:none;padding:0}
 .rul__h{font-family:var(--disp);font-weight:900;font-variation-settings:'wdth' 88;
   font-size:clamp(30px,4.4vw,54px);line-height:.98;letter-spacing:-.026em;margin:0}
 .rul__h em{font-style:normal;background:var(--iri);-webkit-background-clip:text;background-clip:text;
   color:transparent;font-variation-settings:'wdth' 118}
-.rul__i{font-size:16px;color:var(--ash2);margin:16px 0 0;font-weight:300;line-height:1.62;max-width:60ch}
+/* the standing line under every chart-view headline — Ruler, Atlas, Lag,
+   Faults and Moat all use it, so one measure settles all five. 60ch in
+   Newsreader was about 480px, the narrowest measure on the site. */
+.rul__i{font-size:16px;color:var(--ash2);margin:16px 0 0;font-weight:300;line-height:1.62;max-width:1100px}
 
 .rul__stage{position:relative;margin-top:26px;height:min(58vh,560px);border:1px solid var(--line);
   border-radius:14px;background:linear-gradient(180deg,rgba(12,16,32,.7),rgba(6,8,15,.4));overflow:hidden}
@@ -675,7 +684,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   background:var(--ox);transition:.16s var(--ease)}
 .rul__stops button:hover{color:var(--qz);border-color:var(--pls);background:var(--ox2)}
 
-.rul__panel{margin-top:22px;max-width:74ch;border:1px solid var(--line);border-left:2px solid var(--pls);
+.rul__panel{margin-top:22px;max-width:none;border:1px solid var(--line);border-left:2px solid var(--pls);
   border-radius:0 13px 13px 0;padding:18px 22px 17px;background:linear-gradient(100deg,rgba(63,220,210,.045),var(--ox) 52%)}
 .rul__pk{display:flex;align-items:center;gap:11px;margin-bottom:7px}
 .rul__pk span{font-family:var(--mono);font-size:12px;color:var(--pls);letter-spacing:.06em;
@@ -689,7 +698,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   font-variation-settings:'wdth' 94;color:var(--qz)}
 .rul__ps{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--ash);margin:6px 0 0}
-.rul__pb{font-size:15.5px;color:var(--ash2);font-weight:300;line-height:1.66;margin:13px 0 0;max-width:70ch}
+.rul__pb{font-size:15.5px;color:var(--ash2);font-weight:300;line-height:1.66;margin:13px 0 0;max-width:1100px}
 .rul__panel .cas__st{margin-top:13px}
 .rul__panel .cas__cite{margin-top:11px}
 
@@ -708,7 +717,10 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
    ATLAS
    ============================================================ */
 .atl{max-width:min(1860px,95vw);margin:0 auto;padding:44px 3vw 80px}
-.atl__hud{max-width:66ch;padding:0 2vw}
+/* shared by Atlas, Lag, Faults and Moat — changing it changes all four,
+   which is the point. A view that needs to differ adds a prefixed
+   override; do not fork this rule. */
+.atl__hud{max-width:none;padding:0}
 
 .atl__stage{position:relative;margin-top:26px;height:min(64vh,620px);border:1px solid var(--line);
   border-radius:14px;background:linear-gradient(180deg,rgba(8,11,24,.85),rgba(6,8,15,.55));overflow:hidden}
@@ -745,7 +757,9 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .atl__layers button[aria-pressed="true"]{color:var(--sub);background:var(--pls);border-color:var(--pls)}
 .atl__stops{margin-left:auto}
 
-.atl__panel{margin-top:22px;max-width:74ch;border:1px solid var(--line);border-left:2px solid var(--pls);
+/* also shared by Lag, Faults and Moat: the panel runs the frame and the
+   prose inside it keeps the measure */
+.atl__panel{margin-top:22px;max-width:none;border:1px solid var(--line);border-left:2px solid var(--pls);
   border-radius:0 13px 13px 0;padding:18px 22px 17px;background:linear-gradient(100deg,rgba(63,220,210,.045),var(--ox) 52%)}
 .atl__pk{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:7px}
 .atl__pk>span{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
@@ -761,9 +775,9 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   font-variation-settings:'wdth' 94;color:var(--qz)}
 .atl__ps{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--ash);margin:6px 0 0;font-variant-numeric:tabular-nums}
-.atl__pb{font-size:15.5px;color:var(--ash2);font-weight:300;line-height:1.66;margin:13px 0 0;max-width:70ch}
+.atl__pb{font-size:15.5px;color:var(--ash2);font-weight:300;line-height:1.66;margin:13px 0 0;max-width:1100px}
 .atl__pr{display:flex;gap:9px;align-items:baseline;font-size:13.5px;color:var(--ash);font-weight:300;
-  line-height:1.6;margin:11px 0 0;max-width:70ch}
+  line-height:1.6;margin:11px 0 0;max-width:1100px}
 .atl__pr i{width:7px;height:7px;border-radius:50%;flex:none;position:relative;top:-2px}
 .atl__pr b{color:var(--ash2);font-weight:500;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;
   text-transform:uppercase;white-space:nowrap}
@@ -907,7 +921,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   transition:.16s var(--ease)}
 .flt__prec:hover{background:rgba(63,220,210,.09);border-color:var(--pls)}
 .flt__gran{font-size:13.5px;color:var(--ash);font-weight:300;line-height:1.62;margin:13px 0 0;
-  max-width:70ch;border-left:1px solid var(--line2);padding-left:13px}
+  max-width:1100px;border-left:1px solid var(--line2);padding-left:13px}
 .flt__gran b{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;
   text-transform:uppercase;color:var(--ash2);font-weight:500;margin-bottom:3px}
 
@@ -921,14 +935,14 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .flt__item{border:1px solid var(--line);border-left:2px solid var(--brs);border-radius:0 8px 8px 0;
   padding:11px 14px;background:rgba(12,16,32,.5)}
 .flt__item--dead{border-left-color:var(--mag)}
-.flt__item p{font-size:14px;color:var(--ash2);font-weight:300;line-height:1.6;margin:9px 0 0;max-width:68ch}
+.flt__item p{font-size:14px;color:var(--ash2);font-weight:300;line-height:1.6;margin:9px 0 0;max-width:1100px}
 .flt__item .cas__cite{margin-top:8px}
 .flt__ihead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .flt__lead{display:inline-flex;align-items:center;gap:9px;min-width:190px;flex:1 1 190px;max-width:280px}
 .flt__lead i{height:3px;background:var(--brs);border-radius:2px;opacity:.75;min-width:2px}
 .flt__lead b{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--ash);font-weight:500;white-space:nowrap}
-.flt__unc{font-size:13.5px;color:var(--ash);font-weight:300;line-height:1.62;margin:20px 0 0;max-width:70ch}
+.flt__unc{font-size:13.5px;color:var(--ash);font-weight:300;line-height:1.62;margin:20px 0 0;max-width:1100px}
 .flt__unc b{color:var(--ash2);font-weight:500}
 
 @media(max-width:760px){
@@ -942,41 +956,17 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
    ============================================================ */
 .moat{max-width:min(1860px,95vw);margin:0 auto;padding:44px 3vw 80px}
 
-/* The page had been reading as a narrow column pinned to the left: the
-   frame was wide, but every block inside carried its own reading measure
-   on top of that. The blocks now run the width of the frame and only the
-   body copy keeps a measure, so the padding is the page's rather than
-   each block's. */
-.moat__hud{max-width:none;padding:0}
-/* the footer was a 1100px column centred inside a 1860px frame, which is
-   the same boxed-in look from the other direction */
-.moat .foot{max-width:none;padding-left:0;padding-right:0}
-
-/* Measure in px, not ch.
-   A `ch` is the width of the digit zero in the element's own font, and
-   Newsreader at 14px puts that near 7px — so `118ch` was about 830px,
-   not the ~1500px it reads like. The frame was never the constraint;
-   the measure was, and it was being set in a unit that hid its own
-   size. Everything here is px so the number on the page is the number
-   in the file.
-
-   Columns were tried and reverted: two-column body text on a page that
-   is otherwise a single vertical read makes the eye jump back up the
-   page mid-paragraph, which is worse than a long line. This is the
-   ceiling for a single column — wider than it was, and about as wide as
-   14px serif goes before the return sweep starts losing the line. */
-.moat__hud .rul__i{max-width:1100px}
+/* The blocks that made this page read as a narrow column pinned left —
+   the hud, the panel and the footer — are handled by the shared rules
+   they inherit and by the LAYOUT PARITY block at the foot of this file.
+   Only what is Moat's own is left here. */
 .moat__status p{max-width:1100px}
-.moat .foot p{max-width:1100px}
 
-/* the two marks on the chart, named beside it */
-.moat__lg{display:flex;flex-wrap:wrap;gap:8px 26px;align-items:center;margin:12px 2px 0;
-  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#5D6B8C}
-.moat__lg span{display:flex;align-items:center;gap:8px}
+/* the two marks on the chart, named beside it.
+   The layout is shared with Ruler and Lag — see LAYOUT PARITY. */
 .moat__sw{display:inline-block;width:20px;height:8px;border-radius:2px;
   background:linear-gradient(90deg,rgba(120,150,220,.4),rgba(120,150,220,.9))}
 .moat__sw--pip{width:7px;height:7px;border-radius:50%;background:var(--mag)}
-.moat__lgn{margin-left:auto;color:#4C5A7C}
 .moat__status{margin-top:24px;border:1px solid var(--line);border-left:2px solid var(--ok);
   border-radius:0 12px 12px 0;padding:16px 20px;background:linear-gradient(100deg,rgba(63,203,142,.05),var(--ox) 60%)}
 .moat__status--none{border-left-color:var(--brs);background:linear-gradient(100deg,rgba(227,168,62,.05),var(--ox) 60%)}
@@ -1012,10 +1002,8 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .moat__v{font-family:var(--mono);font-size:9.5px;fill:var(--ash2);letter-spacing:.04em;
   font-variant-numeric:tabular-nums}
 
-.moat__panel{border-left-color:var(--ok);max-width:none;
+.moat__panel{border-left-color:var(--ok);
   background:linear-gradient(100deg,rgba(63,203,142,.045),var(--ox) 52%)}
-.moat__panel .atl__pb,.moat__panel .moat__warn,.moat__panel .moat__cov2{max-width:1100px}
-.moat__panel .atl__ps{max-width:none}
 .moat__pk{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:7px}
 .moat__pk>span{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em}
 .moat__fig{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--qz);
@@ -1024,7 +1012,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   color:var(--ash);border:1px solid var(--line2);border-radius:4px;padding:3px 8px;
   font-weight:500;cursor:help}
 .moat__warn{font-size:13.5px;color:var(--ash);font-weight:300;line-height:1.62;margin:13px 0 0;
-  max-width:70ch;border-left:1px solid rgba(227,168,62,.4);padding-left:13px}
+  max-width:1100px;border-left:1px solid rgba(227,168,62,.4);padding-left:13px}
 .moat__warn b{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;
   text-transform:uppercase;color:var(--brs);font-weight:500;margin-bottom:3px}
 /* the jurisdiction breakdown, largest first */
@@ -1036,7 +1024,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .moat__jchip{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--ash);
   border:1px solid var(--line);border-radius:5px;padding:4px 9px;background:var(--ox)}
 .moat__jchip b{color:var(--qz);font-weight:600;margin-right:7px}
-.moat__cov2{font-size:12.5px;color:var(--ash);font-weight:300;line-height:1.6;margin:15px 0 0;max-width:70ch}
+.moat__cov2{font-size:12.5px;color:var(--ash);font-weight:300;line-height:1.6;margin:15px 0 0;max-width:1100px}
 
 /* who works at this depth — the view the site did not have.
    Deliberately the Index's own table rather than a bespoke list: same
@@ -1053,3 +1041,68 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   .moat{padding:34px 4vw 64px}
   .moat__axis{margin-left:0}
 }
+
+/* ============================================================
+   LAYOUT PARITY — the six chart views
+   ============================================================
+
+   Settled on Moat and carried across on 13 Aug 2026. It lives here, in
+   one block, rather than six times over in six view sections, because
+   it is the one rule the views are meant to share: the reason the site
+   looked inconsistent between tabs was that each view had settled its
+   own answer.
+
+   Three parts, in order of how much they cost to get wrong.
+
+   1. The frame is `min(1860px,95vw)` with `44px 3vw 80px` of padding,
+      on all six. Cascade was 1680/60px and read as a different site
+      above 1768px, which is where 95vw overtakes 1680.
+
+   2. Blocks take no width cap of their own. The hud, the panel and the
+      footer run the frame. If each block carries its own reading
+      measure *and* the frame is wide, the page reads as a narrow column
+      pinned left however wide the frame gets — that is the actual
+      cause, and widening the frame alone does nothing. A 1100px footer
+      centred inside an 1860px frame is the same boxed-in look from the
+      other direction.
+
+   3. Only body copy is measured, and the measure is in px. A `ch` is
+      the width of the digit zero *in that element's own font*, and
+      Newsreader at 14px puts that near 7px — so `70ch` was about 490px,
+      not the ~1250px it reads like. The container was never the
+      constraint; the measure was, in a unit that hid its own size. If a
+      block looks narrower than its cap suggests, check the unit before
+      widening the container. 1100px is the house ceiling for a single
+      column of 14–16px serif — about as wide as it goes before the
+      return sweep starts losing the line. Columns were tried on Moat
+      and reverted: on a page that is otherwise one vertical read, they
+      send the eye back up the page mid-paragraph.
+
+   The base `.foot` rule is deliberately untouched — the Descent and the
+   Index are correct as they are, and the Descent is frozen. */
+
+.rul .foot,.atl .foot,.tml .foot,.flt .foot,.cas .foot,.moat .foot{
+  max-width:none;padding-left:0;padding-right:0}
+.rul .foot p,.atl .foot p,.tml .foot p,.flt .foot p,.cas .foot p,.moat .foot p{
+  max-width:1100px}
+
+/* ---- a legend beside every chart ----
+
+   The other half of the parity work, and the one that is not cosmetic.
+   A mark drawn near a bar and named nowhere reads as a caveat on that
+   bar — a reader took Moat's coverage hairline for exactly that, which
+   is what got the hairline removed. Atlas and Faults already named
+   their marks; Ruler and Lag named none of theirs, so five shapes on
+   the Lag bars were explained only in a footer four paragraphs long.
+
+   Naming the marks is not the same as naming the colours. Lag keeps
+   both: `#tmlLegend` says what the colours encode and changes with the
+   layer buttons, `.tml__lg` says what the shapes mean and never
+   changes. Swatches take `currentColor` on purpose — a coloured swatch
+   would imply the shape only means that in that colour.             */
+.rul__lg,.atl__lg,.tml__lg,.moat__lg{display:flex;flex-wrap:wrap;gap:8px 26px;align-items:center;
+  margin:12px 2px 0;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:#5D6B8C}
+.rul__lg span,.atl__lg span,.tml__lg span,.moat__lg span{display:flex;align-items:center;gap:8px}
+.rul__lgn,.atl__lgn,.tml__lgn,.moat__lgn{margin-left:auto;color:#4C5A7C}
+.rul__sw,.atl__sw,.tml__sw{height:12px;width:auto;flex:none;overflow:visible}

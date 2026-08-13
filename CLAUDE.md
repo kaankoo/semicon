@@ -12,7 +12,7 @@ A static, dependency-free site mapping the AI economy as 27 physical strata → 
 
 ```bash
 npm run dev      # http://localhost:5173 — ES modules need HTTP, file:// will not work
-npm test         # check-data + smoke — 232 assertions. Run before every commit
+npm test         # check-data + smoke — 249 assertions. Run before every commit
 npm run peek -- hbm          # one station, without opening stations.json
 npm run peek -- --ids        # all 131 ids
 npm run peek -- --find euv   # search names, taglines and prose
@@ -106,30 +106,35 @@ These are done. They are listed so you can skip them, not so you can read them. 
 | Wrong tab opens / nav broken | `src/core/router.js` (25 lines), nav at `index.html:20-30` | — |
 | Styling | `src/styles/app.css` — grep the banner, never read 1,001 lines | — |
 | A page looks narrow on a wide screen | the block's own `max-width`, not the frame's. Check the **unit** first — see Layout under Conventions | — |
+| A chart view's layout drifts from the other five | the `LAYOUT PARITY` block at the foot of `app.css`; `npm test` names the offender | that view's section |
+| A mark on a chart is unexplained | that view's legend in `index.html` — `.rul__lg` `.atl__lg` `.tml__lg` `.moat__lg`, `#fltLegend`. **Not** the footer | the JS |
 | A test fails | `scripts/smoke.mjs` — section markers below | — |
 | Adding a data file | `scripts/check-data.mjs` — validation is mandatory | — |
 
 ### Finding things inside the big files
 
-`src/styles/app.css` (1,001 lines). Grep the banner, read ±40 lines:
+`src/styles/app.css` (1,108 lines). Grep the banner, read ±40 lines:
 
 | Section | Grep | ~line | Prefix |
 |---|---|---|---|
-| Base, bar, rail, hero, cards, sheet, tour, web, index | `---------- <name> ----------` | 1–386 | `.bar .rail .hero .core .sec .card .sheet .co .web .idx .tbl .tour` |
-| Cascade | `   CASCADE` | 387 | `.cas` |
-| Against the grain | `   AGAINST THE GRAIN` | 493 | `.grain .grainline` |
-| Method | `   METHOD` | 537 | `.mth` |
-| Ruler | `   RULER` | 621 | `.rul` |
-| Atlas | `   ATLAS` | 692 | `.atl` |
-| Lag | `   LAG` | 767 | `.tml` |
-| Faults | `   FAULTS` | 837 | `.flt` |
-| Moat | `   MOAT` | 929 | `.moat` |
+| Base, bar, rail, hero, cards, sheet, tour, web, index | `---------- <name> ----------` | 1–400 | `.bar .rail .hero .core .sec .card .sheet .co .web .idx .tbl .tour` |
+| Cascade | `   CASCADE` | 403 | `.cas` |
+| Against the grain | `   AGAINST THE GRAIN` | 512 | `.grain .grainline` |
+| Method | `   METHOD` | 556 | `.mth` |
+| Ruler | `   RULER` | 640 | `.rul` |
+| Atlas | `   ATLAS` | 717 | `.atl` |
+| Lag | `   LAG` | 797 | `.tml` |
+| Faults | `   FAULTS` | 867 | `.flt` |
+| Moat | `   MOAT` | 955 | `.moat` |
+| **Layout parity** | `   LAYOUT PARITY` | 1046 | all six chart views, grouped |
 
-`scripts/smoke.mjs` sections: `---- behaviour ----` · `cascade` · `against the grain` · `method` · `ruler` · `atlas` · `lag` · `faults` · `moat` · `the price links` · `---- report ----`.
+**The parity block is the one place that breaks prefix locality, deliberately.** Frames, footers and chart legends are what the six chart views are meant to *share* — the site read as inconsistent between tabs precisely because each view had settled its own answer. Anything that must hold for all six lives there, with its reasoning. Anything true of one view stays in that view's section.
+
+`scripts/smoke.mjs` sections: `---- behaviour ----` · `cascade` · `against the grain` · `method` · `ruler` · `atlas` · `lag` · `faults` · `moat` · `the price links` · `layout parity` · `---- report ----`.
 
 `scripts/check-data.mjs` sections: `---- strata / stations / edges / organisations / cascade / notes / method / ruler / atlas / timeline / counterfactuals / companies / jurisdiction / ticker links ----`.
 
-`index.html` (405 ln) — view sections at 44, 70, 91, 124, 153, 185, 226, 260, 291, 352. Safe to read whole.
+`index.html` (448 ln) — view sections at 44, 71, 96, 136, 175, 218, 270, 303, 334, 395. Safe to read whole.
 
 ---
 
@@ -159,12 +164,13 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 
 - **No framework, no build step, no runtime dependency.** ES modules, raw SVG, template strings. jsdom is dev-only; the link check uses built-in `fetch` and writes no numbers. **No page on this site holds a price** — the Index links out instead, so nothing rendered can go stale.
 - **CSS** is BEM-ish with a two-to-five letter view prefix. New views claim a new prefix. Design tokens are the `:root` block; introduce no new colours — `--ok` is up, `--mag` is down.
-- **Layout, as settled on Moat (13 Aug 2026) — the pattern the other chart views still need.**
-  - **Frame:** `max-width:min(1860px,95vw); padding:44px 3vw`. Was 1560px, which left a third of a wide screen empty.
+- **Layout — settled on Moat and carried across all six chart views (13 Aug 2026). Enforced by the `layout parity` block in `smoke.mjs`; the reasoning is in the `LAYOUT PARITY` block at the foot of `app.css`.**
+  - **Frame:** `max-width:min(1860px,95vw); padding:44px 3vw 80px`, identical on Ruler, Atlas, Lag, Faults, Cascade and Moat, so switching tabs does not move the page edge. Cascade was the last holdout at 1680px/60px.
   - **Blocks run the full frame.** The hud, the status band, the panel and the footer take no width cap of their own. If each block carries its own reading measure *and* the frame is wide, the page reads as a narrow column pinned left however wide the frame gets — that is the actual cause, and widening the frame alone does nothing.
-  - **Only body copy is measured, and the measure is in `px`.** **Never `ch`.** A `ch` is the width of the digit zero *in that element's own font*: Newsreader at 14px makes it ~7px, so `118ch` is ~830px, not the ~1500px it reads like. The unit hides its own size and cost two rounds of wrong fixes. `1100px` is the house ceiling for a single column of 14–16px serif.
+  - **Only body copy is measured, and the measure is in `px`.** **Never `ch`.** A `ch` is the width of the digit zero *in that element's own font*: Newsreader at 14px makes it ~7px, so `118ch` is ~830px, not the ~1500px it reads like. The unit hides its own size and cost two rounds of wrong fixes. `1100px` is the house ceiling for a single column of 14–16px serif. A smoke assertion fails if any rule belonging to a chart view uses `ch` again — the Descent, the sheet, Method and the grain cards keep theirs and are not in the group.
   - **No multi-column body text.** Tried on Moat and reverted: on a page that is otherwise one vertical read, columns send the eye back up the page mid-paragraph. A long line beats that.
-  - **Every mark on a chart is named in a legend beside it**, not only in the footer. An unlabelled mark near a bar reads as a caveat on that bar. See `.moat__lg`.
+  - **Every mark on a chart is named in a legend beside it**, not only in the footer. An unlabelled mark near a bar reads as a caveat on that bar. All six have one now: `.rul__lg` `.atl__lg` `.tml__lg` `.moat__lg`, and Faults' tier legend.
+  - **Naming the marks is not naming the colours.** Atlas and Lag carry both, separately: `#atlLegend` / `#tmlLegend` say what the colours encode and change with the layer buttons; `.atl__lg` / `.tml__lg` say what the shapes mean and never change. A shape put in a colour legend would come and go with the colours. Shape swatches take `currentColor` for the same reason.
   - **One bar, one variable.** If a bar encodes a value by length, its shade must track the same value, not a second one.
 - **Numbers** use `font-variant-numeric: tabular-nums` and the mono face.
 - **Charts** are hand-drawn SVG. No chart library — the house style is a lab notebook, not a dashboard.
@@ -205,7 +211,7 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 | Style leaks between views | a prefix collision | `src/styles/app.css` |
 | CI red, local green | `npm ci` vs `npm install`, or a file not committed | `.github/workflows/deploy.yml` |
 
-**First move for any bug: `npm test`.** 200 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
+**First move for any bug: `npm test`.** 249 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
 
 ---
 

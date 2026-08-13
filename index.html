@@ -141,6 +141,16 @@
         <p class="rul__i">Everything here is drawn at its true relative size. Scroll, drag or use ← → to travel from the silicon lattice to the Earth. Click anything to centre it.</p>
       </div>
 
+      <!-- every mark on the chart is named here rather than only in the
+           footer: an unlabelled mark beside a drawing reads as a claim
+           about the thing drawn -->
+      <div class="rul__lg">
+        <span><svg class="rul__sw" viewBox="0 0 12 14" aria-hidden="true"><path d="M6 0v10" stroke="var(--pls)" stroke-width="1"/><path d="M6 14l-3.5-3.5h7z" fill="var(--pls)"/></svg>the centre line — the size read out beside it</span>
+        <span><svg class="rul__sw" viewBox="0 0 20 14" aria-hidden="true"><path d="M3 3v9M10 6v6M17 3v9" stroke="currentColor" stroke-width="1"/></svg>one power of ten per tick, taller at the SI prefixes</span>
+        <span><svg class="rul__sw" viewBox="0 0 20 14" aria-hidden="true"><rect x="1" y="1.5" width="11" height="11" rx="1.5" fill="none" stroke="currentColor"/><rect x="15" y="9.5" width="3" height="3" rx=".5" fill="none" stroke="currentColor"/></svg>true relative size — the shapes are schematic, the sizes are not</span>
+        <span class="rul__lgn">anything smaller than a pixel is not drawn</span>
+      </div>
+
       <div class="rul__stage">
         <svg id="rulSvg" aria-label="A logarithmic scale from the silicon lattice to the Earth"></svg>
         <div class="rul__read"><span>across the view</span><b id="rulScale"></b></div>
@@ -168,6 +178,17 @@
         <p class="eyebrow">Forty jurisdictions, drawn to scale</p>
         <h2 class="rul__h">Every chokepoint is a <em>place.</em></h2>
         <p class="rul__i">Fifty-six sites, each resolving to stations in the corpus. Drag to pan, scroll to zoom, click anything to open it. Circles are true to the ground — the ring around Spruce Pine really is thirty kilometres across.</p>
+      </div>
+
+      <!-- the map already legends its colours, inside itself, and those
+           change with the layer buttons. These are the shapes, which do
+           not — and the ring is the one mark on this page most likely to
+           be read as a drawing convention rather than as a claim -->
+      <div class="atl__lg">
+        <span><svg class="atl__sw" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="currentColor" fill-opacity=".12" stroke="currentColor"/></svg>a geodesic ring at the site's true radius — it widens towards the poles because the map does, not the ground</span>
+        <span><svg class="atl__sw" viewBox="0 0 22 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="var(--brs)" stroke-opacity=".35"/><circle cx="8" cy="8" r="3.4" fill="var(--brs)"/></svg>a chokepoint, named in amber: a single point of failure</span>
+        <span><svg class="atl__sw" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-opacity=".45"/><circle cx="8" cy="8" r="2.2" fill="currentColor"/></svg>every other site, drawn smaller</span>
+        <span class="atl__lgn">colour is legended on the map itself</span>
       </div>
 
       <div class="atl__stage">
@@ -216,6 +237,17 @@
       <div class="atl__ctl">
         <div class="atl__layers" id="tmlLayers" role="group" aria-label="Chart layers"></div>
         <div class="atl__legend tml__legend" id="tmlLegend"></div>
+      </div>
+
+      <!-- the colour legend above says what the colours mean; this one
+           says what the shapes mean. A bar here carries five marks and
+           four of them were unnamed anywhere but the footer -->
+      <div class="tml__lg">
+        <span><svg class="tml__sw" viewBox="0 0 34 9" aria-hidden="true"><rect width="34" height="9" rx="2" fill="currentColor" opacity=".2"/><rect width="17" height="9" rx="2" fill="currentColor" opacity=".9"/></svg>solid to the year you are standing in, faint for the rest of the wait</span>
+        <span><svg class="tml__sw" viewBox="0 0 10 14" aria-hidden="true"><rect x="4" width="3" height="14" fill="currentColor"/></svg>shipped in volume</span>
+        <span><svg class="tml__sw" viewBox="0 0 20 12" aria-hidden="true"><path d="M1 6h15m-4-4l4 4l-4 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>no volume date — this view will not invent one</span>
+        <span><svg class="tml__sw" viewBox="0 0 12 14" aria-hidden="true"><path d="M9 0l-7 7l7 7z" fill="currentColor" opacity=".6"/></svg>first worked before 1947</span>
+        <span class="tml__lgn">the figure past each bar is the years it waited</span>
       </div>
 
       <div class="tml__stage">

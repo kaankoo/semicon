@@ -1,6 +1,6 @@
 # Roadmap
 
-Status as of **13 Aug 2026**. Nine lenses shipped. Money was built, shipped unpriced, and replaced by **Moat** — see Phase 8 for why, because the reasoning matters more than the change. Read `CLAUDE.md` first for conventions and the file routing table.
+Status as of **13 Aug 2026**. Nine lenses shipped, and as of Phase 9 they look like one site. Money was built, shipped unpriced, and replaced by **Moat** — see Phase 8 for why, because the reasoning matters more than the change. Read `CLAUDE.md` first for conventions and the file routing table.
 
 The organising idea: the site holds **one body of knowledge** — 27 strata, 131 stations, 527 organisations — and each new section is **a different index on it**, not new content.
 
@@ -31,8 +31,9 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | 6 · Faults | — | 8 scenarios over the dependency graph. Reach is derived, reroutes and dead-ends are declared, and the two are never added together. `cone()` moved to `src/lib/graph.js` so the traversal is shared rather than copied. |
 | 7 · Money | `d000983` | The ticker spine — 283 of 527 organisations — plus the ingest job, `metrics.js`, and a Money tab rendering the spine unpriced. **Superseded by Phase 8.** |
 | 8 · Moat | — | Money removed. Jurisdictional concentration per stratum, chokepoint pips beside it, a per-layer roster, and price links out to Yahoo. No page holds a price; the nightly ingest became a weekly link check. |
+| 9 · Layout parity | — | One frame, one measure and one legend pattern across all six chart views. Every `ch` gone from the group, every mark on every chart named beside it, and eighteen assertions so it cannot drift again. |
 
-**Current test surface:** 232 assertions + corpus validation of 11 data files. `npm test`.
+**Current test surface:** 249 assertions + corpus validation of 11 data files. `npm test`.
 
 ### What Phase 4 actually landed
 
@@ -267,47 +268,48 @@ It does not contradict Faults, it sharpens it: **a layer can be cosmopolitan in 
 
 ---
 
-## Next — layout parity across the chart views
+## Phase 9 — Layout parity across the chart views *(shipped, 13 Aug 2026)*
 
-**This is the first thing to pick up.** Moat now has a settled layout and the other five chart views do not, so the site is visibly inconsistent between tabs. The work is mechanical, entirely CSS, and needs no new data.
+Moat had a settled layout and the other five chart views did not, so the site read as inconsistent between tabs. Entirely CSS and markup; no new data, no view JS touched.
 
-The pattern to copy is recorded under **Conventions → Layout** in `CLAUDE.md`. In short: the frame runs `min(1860px,95vw)`, blocks take no width cap of their own, only body copy is measured, and **the measure is in `px` — never `ch`**.
+### What it actually landed
 
-### Already done
+- **One frame, six views.** Ruler, Atlas, Lag, Faults, Cascade and Moat all run `min(1860px,95vw)` with `44px 3vw 80px`. Cascade was the only frame that had to move — it was 1680px with 60px of top padding, which is invisible until the viewport passes 1768px and then reads as a different site. The brief said the frames were not the problem; that was right for five of the six and wrong for Cascade, and the difference is exactly the case the acceptance criterion named.
+- **Blocks run the frame.** `.rul__hud` `.atl__hud` `.cas__top` and the three panels lost their caps and their own `2vw` padding, so the padding belongs to the page rather than to each block. `.atl__hud` and `.atl__panel` are shared by four views, so the base rules were changed rather than forked — which then made four of Moat's overrides redundant, and those were deleted.
+- **Every measure is in `px`.** Nine `ch` measures across the six views became `1100px`. The largest jump was `.rul__i`, the standing line under every chart headline: `60ch` in Newsreader is about 480px, so it was the narrowest measure on the site and it appeared on five pages.
+- **Footers unpinned.** A 1100px column centred in an 1860px frame is the boxed-in look from the other direction. The base `.foot` is untouched — the Descent and the Index are correct as they are.
+- **A LAYOUT PARITY block** at the foot of `app.css` holds the rules the six views share, and is the one place that breaks prefix locality. That is the point: the site looked inconsistent because each view had settled its own answer, so what must hold for all six now lives in one place with its reasoning.
 
-`.moat` · `.rul` · `.atl` · `.tml` · `.flt` frames are at `min(1860px,95vw)` with `3vw` padding; `.cas` at `min(1680px,95vw)`; `.mth` at `min(1480px,95vw)`; `.idx` at `min(1860px,95vw)`. **The frames are not the problem.** Every remaining item below is a block inside a frame that is still capping itself.
+### Legends — the half that was not cosmetic
 
-### To do, per view — exact selectors
+The brief listed this as "also worth carrying across". It turned out to be the part with the most content in it.
 
-| View | Selector | Now | Change to | Why |
-|---|---|---|---|---|
-| **Ruler** | `.rul__hud` (line ~640) | `max-width:66ch; padding:0 2vw` | `max-width:none; padding:0` | the hud is the title block; it should span the frame |
-| | `.rul__i` (~645) | `max-width:60ch` | `max-width:1100px` | ~480px today — the narrowest measure on the site |
-| | `.rul__panel` (~678) | `max-width:74ch` | `max-width:none` | prose inside keeps its own measure |
-| | `.rul__pb` (~692) | `max-width:70ch` | `max-width:1100px` | |
-| **Atlas** | `.atl__hud` (~711) | `max-width:66ch; padding:0 2vw` | `max-width:none; padding:0` | shared with Lag and Faults — see the warning below |
-| | `.atl__panel` (~748) | `max-width:74ch` | `max-width:none` | Moat already overrides this for itself |
-| | `.atl__pb` (~764) | `max-width:70ch` | `max-width:1100px` | |
-| **Lag** | — | uses `.atl__hud` and `.atl__panel` | inherits the two rows above | |
-| **Faults** | — | uses `.atl__hud`, `.atl__panel` + `.flt__panel` | inherits, plus: | |
-| | `.flt__item p` (~924) | `max-width:68ch` | `max-width:1100px` | the reroute and dead-end essays |
-| **Cascade** | `.cas__top` (~406) | `max-width:74ch` | `max-width:none` | |
-| | `.cas__intro` (~411) | `max-width:66ch` | `max-width:1100px` | |
-| **All five** | `.foot` (~364) | `max-width:1100px; padding:56px 6vw` centred | per-view `max-width:none; padding-left:0; padding-right:0`, with `p{max-width:1100px}` | a 1100px column centred in an 1860px frame is the boxed-in look from the other direction — copy `.moat .foot` |
+- **Ruler and Atlas and Lag now name their marks.** Ruler named none of its four; Lag named none of the five shapes on a bar; Atlas had a legend but it was a *colour* legend, and its geodesic rings — the one mark on the site most likely to be read as a drawing convention rather than as a claim about the ground — were explained only in a footer paragraph.
+- **Naming the marks is not naming the colours, and the two must not share a legend.** Atlas and Lag now carry both. `#atlLegend` / `#tmlLegend` say what the colours encode and change with the layer buttons; `.atl__lg` / `.tml__lg` say what the shapes mean and never change. A shape put in a colour legend would come and go with the colours. Shape swatches take `currentColor` for the same reason: a coloured swatch implies the shape only means that in that colour.
+- Legends sit **above** their stage. A legend the reader meets after the chart has already misled them is not a legend.
 
-**Warning — `.atl__hud` and `.atl__panel` are shared by four views.** Atlas, Lag and Faults all use them, and Moat uses `.atl__hud`/`.atl__panel` with its own `.moat__hud`/`.moat__panel` overrides on top. Changing the base rule changes all four at once, which is the point, but check each of the four in a browser before committing. If one needs to differ, add a view-prefixed override the way Moat does — do not fork the base rule.
+### What holds it
 
-### Also worth carrying across
+Eighteen assertions in a new `layout parity` block in `smoke.mjs`, run against `app.css` as text and against the booted DOM:
 
-- **A legend beside every chart.** Moat names its two marks in `.moat__lg` rather than only in the footer, after a reader reasonably mistook an unlabelled hairline for a caveat on the bar above it. Atlas and Faults have `.atl__legend` / `.flt__legend` already; **Ruler and Lag have no legend at all** and should get one in the same shape.
-- **One bar, one variable.** Check each chart that encodes a value twice — Moat had length showing the selected axis while shade showed the Herfindahl index, which only broke when a second axis was added. The Lag chart and the Faults blast-radius bars are worth a look.
-- **The `.foot` treatment is per-view by design.** Do not change the base `.foot` rule; the Descent and Index are fine as they are, and the Descent is frozen by hard rule 1.
+- no rule belonging to a chart view uses `ch` again — the Descent, the sheet, Method and the grain cards are outside the group and keep theirs
+- all six frames are byte-identical
+- every chart view unpins its footer and measures the copy inside it
+- the four shared blocks run the frame
+- each of the five charts names at least as many marks as it draws, beside the chart and before it
+- no shape swatch has leaked into a colour legend
 
-### Acceptance
+Verified at 1440, 1920 and 2560 px: frame, hud, footer and body measure agree to the pixel across all six views at every width.
 
-- Every one of the six chart views looks like the same site at 1440px, 1920px and 2560px.
-- No `ch` unit survives in `app.css` outside the Descent and the sheet.
-- `npm test` stays green — the layout assertions live in the Moat block of `scripts/smoke.mjs` (`web chrome is one column`, `no unexplained mark under the bars`); add equivalents for any view you touch.
+### Deviation from the brief
+
+- **Cascade's frame moved**, which the brief said was already done. See above.
+- **Method keeps its `ch` measures and its 1480px frame.** The acceptance criterion said no `ch` should survive outside the Descent and the sheet. Method is not a chart view and is deliberately a narrower reading page; converting it would have been a change to a page nobody had complained about, so it is excluded from the group explicitly rather than quietly. The same goes for the grain cards, whose two `ch` values are component sizing, not a reading measure.
+
+### Standing gaps
+
+- **One bar, one variable** was on the brief and was not needed: the Lag bars and the Faults blast-radius bars each encode one thing by length and the same thing by colour. Nothing to fix, but nothing asserts it either.
+- The Lag shape legend describes the solid/faint split, which is only visible while the scrubber is short of today. At rest every bar is solid and one legend entry describes something not on screen.
 
 ---
 

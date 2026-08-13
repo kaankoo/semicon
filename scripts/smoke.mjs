@@ -1018,6 +1018,87 @@ app.closeSheet();
                 expected: "absent renders as absent" });
 }
 
+/* ---------- layout parity ----------
+
+   The six chart views are meant to be one layout, and the two ways that
+   silently rots are both textual, so they are checked textually.
+
+   The `ch` rule is the expensive one. A `ch` is the width of the digit
+   zero in the element's own font — Newsreader at 14px puts that near
+   7px — so a measure written in `ch` is about half the width it reads
+   like, and the unit hides that. It cost two rounds of wrong fixes on
+   Moat, so no rule belonging to a chart view may use it again. The
+   Descent, the sheet, Method and the grain cards keep theirs: they are
+   narrower pages by design and are not part of this group.            */
+{
+  const css = fs.readFileSync(path.join(ROOT, "src/styles/app.css"), "utf8");
+  const VIEWS = ["rul", "atl", "tml", "flt", "cas", "moat"];
+  const owned = new RegExp(`^\\.(${VIEWS.join("|")})(?![a-z])`);
+
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(m => ({
+    sel: m[1].replace(/\/\*[\s\S]*?\*\//g, "").trim(),
+    body: m[2]
+  }));
+  const mine = rules.filter(r =>
+    r.sel.split(",").some(s => owned.test(s.trim())));
+
+  const withCh = mine.filter(r => /[\d.]\s*ch\b/.test(r.body)).map(r => r.sel);
+  is("no chart view measures itself in ch", withCh.join(" · "), "");
+
+  /* one frame, six views — the page edge must not move between tabs */
+  const frames = VIEWS.map(v => {
+    const r = mine.find(x => x.sel === `.${v}`);
+    return `${v}:${(r ? r.body : "MISSING").replace(/\s+/g, "")}`;
+  });
+  const want = "max-width:min(1860px,95vw);margin:0auto;padding:44px3vw80px";
+  is("all six frames are the same frame",
+     frames.filter(f => !f.endsWith(want)).join(" · "), "");
+
+  /* a 1100px footer centred in an 1860px frame is the boxed-in look from
+     the other direction, so every chart view overrides the base .foot */
+  is("every chart view unpins its footer",
+     VIEWS.filter(v => !new RegExp(`\\.${v} \\.foot[,{]`).test(css)).join(" · "), "");
+  is("…and measures the copy inside it instead",
+     VIEWS.filter(v => !new RegExp(`\\.${v} \\.foot p[,{]`).test(css)).join(" · "), "");
+
+  /* the blocks that made every one of these pages read as a narrow
+     column pinned left. They run the frame; the prose inside them does
+     not — see the LAYOUT PARITY block at the foot of app.css */
+  for (const sel of [".rul__hud", ".atl__hud", ".rul__panel", ".atl__panel"]) {
+    const r = mine.find(x => x.sel === sel);
+    is(`${sel} runs the frame`,
+       /max-width:\s*none/.test(r ? r.body : ""), true);
+  }
+
+  /* Every mark is named beside its chart. A mark drawn near a bar and
+     named nowhere reads as a caveat on that bar — that is what got
+     Moat's coverage hairline removed, and Ruler and Lag were naming
+     none of theirs at all. Lag carries two legends on purpose: one for
+     what the colours encode, which changes with the layer buttons, and
+     one for what the shapes mean, which does not. */
+  for (const [view, sel, min] of [
+    ["ruler", ".rul__lg span", 3],
+    ["atlas", ".atl__lg span", 3],
+    ["lag", ".tml__lg span", 4],
+    ["faults", "#fltLegend span", 2],
+    ["moat", ".moat__lg span", 2]
+  ]) atLeast(`${view} names its marks beside the chart`,
+             D.querySelectorAll(sel).length, min);
+
+  /* the colour legends stay colour legends: they change with the layer
+     buttons, so a shape put in one would come and go with the colours */
+  is("atlas and lag keep shape and colour apart",
+     D.querySelectorAll("#tmlLegend .tml__sw, #atlLegend .atl__sw").length, 0);
+
+  /* a legend the reader meets after the chart has already misled them
+     is not a legend, so each one sits above its stage */
+  for (const [view, lg, stage] of [["ruler", ".rul__lg", ".rul__stage"],
+                                   ["atlas", ".atl__lg", ".atl__stage"],
+                                   ["lag", ".tml__lg", ".tml__stage"]])
+    is(`${view}'s legend comes before its chart`,
+       !!(D.querySelector(lg).compareDocumentPosition(D.querySelector(stage)) & 4), true);
+}
+
 /* ---- report ---- */
 const failed = checks.filter(c => !c.ok);
 const pad = s => String(s).padEnd(34);
