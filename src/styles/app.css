@@ -528,9 +528,9 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .grain__fig b{display:block;font-family:var(--mono);font-size:25px;font-weight:600;color:var(--qz);
   font-variant-numeric:tabular-nums;letter-spacing:-.03em;line-height:1}
 .grain__fig span{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;
-  text-transform:uppercase;color:#5D6B8C;margin-top:4px;max-width:24ch;line-height:1.5}
+  text-transform:uppercase;color:#5D6B8C;margin-top:4px;max-width:126px;line-height:1.5}
 .grain__t{font-family:var(--disp);font-weight:700;font-size:16px;letter-spacing:-.012em;margin:0;
-  font-variation-settings:'wdth' 96;color:var(--qz);flex:1 1 15ch;min-width:0}
+  font-variation-settings:'wdth' 96;color:var(--qz);flex:1 1 150px;min-width:0}
 .grain__b{font-size:14.5px;color:var(--ash2);font-weight:300;line-height:1.62;margin:13px 0 0}
 .grain__b b{color:var(--qz);font-weight:500}
 .grain__b i{color:var(--pls);font-style:italic}
@@ -559,8 +559,13 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   color:var(--ash);padding:7px 11px;border-radius:7px;border:1px solid transparent;transition:.18s var(--ease);flex:none}
 .mthlink:hover{color:var(--qz);border-color:var(--line2)}
 .mthlink[aria-selected=true],.view#v-mth.on ~ *{}
-.mth{max-width:min(1480px,95vw);margin:0 auto;padding:60px 3vw 90px}
-.mth__top{max-width:74ch}
+.mth{max-width:min(1860px,95vw);margin:0 auto;padding:44px 3vw 80px}
+/* Method joins the parity group. It had been the last page with its own
+   answer — a 1480px frame, 60px of top padding and a 74ch title block
+   that computed to 592px, so it opened as a narrow column pinned left
+   inside a frame that was already narrower than everywhere else. Two
+   pages either side of it in the nav, and three different layouts. */
+.mth__top{max-width:none}
 .mth__counts{display:flex;flex-wrap:wrap;gap:0;margin:28px 0 0;border-top:1px solid var(--line)}
 .mth__ct{padding:15px 24px 0 0;margin-right:24px;border-right:1px solid var(--line)}
 .mth__ct:last-child{border-right:none;margin-right:0}
@@ -570,7 +575,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .mth__sec{margin-top:56px}
 .mth__h{font-family:var(--disp);font-weight:800;font-size:clamp(19px,2.1vw,25px);letter-spacing:-.018em;
   margin:0 0 8px;font-variation-settings:'wdth' 94;padding-bottom:12px;border-bottom:1px solid var(--line)}
-.mth__lede{font-size:15px;color:var(--ash);font-weight:300;line-height:1.62;margin:14px 0 22px;max-width:74ch}
+.mth__lede{font-size:15px;color:var(--ash);font-weight:300;line-height:1.62;margin:14px 0 22px;max-width:1100px}
 .mth__lede code{font-family:var(--mono);font-size:12.5px;color:var(--pls);background:var(--ox);
   border:1px solid var(--line);border-radius:4px;padding:1px 5px}
 
@@ -596,7 +601,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .mth__who a{color:var(--pls);text-decoration:none}
 .mth__who a:hover{text-decoration:underline}
 .mth__vt{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:#4C5A7C}
-.mth__pv p{margin:7px 0 0;font-size:13.5px;color:var(--ash2);font-weight:300;line-height:1.58;max-width:88ch}
+.mth__pv p{margin:7px 0 0;font-size:13.5px;color:var(--ash2);font-weight:300;line-height:1.58;max-width:1100px}
 
 .mth__grains{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:12px;margin-top:20px}
 
@@ -626,7 +631,8 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .mth__lim{border:1px solid var(--line);border-left:2px solid var(--mag);border-radius:0 11px 11px 0;padding:15px 17px;background:var(--ox)}
 .mth__lim h4{font-family:var(--disp);font-weight:700;font-size:14.5px;letter-spacing:-.01em;margin:0 0 7px;color:var(--qz)}
 .mth__lim p{margin:0;font-size:13.5px;color:var(--ash2);font-weight:300;line-height:1.58}
-.mth__corr{margin-top:20px;max-width:74ch}
+.mth__corr{margin-top:20px;max-width:none}
+.mth__corr p{max-width:1100px}
 .mth__corr p{font-size:15px;color:var(--ash2);font-weight:300;line-height:1.62;margin:0 0 18px}
 .mth__corr .btn{margin-right:9px}
 
@@ -1051,7 +1057,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 }
 
 /* ============================================================
-   LAYOUT PARITY — the six chart views
+   LAYOUT PARITY — the seven full-width views
    ============================================================
 
    Settled on Moat and carried across on 13 Aug 2026. It lives here, in
@@ -1063,8 +1069,9 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
    Three parts, in order of how much they cost to get wrong.
 
    1. The frame is `min(1860px,95vw)` with `44px 3vw 80px` of padding,
-      on all six. Cascade was 1680/60px and read as a different site
-      above 1768px, which is where 95vw overtakes 1680.
+      on all seven. Cascade was 1680/60px and read as a different site
+      above 1768px, which is where 95vw overtakes 1680; Method was
+      1480/60px and narrower still, which is the same fault twice.
 
    2. Blocks take no width cap of their own. The hud, the panel and the
       footer run the frame. If each block carries its own reading
@@ -1089,9 +1096,9 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
    The base `.foot` rule is deliberately untouched — the Descent and the
    Index are correct as they are, and the Descent is frozen. */
 
-.rul .foot,.atl .foot,.tml .foot,.flt .foot,.cas .foot,.moat .foot{
+.rul .foot,.atl .foot,.tml .foot,.flt .foot,.cas .foot,.moat .foot,.mth .foot{
   max-width:none;padding-left:0;padding-right:0}
-.rul .foot p,.atl .foot p,.tml .foot p,.flt .foot p,.cas .foot p,.moat .foot p{
+.rul .foot p,.atl .foot p,.tml .foot p,.flt .foot p,.cas .foot p,.moat .foot p,.mth .foot p{
   max-width:1100px}
 
 /* ---- a legend beside every chart ----

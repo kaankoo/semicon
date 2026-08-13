@@ -283,7 +283,7 @@ app.closeSheet();
 /* ---------- ruler ---------- */
 {
   const R = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/ruler.json"), "utf8"));
-  const { place } = await import(pathToFileURL(path.join(ROOT, "src/views/ruler.js")).href);
+  const { place, metres } = await import(pathToFileURL(path.join(ROOT, "src/views/ruler.js")).href);
 
   app.show("rul");
   is("ruler view active", D.getElementById("v-rul").classList.contains("on"), true);
@@ -292,6 +292,34 @@ app.closeSheet();
   atLeast("stops offered", D.querySelectorAll("#rulStops button").length, 8);
   atLeast("panel populated", D.getElementById("rulPanel").textContent.trim().length, 80);
   atLeast("scale readout", D.getElementById("rulScale").textContent.trim().length, 2);
+
+  /* Every label must say what the object actually is.
+
+     It did not. The formatter trimmed trailing zeros with `/\.?0+$/`,
+     which is right for a fractional tail and wrong for a whole number,
+     so nine of the thirty-six were labelled an order of magnitude off
+     while being *drawn* at the right size: visible light read "55 nm",
+     a leading-edge fab "3 m", one ALD cycle "1 pm". The drawing is
+     asserted six ways above and the caption on it was not asserted at
+     all. Round-tripping the string back to metres is the check that
+     would have caught it, so it is the check that lives here now. */
+  {
+    const UNIT = { pm: 1e-12, nm: 1e-9, "µm": 1e-6, mm: 1e-3, m: 1, km: 1e3, Mm: 1e6 };
+    const wrong = R.objects.filter(o => {
+      const [num, unit] = metres(o.m).split(" ");
+      const back = parseFloat(num) * UNIT[unit];
+      return !(unit in UNIT) || Math.abs(back - o.m) / o.m > 0.01;
+    }).map(o => `${o.id} says ${metres(o.m)}`);
+    checks.push({ label: "every label reads back as the size it stores",
+                  ok: wrong.length === 0,
+                  actual: wrong.length ? wrong.join(" · ") : `all ${R.objects.length} round-trip`,
+                  expected: "all round-trip" });
+
+    /* the specific shape of the old bug: a whole number ending in zero */
+    is("a round number keeps its zeros", metres(5.5e-7), "550 nm");
+    is("…however many of them", metres(300), "300 m");
+    is("…and a fractional tail is still trimmed", metres(2.2), "2.2 m");
+  }
 
   /* the whole point: an object ten times bigger must be drawn ten times bigger */
   const a = { lg: Math.log10(1e-9) }, b = { lg: Math.log10(1e-8) };
@@ -1115,12 +1143,12 @@ app.closeSheet();
    zero in the element's own font — Newsreader at 14px puts that near
    7px — so a measure written in `ch` is about half the width it reads
    like, and the unit hides that. It cost two rounds of wrong fixes on
-   Moat, so no rule belonging to a chart view may use it again. The
-   Descent, the sheet, Method and the grain cards keep theirs: they are
-   narrower pages by design and are not part of this group.            */
+   Moat, so no rule belonging to one of these views may use it again.
+   Only the Descent and the sheet keep theirs, and the Descent is frozen
+   by hard rule 1.                                                     */
 {
   const css = fs.readFileSync(path.join(ROOT, "src/styles/app.css"), "utf8");
-  const VIEWS = ["rul", "atl", "tml", "flt", "cas", "moat"];
+  const VIEWS = ["rul", "atl", "tml", "flt", "cas", "moat", "mth"];
   const owned = new RegExp(`^\\.(${VIEWS.join("|")})(?![a-z])`);
 
   const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(m => ({
@@ -1131,7 +1159,7 @@ app.closeSheet();
     r.sel.split(",").some(s => owned.test(s.trim())));
 
   const withCh = mine.filter(r => /[\d.]\s*ch\b/.test(r.body)).map(r => r.sel);
-  is("no chart view measures itself in ch", withCh.join(" · "), "");
+  is("no view in the group measures itself in ch", withCh.join(" · "), "");
 
   /* one frame, six views — the page edge must not move between tabs */
   const frames = VIEWS.map(v => {
@@ -1139,12 +1167,12 @@ app.closeSheet();
     return `${v}:${(r ? r.body : "MISSING").replace(/\s+/g, "")}`;
   });
   const want = "max-width:min(1860px,95vw);margin:0auto;padding:44px3vw80px";
-  is("all six frames are the same frame",
+  is("all seven frames are the same frame",
      frames.filter(f => !f.endsWith(want)).join(" · "), "");
 
   /* a 1100px footer centred in an 1860px frame is the boxed-in look from
      the other direction, so every chart view overrides the base .foot */
-  is("every chart view unpins its footer",
+  is("every view in the group unpins its footer",
      VIEWS.filter(v => !new RegExp(`\\.${v} \\.foot[,{]`).test(css)).join(" · "), "");
   is("…and measures the copy inside it instead",
      VIEWS.filter(v => !new RegExp(`\\.${v} \\.foot p[,{]`).test(css)).join(" · "), "");

@@ -87,13 +87,19 @@ let sweeping = null;
 
 /* ---------- formatting ---------- */
 
-function metres(v) {
+export function metres(v) {
   const e = Math.floor(Math.log10(Math.abs(v)));
   let [exp, unit] = SI[0];
   for (const [x, u] of SI) if (e >= x) { exp = x; unit = u; }
   const n = v / Math.pow(10, exp);
   const s = n >= 100 ? n.toFixed(0) : n >= 10 ? n.toFixed(1) : n >= 1 ? n.toFixed(2) : n.toFixed(3);
-  return `${s.replace(/\.?0+$/, "")} ${unit}`;
+  /* trim the fractional tail only. `/\.?0+$/` also ate zeros off whole
+     numbers — 550 nm rendered as "55 nm", 300 m as "3 m", 100 pm as
+     "1 pm" — so nine of the thirty-six objects were labelled an order
+     of magnitude off while being *drawn* at the right size. Every label
+     is now round-tripped against its stored value by the test. */
+  const t = s.includes(".") ? s.replace(/0+$/, "").replace(/\.$/, "") : s;
+  return `${t} ${unit}`;
 }
 
 function decadeLabel(e) {

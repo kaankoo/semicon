@@ -32,9 +32,10 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | 7 · Money | `d000983` | The ticker spine — 283 of 527 organisations — plus the ingest job, `metrics.js`, and a Money tab rendering the spine unpriced. **Superseded by Phase 8.** |
 | 8 · Moat | — | Money removed. Jurisdictional concentration per stratum, chokepoint pips beside it, a per-layer roster, and price links out to Yahoo. No page holds a price; the nightly ingest became a weekly link check. |
 | 9 · Layout parity | — | One frame, one measure and one legend pattern across all six chart views. Every `ch` gone from the group, every mark on every chart named beside it, and eighteen assertions so it cannot drift again. |
-| 10 · Ruler usability | — | Zoom over the whole stage rather than over a shape, five tracks instead of three so objects stop covering each other, labels placed against each other and kept inside the frame, and a sweep from the lattice to the Earth. |
+| 10 · Ruler usability | — | Zoom over the whole stage rather than over a shape, spacing widened until objects sit beside each other rather than inside each other, labels placed against each other and kept inside the frame, and a sweep from the lattice to the Earth. Nine mislabelled sizes fixed along the way. |
+| 11 · Method parity | — | The last page with its own layout brought into the group — seven views, one frame. No `ch` measure survives outside the frozen Descent. |
 
-**Current test surface:** 260 assertions + corpus validation of 11 data files. `npm test`.
+**Current test surface:** 264 assertions + corpus validation of 11 data files. `npm test`.
 
 ### What Phase 4 actually landed
 
@@ -353,6 +354,16 @@ Each label now takes the first rung — clear above, clear below, a rank further
 ### The harness bug it surfaced
 
 `smoke.mjs` shimmed `requestAnimationFrame` and never its partner. `jump()` in the ruler has always called `cancelAnimationFrame`; nothing in the suite had reached that line, so a missing global sat in the harness unnoticed until the sweep made every jump take it. Both are shimmed now.
+
+### Follow-up, same day — and the one that mattered
+
+Reading the finished page turned up a bug older than any of this work, and two pages that had not been finished.
+
+- **Nine of the thirty-six labels were an order of magnitude wrong.** `metres()` trimmed trailing zeros with `/\.?0+$/`, which is right for a fractional tail and wrong for a whole number: 550 nm rendered as "55 nm", a leading-edge fab as "3 m", one ALD cycle as "1 pm", a 300 mm wafer as "3 mm". The stored figures were all correct and every object was *drawn* at the right size — the drawing is asserted six ways — so the error was invisible to the tests and to anyone who trusted them. It was visible immediately to someone who knew that visible light is not 55 nm. **The lesson is narrower than "test more": the caption on a chart is a claim, and it was the only claim on this page nothing checked.** Every label now round-trips back to metres and is compared against the stored value.
+- **Two prose errors underneath it.** Visible light was captioned "the shortest thing your eye can resolve" — 550 nm is the middle of the band, not its short end, and wavelength is not acuity; it now reads "green — the middle of the band your eye sees", and its precision drops from `exact` to `typical` because a representative point in a 380–750 nm band is not a measured quantity. The CoWoS interposer was "more than three reticles across" — 52 mm against a 33 mm reticle is 1.6 across and 3.3 by area; it now says "three reticles' worth of silicon, in one piece". Every other figure was checked against its claim and stands.
+- **Method joins the parity group, which is now seven views.** It was the last page with its own answer: a 1480px frame, 60px of top padding and a `74ch` title block that computed to 592px — a narrow column pinned left inside a frame already narrower than everywhere else. Nine tabs had been carrying three different layouts.
+- **Two headlines had hard line breaks in them.** Cascade and Method both wrapped early because a `<br>` written for a 74ch header block survived into one nearly three times as wide. A `<br>` in a headline is a layout decision typed into the content, and it goes stale exactly like a typed number.
+- No `ch` unit now survives anywhere in `app.css` outside the Descent, which is frozen by hard rule 1.
 
 ### Standing gaps
 

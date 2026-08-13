@@ -12,7 +12,7 @@ A static, dependency-free site mapping the AI economy as 27 physical strata → 
 
 ```bash
 npm run dev      # http://localhost:5173 — ES modules need HTTP, file:// will not work
-npm test         # check-data + smoke — 260 assertions. Run before every commit
+npm test         # check-data + smoke — 264 assertions. Run before every commit
 npm run peek -- hbm          # one station, without opening stations.json
 npm run peek -- --ids        # all 131 ids
 npm run peek -- --find euv   # search names, taglines and prose
@@ -80,6 +80,7 @@ These are done. They are listed so you can skip them, not so you can read them. 
 | Bug in the Cascade | `src/views/cascade.js`, `src/lib/cascade.js` | stations.json |
 | A Ruler object is the wrong size | `data/static/ruler.json` (`m` is the whole story) | the JS |
 | Bug in the Ruler | `src/views/ruler.js`; glyph problems → `src/lib/glyphs.js` | stations.json |
+| **A Ruler label reads an order of magnitude off** | `metres()` in `ruler.js`, not the JSON. Trimming trailing zeros off a *whole* number turned 550 nm into "55 nm". Round-tripped by the test now | `ruler.json` |
 | A circle is the wrong size, or a site is misplaced | `data/static/atlas.json` — `lat`, `lon`, `radiusKm` | the JS |
 | Bug in the Atlas | `src/views/atlas.js` | stations.json, world.json |
 | Projection, geodesic or wrapping problem | `src/lib/projection.js` (131 lines, pure) | — |
@@ -113,7 +114,7 @@ These are done. They are listed so you can skip them, not so you can read them. 
 
 ### Finding things inside the big files
 
-`src/styles/app.css` (1,108 lines). Grep the banner, read ±40 lines:
+`src/styles/app.css` (1,123 lines). Grep the banner, read ±40 lines:
 
 | Section | Grep | ~line | Prefix |
 |---|---|---|---|
@@ -121,14 +122,14 @@ These are done. They are listed so you can skip them, not so you can read them. 
 | Cascade | `   CASCADE` | 403 | `.cas` |
 | Against the grain | `   AGAINST THE GRAIN` | 512 | `.grain .grainline` |
 | Method | `   METHOD` | 556 | `.mth` |
-| Ruler | `   RULER` | 640 | `.rul` |
-| Atlas | `   ATLAS` | 717 | `.atl` |
-| Lag | `   LAG` | 797 | `.tml` |
-| Faults | `   FAULTS` | 867 | `.flt` |
-| Moat | `   MOAT` | 955 | `.moat` |
-| **Layout parity** | `   LAYOUT PARITY` | 1046 | all six chart views, grouped |
+| Ruler | `   RULER` | 646 | `.rul` |
+| Atlas | `   ATLAS` | 731 | `.atl` |
+| Lag | `   LAG` | 811 | `.tml` |
+| Faults | `   FAULTS` | 881 | `.flt` |
+| Moat | `   MOAT` | 969 | `.moat` |
+| **Layout parity** | `   LAYOUT PARITY` | 1060 | all seven full-width views, grouped |
 
-**The parity block is the one place that breaks prefix locality, deliberately.** Frames, footers and chart legends are what the six chart views are meant to *share* — the site read as inconsistent between tabs precisely because each view had settled its own answer. Anything that must hold for all six lives there, with its reasoning. Anything true of one view stays in that view's section.
+**The parity block is the one place that breaks prefix locality, deliberately.** Frames, footers and chart legends are what the seven full-width views are meant to *share* — the site read as inconsistent between tabs precisely because each view had settled its own answer. Anything that must hold for all six lives there, with its reasoning. Anything true of one view stays in that view's section.
 
 `scripts/smoke.mjs` sections: `---- behaviour ----` · `cascade` · `against the grain` · `method` · `ruler` · `atlas` · `lag` · `faults` · `moat` · `the price links` · `layout parity` · `---- report ----`.
 
@@ -165,9 +166,10 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 - **No framework, no build step, no runtime dependency.** ES modules, raw SVG, template strings. jsdom is dev-only; the link check uses built-in `fetch` and writes no numbers. **No page on this site holds a price** — the Index links out instead, so nothing rendered can go stale.
 - **CSS** is BEM-ish with a two-to-five letter view prefix. New views claim a new prefix. Design tokens are the `:root` block; introduce no new colours — `--ok` is up, `--mag` is down.
 - **Layout — settled on Moat and carried across all six chart views (13 Aug 2026). Enforced by the `layout parity` block in `smoke.mjs`; the reasoning is in the `LAYOUT PARITY` block at the foot of `app.css`.**
-  - **Frame:** `max-width:min(1860px,95vw); padding:44px 3vw 80px`, identical on Ruler, Atlas, Lag, Faults, Cascade and Moat, so switching tabs does not move the page edge. Cascade was the last holdout at 1680px/60px.
+  - **Frame:** `max-width:min(1860px,95vw); padding:44px 3vw 80px`, identical on Ruler, Atlas, Lag, Faults, Cascade, Moat **and Method**, so switching tabs does not move the page edge. Cascade was 1680px/60px and Method 1480px/60px — three different answers across nine tabs.
+  - **No hard line breaks in a headline.** A `<br>` is a layout decision typed into the content, and it goes stale exactly like a typed number: Cascade's and Method's titles were broken for a header block that has since doubled in width, so they wrapped early inside a line that had room to spare. `clamp()` on the font size handles narrow screens.
   - **Blocks run the full frame.** The hud, the status band, the panel and the footer take no width cap of their own. If each block carries its own reading measure *and* the frame is wide, the page reads as a narrow column pinned left however wide the frame gets — that is the actual cause, and widening the frame alone does nothing.
-  - **Only body copy is measured, and the measure is in `px`.** **Never `ch`.** A `ch` is the width of the digit zero *in that element's own font*: Newsreader at 14px makes it ~7px, so `118ch` is ~830px, not the ~1500px it reads like. The unit hides its own size and cost two rounds of wrong fixes. `1100px` is the house ceiling for a single column of 14–16px serif. A smoke assertion fails if any rule belonging to a chart view uses `ch` again — the Descent, the sheet, Method and the grain cards keep theirs and are not in the group.
+  - **Only body copy is measured, and the measure is in `px`.** **Never `ch`.** A `ch` is the width of the digit zero *in that element's own font*: Newsreader at 14px makes it ~7px, so `118ch` is ~830px, not the ~1500px it reads like. The unit hides its own size and cost two rounds of wrong fixes. `1100px` is the house ceiling for a single column of 14–16px serif. A smoke assertion fails if any rule belonging to a view in the group uses `ch` again. Only the Descent and the sheet keep theirs, and the Descent is frozen by hard rule 1.
   - **No multi-column body text.** Tried on Moat and reverted: on a page that is otherwise one vertical read, columns send the eye back up the page mid-paragraph. A long line beats that.
   - **Every mark on a chart is named in a legend beside it**, not only in the footer. An unlabelled mark near a bar reads as a caveat on that bar. All six have one now: `.rul__lg` `.atl__lg` `.tml__lg` `.moat__lg`, and Faults' tier legend.
   - **Naming the marks is not naming the colours.** Atlas and Lag carry both, separately: `#atlLegend` / `#tmlLegend` say what the colours encode and change with the layer buttons; `.atl__lg` / `.tml__lg` say what the shapes mean and never change. A shape put in a colour legend would come and go with the colours. Shape swatches take `currentColor` for the same reason.
@@ -217,7 +219,7 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 | Style leaks between views | a prefix collision | `src/styles/app.css` |
 | CI red, local green | `npm ci` vs `npm install`, or a file not committed | `.github/workflows/deploy.yml` |
 
-**First move for any bug: `npm test`.** 260 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
+**First move for any bug: `npm test`.** 264 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
 
 ---
 

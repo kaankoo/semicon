@@ -42,8 +42,8 @@
       "precision": "exact", "station": "scan",
       "note": "Argon fluoride at 193 nm, with water between the lens and the wafer to shorten it further. Fourteen times longer than EUV, and still responsible for the majority of layers on a leading-edge wafer — and for essentially every mature-node chip in the world." },
 
-    { "id": "visible", "m": 5.5e-7, "glyph": "wave", "label": "Visible light", "sub": "the shortest thing your eye can resolve",
-      "precision": "exact", "station": "opt",
+    { "id": "visible", "m": 5.5e-7, "glyph": "wave", "label": "Visible light", "sub": "green \u2014 the middle of the band your eye sees",
+      "precision": "typical", "station": "opt",
       "note": "Everything to the left of here is smaller than the wavelength of light you see with. No optical microscope will ever image a modern transistor; the industry inspects its own work with electrons and with scattered deep-ultraviolet light instead." },
 
     { "id": "tsv", "m": 5.0e-6, "glyph": "via", "label": "A through-silicon via", "sub": "a hole drilled clean through a die",
@@ -92,7 +92,7 @@
       "precision": "exact", "station": "scan",
       "note": "No lithography scanner can pattern more than about 858 mm² in one exposure. This rectangle is why chiplets exist, why advanced packaging became a bottleneck, and why a Blackwell part is two dies stitched together rather than one big one. It is the most consequential object on this ruler." },
 
-    { "id": "interposer", "m": 5.2e-2, "glyph": "rect", "detail": "grid", "label": "A CoWoS interposer", "sub": "more than three reticles across",
+    { "id": "interposer", "m": 5.2e-2, "glyph": "rect", "detail": "grid", "label": "A CoWoS interposer", "sub": "three reticles\u2019 worth of silicon, in one piece",
       "precision": "approx", "station": "cowos",
       "note": "Because the interposer is larger than a single exposure, it has to be stitched from multiple ones — an expensive, low-yielding process that only a handful of lines in the world can do. Packaging capacity, not wafer capacity, is what has been rationing accelerators." },
 
