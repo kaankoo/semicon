@@ -65,7 +65,22 @@ function series() {
   return { values: out, fmt: v => idx(v), label: "jurisdictional concentration — Herfindahl index, 0 to 1" };
 }
 
-/* ---------- painting ---------- */
+/* ---------- painting ----------
+   One bar, one variable. The priced page drew a coverage hairline under
+   each bar — what share of that layer's cast carried a ticker — because
+   there it qualified the bar directly: a total over a quarter of a layer
+   was a lower bound and had to say so.
+
+   Here it qualifies nothing. This index is computed from the whole
+   527-organisation corpus, not from the 283-name spine, so how many of
+   them happen to be listed has no bearing on the number above it. A mark
+   sitting under a bar reads as a caveat on that bar, and that reading
+   would have been wrong. It is gone; the coverage figure still appears
+   in the panel, where it explains the price column and nothing else.
+
+   The fill now tracks the plotted value rather than always tracking the
+   Herfindahl index, so switching axes does not leave the shade encoding
+   one variable while the length encodes another. */
 
 function paint() {
   const { values, fmt, label } = series();
@@ -80,7 +95,6 @@ function paint() {
     const v = values[l.n];
     const j = J[l.n];
     const w = v == null ? 0 : Math.max(1, (v / max) * chartW);
-    const c = cov[l.n] || { share: 0, curated: 0, corpus: 0 };
     const chk = chokepointsAt(app.S, l.n);
 
     /* the pips sit past the end of the bar, in the chokepoint magenta
@@ -96,9 +110,7 @@ function paint() {
       <text class="moat__l" x="${GUTTER - 46}" y="${y + BAR - 3}" text-anchor="end">${esc(l.t)}</text>
       <text class="moat__s" x="${GUTTER - 12}" y="${y + BAR - 3}" text-anchor="end" fill="${l.c}">${app.pad(l.n)}</text>
       <rect class="moat__b" x="${GUTTER}" y="${y}" width="${w.toFixed(1)}" height="${BAR}"
-        fill="${l.c}" fill-opacity="${j.hhi != null ? (0.3 + j.hhi * 0.62).toFixed(2) : "0.25"}"/>
-      <rect class="moat__cov" x="${GUTTER}" y="${y + BAR + 1}" width="${(chartW * 0.16).toFixed(1)}" height="2" fill="var(--line)"/>
-      <rect x="${GUTTER}" y="${y + BAR + 1}" width="${(chartW * 0.16 * c.share).toFixed(1)}" height="2" fill="${l.c}" fill-opacity=".65"/>
+        fill="${l.c}" fill-opacity="${v == null ? "0.25" : (0.32 + (v / max) * 0.6).toFixed(2)}"/>
       <text class="moat__v" x="${GUTTER + w + 9}" y="${y + BAR - 3}">${fmt(v)}</text>
       ${pips}
     </g>`;

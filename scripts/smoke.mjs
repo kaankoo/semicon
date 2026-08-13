@@ -880,6 +880,23 @@ app.closeSheet();
        /single-sourced at the joints/.test(D.getElementById("moatPanel").textContent), true);
   }
 
+  /* One bar, one variable. The priced page drew a coverage hairline
+     under each bar, where it qualified the bar directly. Here the index
+     is computed from the whole 527-organisation corpus rather than the
+     283-name spine, so how many are listed has no bearing on the number
+     above it — and a mark under a bar reads as a caveat on that bar.
+     Every mark that survives is named in the legend. */
+  {
+    is("no unexplained mark under the bars", D.querySelectorAll(".moat__cov").length, 0);
+    const row = D.querySelector("#moatSvg .moat__r");
+    is("a row draws only its hit area and its bar", row.querySelectorAll("rect").length, 2);
+    atLeast("every surviving mark is named beside the chart",
+            D.querySelectorAll(".moat__lg .moat__sw").length, 2);
+    checks.push({ label: "…including the chokepoint pip",
+                  ok: /chokepoint/i.test(D.querySelector(".moat__lg").textContent),
+                  actual: "legend names the bar and the pip", expected: "both marks named" });
+  }
+
   /* The roster is the Index's table, not a bespoke list — same classes,
      same columns — so the two read as one table in two places. And the
      row count is not the organisation count: a firm at three stations in

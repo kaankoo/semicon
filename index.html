@@ -95,18 +95,25 @@
   <!-- ============ MOAT ============ -->
   <section class="view" id="v-moat">
     <div class="moat">
-      <div class="moat__head2">
-        <div class="atl__hud">
-          <p class="eyebrow">The same column, by who stands in it</p>
-          <h2 class="rul__h">Where the barrier <em>actually is.</em></h2>
-          <p class="rul__i">You have walked down this column by depth, by size, by place and by time. Here it is again, sized by how much of each layer's cast sits in one country. Everything on this page is computed from the corpus at render — nothing is fetched, so nothing can go stale.</p>
-        </div>
-        <div class="moat__status" id="moatStatus"></div>
+      <div class="atl__hud moat__hud">
+        <p class="eyebrow">The same column, by who stands in it</p>
+        <h2 class="rul__h">Where the barrier <em>actually is.</em></h2>
+        <p class="rul__i">You have walked down this column by depth, by size, by place and by time. Here it is again, sized by how much of each layer's cast sits in one country. Everything on this page is computed from the corpus at render — nothing is fetched, so nothing can go stale.</p>
       </div>
+
+      <div class="moat__status" id="moatStatus"></div>
 
       <div class="moat__ctl">
         <div class="atl__layers" id="moatMetric" role="group" aria-label="Axis"></div>
         <p class="moat__axis" id="moatAxis"></p>
+      </div>
+
+      <!-- every mark on the chart is named here rather than only in the
+           footer: an unlabelled mark under a bar reads as a caveat on it -->
+      <div class="moat__lg">
+        <span><i class="moat__sw"></i>bar length &amp; shade — the value on the axis above</span>
+        <span><i class="moat__sw moat__sw--pip"></i>a chokepoint station: a single point of failure</span>
+        <span class="moat__lgn">click any row for its roster</span>
       </div>
 
       <div class="moat__stage">
@@ -117,7 +124,7 @@
 
       <footer class="foot">
         <h5>How to read this</h5>
-        <p>Bar length is <b>jurisdictional concentration</b> — the Herfindahl index over the countries the layer's organisations are based in, where 1 is every one of them in the same place. Longer means more concentrated, which on this page means a deeper moat. The magenta pips past the end of each bar are <b>chokepoint stations</b>: places the corpus marks as a single point of failure. The hairline beneath each bar is how much of the layer's cast carries a market listing at all.</p>
+        <p>Bar length is <b>jurisdictional concentration</b> — the Herfindahl index over the countries the layer's organisations are based in, where 1 is every one of them in the same place. Longer means more concentrated, which on this page means a deeper moat. The magenta pips past the end of each bar are <b>chokepoint stations</b>: places the corpus marks as a single point of failure. Those are the only two marks — the bar and the pips. Nothing else on a row encodes anything.</p>
         <p class="moat__head" id="moatHead" style="margin-top:14px"></p>
         <p style="margin-top:14px"><b>A layer can be diverse and still single-sourced.</b> Patterning spans eight jurisdictions and holds four chokepoint stations. The index is about spread; it says nothing about substitutability, and the two come apart exactly where it matters most. That is what the pips are for, and what <b>Faults</b> is for. Concentration is arithmetic; the pips are judgement; they are drawn separately and never added together.</p>
         <p style="margin-top:14px">An organisation counts once per layer however many stations it holds there. The 41 recorded against two countries are counted half in each, so <b>UK/US</b> is not a third country and its ordering does not matter; the 16 with no stated base are excluded from the index rather than bucketed as a country of their own. <b>No prices are held anywhere on this site.</b> The price column in the Index links out to a source that maintains them. Sources and known weaknesses are on <b>Method</b>.</p>

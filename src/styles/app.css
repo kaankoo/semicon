@@ -942,14 +942,26 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
    ============================================================ */
 .moat{max-width:min(1860px,95vw);margin:0 auto;padding:44px 3vw 80px}
 
-/* hud beside headline on a wide screen: two measured columns use the
-   width that one measured column was wasting */
-.moat__head2{display:grid;gap:26px 44px;align-items:start;margin-top:8px}
-@media(min-width:1180px){
-  .moat__head2{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}
-  .moat__head2 .atl__hud{max-width:none}
-  .moat__head2 .moat__status{margin-top:0}
-}
+/* The page had been reading as a narrow column pinned to the left: the
+   frame was wide, but every block inside carried its own reading measure
+   on top of that. The blocks now run the width of the frame and only the
+   body copy keeps a measure, so the padding is the page's rather than
+   each block's. */
+.moat__hud{max-width:none;padding:0}
+/* the footer was a 1100px column centred inside a 1860px frame, which is
+   the same boxed-in look from the other direction */
+.moat .foot{max-width:none;padding-left:0;padding-right:0}
+.moat .foot p{max-width:118ch}
+.moat__hud .rul__i{max-width:112ch}
+
+/* the two marks on the chart, named beside it */
+.moat__lg{display:flex;flex-wrap:wrap;gap:8px 26px;align-items:center;margin:12px 2px 0;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#5D6B8C}
+.moat__lg span{display:flex;align-items:center;gap:8px}
+.moat__sw{display:inline-block;width:20px;height:8px;border-radius:2px;
+  background:linear-gradient(90deg,rgba(120,150,220,.4),rgba(120,150,220,.9))}
+.moat__sw--pip{width:7px;height:7px;border-radius:50%;background:var(--mag)}
+.moat__lgn{margin-left:auto;color:#4C5A7C}
 .moat__status{margin-top:24px;border:1px solid var(--line);border-left:2px solid var(--ok);
   border-radius:0 12px 12px 0;padding:16px 20px;background:linear-gradient(100deg,rgba(63,203,142,.05),var(--ox) 60%)}
 .moat__status--none{border-left-color:var(--brs);background:linear-gradient(100deg,rgba(227,168,62,.05),var(--ox) 60%)}
@@ -958,7 +970,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   color:var(--brs);font-weight:600;margin:0 0 9px}
 .moat__status--stale .moat__sk,.moat__staleb{color:var(--mag)}
 .moat__status:not(.moat__status--none) .moat__sk{color:var(--ok)}
-.moat__status p{font-size:14px;color:var(--ash2);font-weight:300;line-height:1.62;margin:0 0 9px;max-width:70ch}
+.moat__status p{font-size:14px;color:var(--ash2);font-weight:300;line-height:1.62;margin:0 0 9px;max-width:118ch}
 .moat__status p:last-child{margin-bottom:0}
 .moat__status b{color:var(--qz);font-weight:500;font-variant-numeric:tabular-nums}
 .moat__status pre{font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--pls);
@@ -987,7 +999,8 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 
 .moat__panel{border-left-color:var(--ok);max-width:none;
   background:linear-gradient(100deg,rgba(63,203,142,.045),var(--ox) 52%)}
-.moat__panel .atl__pb,.moat__panel .moat__warn,.moat__panel .moat__cov2{max-width:82ch}
+.moat__panel .atl__pb,.moat__panel .moat__warn,.moat__panel .moat__cov2{max-width:118ch}
+.moat__panel .atl__ps{max-width:none}
 .moat__pk{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-bottom:7px}
 .moat__pk>span{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em}
 .moat__fig{font-family:var(--mono);font-size:19px;font-weight:600;color:var(--qz);
