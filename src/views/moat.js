@@ -232,6 +232,7 @@ function status() {
   el.className = "moat__status";
   el.innerHTML = `
     <p class="moat__sk">Where the barrier actually is</p>
+    <div class="moat__statusbody">
     <p>The nine shallowest strata — model, agent, application — are
        <b>${ratio ? ratio.toFixed(1) : "—"}×</b> more concentrated in a single jurisdiction than the nine
        deepest. Index <b>${idx(shallow.hhi)}</b> against <b>${idx(deep.hhi)}</b>, over
@@ -241,7 +242,8 @@ function status() {
        assumed to be the concentrated part and the software assumed to be global; by this measure the
        physical base is the cosmopolitan end of the stack and the intelligence layer is the provincial one.
        Every figure on this page is computed from the corpus at render — nothing here is fetched, so
-       nothing here can go stale.</p>`;
+       nothing here can go stale.</p>
+    </div>`;
 }
 
 /* ---------- init ---------- */

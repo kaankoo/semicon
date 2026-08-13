@@ -951,8 +951,29 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 /* the footer was a 1100px column centred inside a 1860px frame, which is
    the same boxed-in look from the other direction */
 .moat .foot{max-width:none;padding-left:0;padding-right:0}
-.moat .foot p{max-width:118ch}
-.moat__hud .rul__i{max-width:112ch}
+
+/* Why the prose still stopped halfway. A `ch` is the width of the digit
+   zero in the element's own font, and Newsreader at 14px puts that near
+   7px — so a cap of 118ch is about 830px, not the ~1500px it sounds
+   like. The container was never the constraint; the measure was.
+   
+   Setting the cap to none is not the answer either: a 14px serif line
+   across 1800px is roughly 230 characters, and the eye loses its place
+   on the return. So the blocks now flow into columns instead. The text
+   genuinely fills the width, and each line stays near 90 characters,
+   which is what the measure was protecting in the first place. */
+.moat__hud .rul__i{max-width:none}
+
+@media(min-width:1240px){
+  .moat__status p,.moat .foot p{max-width:none}
+  .moat__statusbody{columns:2;column-gap:56px;column-rule:1px solid var(--line)}
+  .moat__statusbody p:first-child{margin-top:0}
+  .moat .foot p{columns:2;column-gap:56px;column-rule:1px solid var(--line)}
+  .moat__hud .rul__i{columns:2;column-gap:56px}
+}
+@media(min-width:1800px){
+  .moat__statusbody,.moat .foot p,.moat__hud .rul__i{columns:3}
+}
 
 /* the two marks on the chart, named beside it */
 .moat__lg{display:flex;flex-wrap:wrap;gap:8px 26px;align-items:center;margin:12px 2px 0;
