@@ -22,6 +22,9 @@ const { window } = dom;
 window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
 window.IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} };
 window.requestAnimationFrame = cb => setTimeout(cb, 0);
+/* its partner, which the harness had never provided — `jump()` in the
+   ruler has always called it, and nothing happened to reach that line */
+window.cancelAnimationFrame = id => clearTimeout(id);
 window.scrollTo = () => {};
 window.Element.prototype.scrollIntoView = () => {};
 window.Element.prototype.getBoundingClientRect = () => ({ width: 1200, height: 800, top: 0, left: 0, right: 1200, bottom: 800 });
@@ -36,7 +39,8 @@ window.fetch = async url => {
 };
 
 /* expose to modules */
-for (const k of ["document", "matchMedia", "IntersectionObserver", "requestAnimationFrame",
+for (const k of ["document", "matchMedia", "IntersectionObserver",
+                 "requestAnimationFrame", "cancelAnimationFrame",
                  "fetch", "addEventListener", "scrollTo", "Element", "Node", "SVGElement",
                  "MouseEvent", "KeyboardEvent", "getComputedStyle", "location", "history"]) {
   globalThis[k] = typeof window[k] === "function" && !/^[A-Z]/.test(k) ? window[k].bind(window) : window[k];
@@ -336,6 +340,67 @@ app.closeSheet();
   const shownNow = D.getElementById("rulScale").textContent;
   checks.push({ label: "jumping centres the target", ok: shownNow.includes("33") || shownNow.includes("32"),
                 actual: shownNow, expected: "≈ 33 mm across the view" });
+
+  /* The wheel and the drag belong to the stage, not to the SVG. An SVG
+     only hit-tests where it has painted something, so listening on the
+     SVG caught the wheel over a glyph and nowhere else — and since
+     zooming moves that glyph out from under the cursor, the next notch
+     fell through and scrolled the page. Asserted structurally because
+     jsdom has no hit-testing to assert it behaviourally. */
+  {
+    const src = fs.readFileSync(path.join(ROOT, "src/views/ruler.js"), "utf8");
+    const bound = [...src.matchAll(/(\w+)\.addEventListener\("(wheel|pointerdown|pointermove)"/g)]
+      .map(m => `${m[1]}:${m[2]}`);
+    is("the wheel and the drag are bound to the stage, not the SVG",
+       bound.filter(b => !b.startsWith("stage:")).join(" · "), "");
+    is("…and the stage is the element that catches them",
+       D.querySelector("#rulSvg").parentElement.className, "rul__stage");
+  }
+
+  /* Five lanes across most of the stage, not three within 24px of each
+     other. Objects a place apart are three times each other's size on a
+     true-scale ruler, so without real vertical separation the view is
+     one pile. */
+  {
+    const lanes = new Set([...D.querySelectorAll("#rulSvg .rul__o")]
+      .map(g => Math.round(+/translate\([-\d.]+,([-\d.]+)\)/.exec(g.getAttribute("transform"))[1])));
+    atLeast("objects are spread across lanes, not stacked on one line", lanes.size, 3);
+    const spread = Math.max(...lanes) - Math.min(...lanes);
+    atLeast("…and the spread is most of the stage", spread, 120);
+  }
+
+  /* no label may be written over another: two shapes of similar size on
+     adjacent lanes put their names in the same band unless something
+     stops them */
+  {
+    const boxes = [...D.querySelectorAll("#rulSvg .rul__o")].flatMap(g => {
+      const t = /translate\(([-\d.]+),([-\d.]+)\)/.exec(g.getAttribute("transform"));
+      const n = g.querySelector("text.rul__n");
+      return n ? [{ x: +t[1], y: +t[2] + +n.getAttribute("y"), w: n.textContent.length * 3.3 + 6 }] : [];
+    });
+    const clash = boxes.filter((a, i) => boxes.some((b, j) =>
+      j > i && Math.abs(a.y - b.y) < 11 && Math.abs(a.x - b.x) < a.w + b.w));
+    is("no two names are written on top of each other",
+       clash.map(c => c.y).join(" · "), "");
+  }
+
+  /* the sweep: the journey the page describes, taken end to end */
+  {
+    const play = D.getElementById("rulPlay");
+    is("the ruler offers a sweep", !!play, true);
+    const before = D.getElementById("rulRange").value;
+    play.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    is("…which says how to stop it while it runs", play.textContent, "Stop");
+    await new Promise(r => setTimeout(r, 260));
+    checks.push({ label: "…and moves the camera towards the Earth",
+                  ok: +D.getElementById("rulRange").value > +before,
+                  actual: `${before} → ${D.getElementById("rulRange").value}`,
+                  expected: "larger than it started" });
+    /* a control that fights the reader is worse than no control */
+    app.rulerGoTo("reticle");
+    await new Promise(r => setTimeout(r, 120));
+    is("…and any interaction ends it", play.textContent, "Sweep lattice → Earth");
+  }
 }
 
 

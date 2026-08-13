@@ -653,8 +653,13 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
    Newsreader was about 480px, the narrowest measure on the site. */
 .rul__i{font-size:16px;color:var(--ash2);margin:16px 0 0;font-weight:300;line-height:1.62;max-width:1100px}
 
+/* the stage, not the SVG, owns the wheel and the drag — an SVG only
+   hit-tests where it has painted something, so listening on it caught
+   the wheel over a glyph and nowhere else. See the note in ruler.js. */
 .rul__stage{position:relative;margin-top:26px;height:min(58vh,560px);border:1px solid var(--line);
-  border-radius:14px;background:linear-gradient(180deg,rgba(12,16,32,.7),rgba(6,8,15,.4));overflow:hidden}
+  border-radius:14px;background:linear-gradient(180deg,rgba(12,16,32,.7),rgba(6,8,15,.4));
+  overflow:hidden;cursor:grab;touch-action:none;overscroll-behavior:contain}
+.rul__stage.drag,.rul__stage.drag #rulSvg{cursor:grabbing}
 .rul__stage::before{content:"";position:absolute;left:50%;top:0;bottom:52px;width:1px;
   background:linear-gradient(180deg,transparent,rgba(63,220,210,.18) 22%,rgba(63,220,210,.18) 78%,transparent);pointer-events:none}
 #rulSvg{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
@@ -671,6 +676,9 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 
 .rul__ctl{margin-top:14px;display:flex;flex-direction:column;gap:11px}
+.rul__row{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.rul__row .btn{flex:none}
+.rul__row .rul__stops{flex:1 1 auto}
 #rulRange{-webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:2px;
   background:linear-gradient(90deg,#8A7C64,#4479DE 22%,#3FDCC8 40%,#BCC94F 60%,#DC6154 78%,#9FB2C9);
   outline:none;cursor:pointer}

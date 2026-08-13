@@ -32,8 +32,9 @@ The organising idea: the site holds **one body of knowledge** — 27 strata, 131
 | 7 · Money | `d000983` | The ticker spine — 283 of 527 organisations — plus the ingest job, `metrics.js`, and a Money tab rendering the spine unpriced. **Superseded by Phase 8.** |
 | 8 · Moat | — | Money removed. Jurisdictional concentration per stratum, chokepoint pips beside it, a per-layer roster, and price links out to Yahoo. No page holds a price; the nightly ingest became a weekly link check. |
 | 9 · Layout parity | — | One frame, one measure and one legend pattern across all six chart views. Every `ch` gone from the group, every mark on every chart named beside it, and eighteen assertions so it cannot drift again. |
+| 10 · Ruler usability | — | Zoom over the whole stage rather than over a shape, five tracks instead of three so objects stop covering each other, labels placed against each other and kept inside the frame, and a sweep from the lattice to the Earth. |
 
-**Current test surface:** 249 assertions + corpus validation of 11 data files. `npm test`.
+**Current test surface:** 258 assertions + corpus validation of 11 data files. `npm test`.
 
 ### What Phase 4 actually landed
 
@@ -310,6 +311,41 @@ Verified at 1440, 1920 and 2560 px: frame, hud, footer and body measure agree to
 
 - **One bar, one variable** was on the brief and was not needed: the Lag bars and the Faults blast-radius bars each encode one thing by length and the same thing by colour. Nothing to fix, but nothing asserts it either.
 - The Lag shape legend describes the solid/faint split, which is only visible while the scrubber is short of today. At rest every bar is solid and one legend entry describes something not on screen.
+
+---
+
+## Phase 10 — The Ruler, made usable *(shipped, 13 Aug 2026)*
+
+Three faults, reported by reading the page rather than the code, and all three turned out to be the same kind of mistake: the view was drawing correctly and behaving as though the drawing were the only thing on screen.
+
+### The wheel belonged to the wrong element
+
+Zooming worked with the pointer over a shape and nowhere else, and since zooming is exactly what moves a shape out from under the pointer, the next notch of the wheel fell through to the page and scrolled it. **An SVG only hit-tests where it has painted something** — a wheel listener on `#rulSvg` is a listener on the glyphs, not on the rectangle they sit in. The wheel, the drag and `touch-action` now belong to `.rul__stage`, a plain block that hit-tests across its whole area. Asserted structurally, because jsdom has no hit-testing to assert it with.
+
+### Three tracks 24px apart is one line
+
+On a true-scale log ruler the object one place along is about three times the size of this one, so anything sharing a line disappears under its neighbour. The old layout offered ±24px of separation on a 560px stage and used the top third of it. Now five tracks span most of the stage, run as a **triangle wave** (0,1,2,3,4,3,2,1) so consecutive objects climb and descend in long diagonals with no jump where the pattern wraps, and **taper to the centre line as a shape grows** — so the object you are actually looking at is never shoved off the top while its smaller neighbours stay fanned out beside it.
+
+**Height therefore encodes nothing, and the legend says so in as many words.** A prominent visual variable that carries no data is the same failure as an unlabelled mark under a bar: the reader will infer an encoding that is not there. This is now a convention in `CLAUDE.md`, not a note about one view.
+
+### Labels were placed against their own shape and nothing else
+
+Lanes stop the shapes piling up. They do not stop two *labels* landing on one line, because a label sits a shape-height from its lane and two shapes of similar size on adjacent lanes put their names in the same band — which is how two names came to be written over each other at the small end of the ruler. Worse, `cy − half − 15` for a 480px shape on a 560px stage is *above the stage*: the label was not overlapping, it was gone.
+
+Each label now takes the first rung — clear above, clear below, a rank further out, then just inside the shape's own edge — that no already-placed label occupies, and is clamped inside the stage if none is free. A name over a shape still reads, because the labels carry a stroke halo. A name off the top of the frame does not.
+
+### And a sweep
+
+`Sweep lattice → Earth`, mirroring the Lag chart's scrubber. The camera moves at a constant rate in decades, which on a log ruler is a constant rate of growth: every object swells, passes and shrinks away at the same pace whatever its size, which is the one thing a still frame cannot show. Any interaction ends it — a control that fights the reader is worse than no control — and it stops itself if the reader leaves the tab.
+
+### The harness bug it surfaced
+
+`smoke.mjs` shimmed `requestAnimationFrame` and never its partner. `jump()` in the ruler has always called `cancelAnimationFrame`; nothing in the suite had reached that line, so a missing global sat in the harness unnoticed until the sweep made every jump take it. Both are shimmed now.
+
+### Standing gaps
+
+- The label solver is greedy and runs in draw order, so the smallest visible object claims its slot first. The focal object — the one the reader is looking at — has no priority.
+- `SPREAD` and `SETTLE` are tuned by eye against a 560px stage. Nothing asserts they still separate the objects at a much shorter viewport.
 
 ---
 

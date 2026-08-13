@@ -12,7 +12,7 @@ A static, dependency-free site mapping the AI economy as 27 physical strata → 
 
 ```bash
 npm run dev      # http://localhost:5173 — ES modules need HTTP, file:// will not work
-npm test         # check-data + smoke — 249 assertions. Run before every commit
+npm test         # check-data + smoke — 258 assertions. Run before every commit
 npm run peek -- hbm          # one station, without opening stations.json
 npm run peek -- --ids        # all 131 ids
 npm run peek -- --find euv   # search names, taglines and prose
@@ -172,6 +172,8 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
   - **Every mark on a chart is named in a legend beside it**, not only in the footer. An unlabelled mark near a bar reads as a caveat on that bar. All six have one now: `.rul__lg` `.atl__lg` `.tml__lg` `.moat__lg`, and Faults' tier legend.
   - **Naming the marks is not naming the colours.** Atlas and Lag carry both, separately: `#atlLegend` / `#tmlLegend` say what the colours encode and change with the layer buttons; `.atl__lg` / `.tml__lg` say what the shapes mean and never change. A shape put in a colour legend would come and go with the colours. Shape swatches take `currentColor` for the same reason.
   - **One bar, one variable.** If a bar encodes a value by length, its shade must track the same value, not a second one.
+  - **A position that means nothing must say so.** The Ruler stacks its objects across five tracks purely so neighbours stop covering each other — three times the size of the one before it, every object would otherwise sit on top of the last. Height there carries no data, and the legend says that in as many words rather than leaving a reader to infer an encoding that is not there.
+- **Pointer events on a chart belong to the stage, not to the SVG.** An SVG only hit-tests where it has painted something, so a wheel listener on `#rulSvg` fires over a glyph and nowhere else — and since zooming moves the glyph out from under the cursor, the next notch falls through to the page and scrolls it. Bind to the containing block, which hit-tests across its whole area, and give it `touch-action:none`.
 - **Numbers** use `font-variant-numeric: tabular-nums` and the mono face.
 - **Charts** are hand-drawn SVG. No chart library — the house style is a lab notebook, not a dashboard.
 - **Prose** is British spelling, en-dashes, no exclamation marks.
@@ -196,6 +198,9 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 | Clicking a chip does nothing | chips are re-wired after every re-render | `wireNotes()` in `src/core/notes.js` |
 | Cascade operator disagrees with the values | it cannot — `reconcile()` would fail. Run `npm test` | `src/lib/cascade.js` |
 | Ruler object never appears | its `m` sits outside `meta.span` | `place()` in `ruler.js` |
+| Ruler objects pile on one line | `LANES` / `SPREAD` / `SETTLE` at the top of `ruler.js` — five tracks, tapering to centre as a shape fills the stage | the CSS |
+| A Ruler label is missing or written over another | the rung ladder in `paint()` — labels are placed against each other, then clamped inside the stage | `ruler.json` |
+| Zoom only works over a shape, or the page scrolls instead | the wheel is bound to `.rul__stage`, not `#rulSvg`. **An SVG only hit-tests where it has painted** | the CSS |
 | Atlas circles invisible or absurdly fat | strokes are counter-scaled in `paint()`, not by `vector-effect` | `atlas.js` `paint()` |
 | An Atlas circle vanishes after flying somewhere | camera left [-180,180); rings are drawn once, coastline three times | `clampCam()` |
 | A country is missing from the map | small islands below the area floor are dropped by design | `world.mjs` `MIN_AREA` |
@@ -211,7 +216,7 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 | Style leaks between views | a prefix collision | `src/styles/app.css` |
 | CI red, local green | `npm ci` vs `npm install`, or a file not committed | `.github/workflows/deploy.yml` |
 
-**First move for any bug: `npm test`.** 249 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
+**First move for any bug: `npm test`.** 258 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
 
 ---
 

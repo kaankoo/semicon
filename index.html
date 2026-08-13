@@ -148,6 +148,7 @@
         <span><svg class="rul__sw" viewBox="0 0 12 14" aria-hidden="true"><path d="M6 0v10" stroke="var(--pls)" stroke-width="1"/><path d="M6 14l-3.5-3.5h7z" fill="var(--pls)"/></svg>the centre line — the size read out beside it</span>
         <span><svg class="rul__sw" viewBox="0 0 20 14" aria-hidden="true"><path d="M3 3v9M10 6v6M17 3v9" stroke="currentColor" stroke-width="1"/></svg>one power of ten per tick, taller at the SI prefixes</span>
         <span><svg class="rul__sw" viewBox="0 0 20 14" aria-hidden="true"><rect x="1" y="1.5" width="11" height="11" rx="1.5" fill="none" stroke="currentColor"/><rect x="15" y="9.5" width="3" height="3" rx=".5" fill="none" stroke="currentColor"/></svg>true relative size — the shapes are schematic, the sizes are not</span>
+        <span><svg class="rul__sw" viewBox="0 0 22 14" aria-hidden="true"><path d="M2 11h4M9 7h4M16 3h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>height carries nothing — the tracks only stop neighbours covering each other</span>
         <span class="rul__lgn">anything smaller than a pixel is not drawn</span>
       </div>
 
@@ -158,7 +159,10 @@
 
       <div class="rul__ctl">
         <input type="range" id="rulRange" aria-label="Scale">
-        <div class="rul__stops" id="rulStops"></div>
+        <div class="rul__row">
+          <button class="btn" id="rulPlay">Sweep lattice → Earth</button>
+          <div class="rul__stops" id="rulStops"></div>
+        </div>
       </div>
 
       <aside class="rul__panel" id="rulPanel"></aside>
