@@ -18,7 +18,7 @@ npm run peek -- hbm  # one station, without opening the 8,887-line corpus
 
 No runtime dependencies. Node 20+. jsdom is dev-only; the market ingest uses built-in `fetch` and nothing else.
 
-Eight lenses on one body of knowledge: **Descent · Web · Money · Ruler · Atlas · Lag · Faults · Cascade**, with **Method** and **Index** alongside.
+Nine lenses on one body of knowledge: **Descent · Web · Moat · Ruler · Atlas · Lag · Faults · Cascade**, with **Method** and **Index** alongside.
 
 ---
 
@@ -46,7 +46,7 @@ src/
     atlas.js               where the stack physically is
     timeline.js            how long each capability waited
     faults.js              what breaks if a link is cut
-    money.js               the stack, priced
+    moat.js                the stack, by where its organisations sit
     cascade.js             sand to sentence, quantified
     method.js              sources, assumptions and limits
     sheet.js               station dossiers
@@ -150,25 +150,27 @@ The finding it exists for is sharper than the gradient. Twelve capabilities wait
 
 ---
 
-## Money
+## Moat
 
-The Descent's column, re-weighted by capital. Same twenty-seven rows, sized by money instead of by station count — recognition and rearrangement teach more than either alone.
+The Descent's column, sized by how much of each layer's cast sits in one country. Same twenty-seven rows a fourth time — recognition and rearrangement teach more than either alone.
 
-**Nothing on this page can invent a number.** Every figure comes from `src/lib/metrics.js`, which returns `null` rather than `0` when `data/live/quotes.json` has not been written. Ship the site without ever running the ingest job and the page renders the spine itself — companies per layer, listed against private, coverage per layer — and says plainly that no market data is committed. `npm test` asserts that with no data `layerTotals`, `valueOf` and `capitalAt` all return null, that a null formats as a dash, and that the empty state is stated rather than implied.
+**The finding runs against the intuition.** Mean jurisdictional concentration is **0.24 across the deepest nine strata and 0.59 across the shallowest nine** — the shallow end is 2.4× more concentrated. Lithosphere spans 17 countries with none above 25%; Surface is 93% American across two. The received view is that rock and fabs are the dangerous chokepoint and software is global; at the layer level it is inverted.
 
-`data/static/companies.json` is the join, and PLAN.md is right that it is the critical path: **283 of 527 organisations**, every multi-station one covered, mapped to a primary listing, a listed parent, or neither. A company at nineteen stations must not be counted nineteen times, so every one carries weights summing to one — an **even split** by default, with thirteen hand-set exceptions that each say why. The toggle shows exactly how much that judgement moved the answer; the build fails if any weight set stops being a partition of one, and asserts that attribution conserves value to floating point.
+It does not contradict Faults, it sharpens it: **a layer can be cosmopolitan in aggregate and single-sourced at every joint that matters.** Patterning spans eight jurisdictions and holds four chokepoint stations. The chokepoint pips are drawn beside the bars and never folded into the index — concentration is arithmetic, pips are judgement, and the two are not blended.
 
-Coverage is drawn as a hairline under every bar and stated in the panel below 60%, because a long bar over a short hairline is a lower bound wearing a confident face.
+**Why not a headcount.** Every station names five to eight organisations because that is the editorial policy, so counting them per layer measures how the corpus was written: 23.0 per stratum across the deepest nine against 21.7 across the shallowest three. Flat, and it would have looked like a measurement. The page states both figures, computed at render, and `npm test` fails if the corpus ever stops being evenly curated.
 
-Private companies have no market value here at all. Divisions carry an estimated share of a listed parent, flagged as an estimate. CIKs are left null on purpose and resolved from the SEC's own ticker map at ingest, because a hand-typed CIK is a silent wrong answer.
+Two handling rules. An organisation counts **once per stratum** however many stations it holds there. The 41 recorded against two countries are counted **half in each**, because using `UK/US` as a bucket key would make it a country of its own, drop those firms from the tallies of the countries they are in, and split one pair across two keys — the corpus writes `UK/US` sixteen times and `US/UK` twice. The 16 with no stated base are excluded rather than bucketed as unknown.
 
-### The ingest job
+Clicking any row opens that layer's roster: the Index's own table, same columns and same classes, one row per organisation per station.
 
-`scripts/ingest/run.mjs` and `.github/workflows/ingest.yml`. Yahoo's v8 chart endpoint with a Stooq fallback, EDGAR company facts for US fundamentals and shares outstanding, ECB rates for FX. It writes `data/live/` and commits, so the site stays fully static and a failed run degrades to yesterday's numbers rather than to an error page.
+### No page holds a price
 
-**It has never been run and the schedule is commented out** — turning it on is a decision, not a default. `--dry` exercises the plumbing without fetching anything, which is what keeps the pipeline from rotting while it is switched off. The rule the file exists to enforce: a source that fails keeps yesterday's value, marks it stale with the date it went stale, and writes the reason to `meta.json`. Never ship a silent stale number.
+A priced version of this page was built, shipped unpriced, and removed. The pipeline worked — 168 of 171 quotes on its first live run. What it could not fetch was share counts, and a market capitalisation needs both. The only free source of share counts covers US filers, and **65 of the 171 listed organisations trade in Taipei, Tokyo, Seoul, Frankfurt, Amsterdam or Paris — concentrated in exactly the deep strata this site is about.** A market-cap chart built on US filings alone would have drawn the physical base as near-worthless and the software layer as enormous: the inverse of the argument, in the site's own colours.
 
----
+So the site points at prices instead of holding them. The **Index** carries a Price column linking out to Yahoo for the 283 organisations with a listing to link to; the rest show a dash. Yahoo because the tickers in `companies.json` are already in its symbol convention — every other provider would need a hand-maintained symbol map for the 65 foreign listings, which is the maintenance this change exists to remove. A weekly job checks the links still resolve and commits no numbers.
+
+`data/static/companies.json` remains the join: **283 of 527 organisations**, every multi-station one covered, mapped to a primary listing, a listed parent, or neither. Note that `parent` on a division holds a **ticker**, not a name.
 
 ## Faults
 
@@ -234,7 +236,7 @@ Built as a map for understanding, not a database of record.
 ## Where it's going
 
 - [`ROADMAP.md`](ROADMAP.md) — what has shipped and what comes next, with a file manifest per phase
-- [`PLAN.md`](PLAN.md) — the MONEY section as originally specified, with a header recording what shipped and what departed from it
+- [`PLAN.md`](PLAN.md) — the MONEY section as originally specified. **Superseded**: the priced page was built, shipped unpriced, then replaced by Moat. ROADMAP records why
 - [`IDEAS.md`](IDEAS.md) — the original non-financial thinking. Every lens it proposed has shipped; kept for the reasoning
 - [`CLAUDE.md`](CLAUDE.md) — conventions, the file routing table, and which files are finished and should not be opened
 

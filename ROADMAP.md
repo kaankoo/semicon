@@ -255,7 +255,8 @@ It does not contradict Faults, it sharpens it: **a layer can be cosmopolitan in 
 - **The pages were wasting half a wide screen.** Moat through Cascade were capped at 1560 px inside viewports often half again as wide, and — the real cause — every block inside carried its own reading measure on top of that, so the page read as a narrow column pinned to the left however wide the frame got. The frames now run to `min(1860px, 95vw)` and the blocks run the width of the frame; only body copy keeps a measure, so the padding belongs to the page rather than to each block. A first attempt put the hud and the headline side by side, which fixed the emptiness and kept the boxed-in feel; stacking them full-width was the right answer.
 - **The attribution toggle is gone.** *Declared weights / Even split* was inherited from the priced page, where it re-split every market capitalisation. Nothing on Moat is divided by those weights, so it changed one sentence in the footer and nothing else: a prominent control above a chart that did not move the chart. A smoke assertion now fails if it comes back. The weights themselves stay in `companies.json` — thirteen hand-set and individually argued, still held to summing to one by the build — and Method now says plainly that they are dormant rather than load-bearing.
 - **The coverage hairline is gone, and its removal is the useful part.** Each bar carried a thin second mark beneath it — what share of that layer's cast held a ticker. On the priced page that qualified the bar directly: a total computed over a quarter of a layer was a lower bound and had to say so. On Moat it qualifies nothing, because the index is computed from the whole 527-organisation corpus rather than the 283-name spine, so how many happen to be listed has no bearing on the number above it. A mark sitting under a bar reads as a caveat on that bar, and that reading would have been wrong — it was inherited furniture, not information. The coverage figure still appears in the panel, where it explains the price column and nothing else. The two marks that survive are now named in a legend beside the chart rather than only in the footer, and the bar's shade tracks the plotted value instead of always tracking the Herfindahl index, so switching axes no longer leaves shade and length encoding different variables.
-- **And the prose still stopped halfway, for a reason worth writing down.** The caps were set in `ch`, which is the width of the digit zero *in the element's own font* — Newsreader at 14px puts that near 7px, so `max-width:118ch` is about 830px rather than the ~1500px it reads like. The container had never been the constraint. Setting the cap to `none` is not the fix either: a 14px serif line across 1800px is roughly 230 characters and the eye loses its place on the return. The blocks flow into columns instead — two above 1240px, three above 1800px — so the text genuinely fills the width while each line stays near 90 characters, which is what the measure existed to protect. **If a block looks narrower than its cap suggests, check the unit before widening the container.**
+- **And the prose still stopped halfway, for a reason worth writing down.** The caps were set in `ch`, which is the width of the digit zero *in the element's own font* — Newsreader at 14px puts that near 7px, so `max-width:118ch` is about 830px rather than the ~1500px it reads like. The container had never been the constraint; the measure was, in a unit that hides its own size. Every measure on Moat is now in `px`. **If a block looks narrower than its cap suggests, check the unit before widening the container** — this cost two rounds of wrong fixes.
+- **Multi-column body text was tried and reverted.** Flowing the prose into two or three columns filled the width and kept lines near 90 characters, which is textbook. It read badly: on a page that is otherwise one continuous vertical scroll, columns send the eye back up the page in the middle of a paragraph, and a reader does not expect that from a chart page. A single column at `1100px` is the settled answer — wider than it was, and about as wide as 14–16px serif goes before the return sweep starts losing the line.
 - **The per-stratum card is the Index's table.** Page-wide, with the Index's own columns and its own classes: Company, What it does here, Station, Base, Price. One row per organisation per station, so a firm at three stations in a layer is three rows — and since that is not the organisation count the index above is computed on, the header states both numbers rather than leaving the reader to reconcile them. Clicking a row opens the station, exactly as in the Index.
 
 ### Standing gaps
@@ -263,6 +264,50 @@ It does not contradict Faults, it sharpens it: **a layer can be cosmopolitan in 
 - **Jurisdiction is where an organisation is *based*, not where it *operates*.** TSMC is TW throughout, including its Arizona fab. The Atlas holds the operating geography; this page does not, and the two should not be read as the same claim.
 - **16 organisations carry no stated base** and are excluded from the index rather than bucketed. `check-data` fails if that ever exceeds 10%.
 - The index measures spread, not substitutability. Eight countries making the same commodity and eight countries each making one irreplaceable thing score identically.
+
+---
+
+## Next — layout parity across the chart views
+
+**This is the first thing to pick up.** Moat now has a settled layout and the other five chart views do not, so the site is visibly inconsistent between tabs. The work is mechanical, entirely CSS, and needs no new data.
+
+The pattern to copy is recorded under **Conventions → Layout** in `CLAUDE.md`. In short: the frame runs `min(1860px,95vw)`, blocks take no width cap of their own, only body copy is measured, and **the measure is in `px` — never `ch`**.
+
+### Already done
+
+`.moat` · `.rul` · `.atl` · `.tml` · `.flt` frames are at `min(1860px,95vw)` with `3vw` padding; `.cas` at `min(1680px,95vw)`; `.mth` at `min(1480px,95vw)`; `.idx` at `min(1860px,95vw)`. **The frames are not the problem.** Every remaining item below is a block inside a frame that is still capping itself.
+
+### To do, per view — exact selectors
+
+| View | Selector | Now | Change to | Why |
+|---|---|---|---|---|
+| **Ruler** | `.rul__hud` (line ~640) | `max-width:66ch; padding:0 2vw` | `max-width:none; padding:0` | the hud is the title block; it should span the frame |
+| | `.rul__i` (~645) | `max-width:60ch` | `max-width:1100px` | ~480px today — the narrowest measure on the site |
+| | `.rul__panel` (~678) | `max-width:74ch` | `max-width:none` | prose inside keeps its own measure |
+| | `.rul__pb` (~692) | `max-width:70ch` | `max-width:1100px` | |
+| **Atlas** | `.atl__hud` (~711) | `max-width:66ch; padding:0 2vw` | `max-width:none; padding:0` | shared with Lag and Faults — see the warning below |
+| | `.atl__panel` (~748) | `max-width:74ch` | `max-width:none` | Moat already overrides this for itself |
+| | `.atl__pb` (~764) | `max-width:70ch` | `max-width:1100px` | |
+| **Lag** | — | uses `.atl__hud` and `.atl__panel` | inherits the two rows above | |
+| **Faults** | — | uses `.atl__hud`, `.atl__panel` + `.flt__panel` | inherits, plus: | |
+| | `.flt__item p` (~924) | `max-width:68ch` | `max-width:1100px` | the reroute and dead-end essays |
+| **Cascade** | `.cas__top` (~406) | `max-width:74ch` | `max-width:none` | |
+| | `.cas__intro` (~411) | `max-width:66ch` | `max-width:1100px` | |
+| **All five** | `.foot` (~364) | `max-width:1100px; padding:56px 6vw` centred | per-view `max-width:none; padding-left:0; padding-right:0`, with `p{max-width:1100px}` | a 1100px column centred in an 1860px frame is the boxed-in look from the other direction — copy `.moat .foot` |
+
+**Warning — `.atl__hud` and `.atl__panel` are shared by four views.** Atlas, Lag and Faults all use them, and Moat uses `.atl__hud`/`.atl__panel` with its own `.moat__hud`/`.moat__panel` overrides on top. Changing the base rule changes all four at once, which is the point, but check each of the four in a browser before committing. If one needs to differ, add a view-prefixed override the way Moat does — do not fork the base rule.
+
+### Also worth carrying across
+
+- **A legend beside every chart.** Moat names its two marks in `.moat__lg` rather than only in the footer, after a reader reasonably mistook an unlabelled hairline for a caveat on the bar above it. Atlas and Faults have `.atl__legend` / `.flt__legend` already; **Ruler and Lag have no legend at all** and should get one in the same shape.
+- **One bar, one variable.** Check each chart that encodes a value twice — Moat had length showing the selected axis while shade showed the Herfindahl index, which only broke when a second axis was added. The Lag chart and the Faults blast-radius bars are worth a look.
+- **The `.foot` treatment is per-view by design.** Do not change the base `.foot` rule; the Descent and Index are fine as they are, and the Descent is frozen by hard rule 1.
+
+### Acceptance
+
+- Every one of the six chart views looks like the same site at 1440px, 1920px and 2560px.
+- No `ch` unit survives in `app.css` outside the Descent and the sheet.
+- `npm test` stays green — the layout assertions live in the Moat block of `scripts/smoke.mjs` (`web chrome is one column`, `no unexplained mark under the bars`); add equivalents for any view you touch.
 
 ---
 

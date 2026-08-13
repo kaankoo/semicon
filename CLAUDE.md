@@ -105,6 +105,7 @@ These are done. They are listed so you can skip them, not so you can read them. 
 | Method page missing an entry | `data/static/method.json` — the page is generated, so the data is the bug | the JS |
 | Wrong tab opens / nav broken | `src/core/router.js` (25 lines), nav at `index.html:20-30` | — |
 | Styling | `src/styles/app.css` — grep the banner, never read 1,001 lines | — |
+| A page looks narrow on a wide screen | the block's own `max-width`, not the frame's. Check the **unit** first — see Layout under Conventions | — |
 | A test fails | `scripts/smoke.mjs` — section markers below | — |
 | Adding a data file | `scripts/check-data.mjs` — validation is mandatory | — |
 
@@ -158,6 +159,13 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 
 - **No framework, no build step, no runtime dependency.** ES modules, raw SVG, template strings. jsdom is dev-only; the link check uses built-in `fetch` and writes no numbers. **No page on this site holds a price** — the Index links out instead, so nothing rendered can go stale.
 - **CSS** is BEM-ish with a two-to-five letter view prefix. New views claim a new prefix. Design tokens are the `:root` block; introduce no new colours — `--ok` is up, `--mag` is down.
+- **Layout, as settled on Moat (13 Aug 2026) — the pattern the other chart views still need.**
+  - **Frame:** `max-width:min(1860px,95vw); padding:44px 3vw`. Was 1560px, which left a third of a wide screen empty.
+  - **Blocks run the full frame.** The hud, the status band, the panel and the footer take no width cap of their own. If each block carries its own reading measure *and* the frame is wide, the page reads as a narrow column pinned left however wide the frame gets — that is the actual cause, and widening the frame alone does nothing.
+  - **Only body copy is measured, and the measure is in `px`.** **Never `ch`.** A `ch` is the width of the digit zero *in that element's own font*: Newsreader at 14px makes it ~7px, so `118ch` is ~830px, not the ~1500px it reads like. The unit hides its own size and cost two rounds of wrong fixes. `1100px` is the house ceiling for a single column of 14–16px serif.
+  - **No multi-column body text.** Tried on Moat and reverted: on a page that is otherwise one vertical read, columns send the eye back up the page mid-paragraph. A long line beats that.
+  - **Every mark on a chart is named in a legend beside it**, not only in the footer. An unlabelled mark near a bar reads as a caveat on that bar. See `.moat__lg`.
+  - **One bar, one variable.** If a bar encodes a value by length, its shade must track the same value, not a second one.
 - **Numbers** use `font-variant-numeric: tabular-nums` and the mono face.
 - **Charts** are hand-drawn SVG. No chart library — the house style is a lab notebook, not a dashboard.
 - **Prose** is British spelling, en-dashes, no exclamation marks.
