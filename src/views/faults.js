@@ -147,6 +147,13 @@ function detail(f) {
   const ex = exposure(f);
   const maxLead = Math.max(12, f.leadTimeYears, ...f.reroutes.map(r => r.leadTimeYears || 0));
 
+  /* The rail shows where the cut is, not how far it travels. A blast
+     radius spans most of the stack by construction — lighting all of it
+     would say nothing — whereas the depth the shock starts at is the
+     one fact about this scenario the rail can carry. */
+  const cut = app.byId[f.removes[0]];
+  if (cut) app.depth("flt", cut.L);
+
   document.getElementById("fltPanel").innerHTML = `
     <div class="flt__pk">
       <span>Exposure map</span>

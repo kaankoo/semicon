@@ -143,11 +143,6 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 .core__b:hover{opacity:1!important;filter:brightness(1.35)}
 .core__b:hover::before{color:var(--qz)}
 @keyframes fin{to{opacity:1}}
-.core__cap{position:absolute;left:120px;right:0;font-family:var(--mono);font-size:10px;
-  letter-spacing:.13em;text-transform:uppercase;color:var(--ash);opacity:0;
-  animation:fin .6s var(--ease) forwards}
-.core__cap--t{top:-26px;animation-delay:2.1s;color:var(--pls)}
-.core__cap--b{bottom:-26px;animation-delay:.2s;color:var(--brs)}
 
 /* ---------- stratum sections ---------- */
 .strata{padding:0 0 120px}
@@ -396,7 +391,7 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
   *{animation-duration:.001ms!important;animation-iteration-count:1!important;
     transition-duration:.001ms!important;scroll-behavior:auto!important}
   .core__b{transform:scaleX(var(--w));opacity:.88}
-  .core__b::before,.core__cap{opacity:1}
+  .core__b::before{opacity:1}
 }
 
 /* ============================================================
@@ -741,10 +736,18 @@ h1 em{font-style:normal;background:var(--iri);-webkit-background-clip:text;backg
 #atlSvg{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
 #atlSvg.drag{cursor:grabbing}
 .atl__m{cursor:pointer}
+/* the target you actually click. Stated explicitly rather than left to
+   visiblePainted, which reads a fully transparent fill differently
+   between engines — and this circle is nothing but a fill */
+.atl__hit{pointer-events:all}
 .atl__dot{transition:r .16s var(--ease)}
 .atl__m:hover .atl__dot{r:6}
 .atl__halo{transition:stroke-opacity .16s var(--ease)}
 .atl__m:hover .atl__halo{stroke-opacity:.9}
+/* the open site, so the description below the map has something on the
+   map to belong to */
+.atl__m.on .atl__dot{r:6}
+.atl__m.on .atl__halo{stroke-opacity:.95;stroke-width:1.8}
 .atl__t{font-family:var(--disp);font-weight:600;font-size:11px;fill:var(--qz);pointer-events:none;
   font-variation-settings:'wdth' 92;paint-order:stroke;stroke:var(--sub);stroke-width:3.2px;stroke-linejoin:round}
 .atl__m--chokepoint .atl__t{fill:var(--brs)}

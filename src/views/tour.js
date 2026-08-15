@@ -28,7 +28,9 @@ function tourStop() {
 export function initTour() {
   tour = document.getElementById("tour");
 
-  document.getElementById("btnTour").addEventListener("click", () => ti < 0 ? tourGo(0) : tourStop());
+  /* one way in — the hero's own button. The header carried an unlabelled
+     arrow beside the Method link that did this too, and next to a row of
+     tabs an arrow reads as navigation rather than as a tour */
   document.getElementById("ctaTour").addEventListener("click", () => tourGo(0));
   document.getElementById("tNext").addEventListener("click", () => ti >= app.L.length - 1 ? tourStop() : tourGo(ti + 1));
   document.getElementById("tPrev").addEventListener("click", () => tourGo(ti - 1));

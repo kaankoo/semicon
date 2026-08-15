@@ -27,6 +27,17 @@ window.requestAnimationFrame = cb => setTimeout(cb, 0);
 window.cancelAnimationFrame = id => clearTimeout(id);
 window.scrollTo = () => {};
 window.Element.prototype.scrollIntoView = () => {};
+/* Pointer capture, which jsdom has no notion of — and which is the whole
+   reason the atlas resolves taps the way it does. In a real browser
+   capture retargets the synthesised click to the element holding it, so
+   a click listener on a marker under the cursor never fires. */
+window.Element.prototype.setPointerCapture = () => {};
+window.Element.prototype.releasePointerCapture = () => {};
+/* jsdom has no layout, so no hit-testing either. The atlas asks what is
+   under the release point; the harness answers with whatever the test
+   has put there, which leaves the tap routing under test and the
+   geometry to the browser. */
+window.document.elementFromPoint = () => window.__under || null;
 window.Element.prototype.getBoundingClientRect = () => ({ width: 1200, height: 800, top: 0, left: 0, right: 1200, bottom: 800 });
 window.fetch = async url => {
   const u = String(url);
@@ -71,6 +82,14 @@ is("stations loaded", app.S.length, 131);
 /* descent */
 is("hero stat blocks", D.querySelectorAll(".hstat").length, 4);
 is("core sample bars", D.querySelectorAll(".core__b").length, 27);
+/* every bar already names its own stratum, so end caps repeated the
+   first and last of the twenty-seven in a second, louder voice */
+is("core sample carries no end caps", D.querySelectorAll(".core__cap").length, 0);
+is("…because every bar names itself", !!D.querySelector(".core__b")?.dataset.l, true);
+/* the guided descent has one way in, and it is the hero's own button.
+   Beside a row of tabs, an unlabelled arrow reads as navigation */
+is("the tour is started from the hero alone", D.querySelectorAll("#btnTour").length, 0);
+is("…and that button is still there", !!D.getElementById("ctaTour"), true);
 is("rail segments", D.querySelectorAll(".stratum").length, 27);
 is("stratum sections", D.querySelectorAll(".sec").length, 27);
 is("station cards", D.querySelectorAll(".card").length, 131);
@@ -89,7 +108,7 @@ is("group chips", D.querySelectorAll("#chips .chip").length, 9);
 
 /* every action must have been replaced by a real implementation —
    the defaults in app.js are empty arrow functions with no body */
-["openStation", "closeSheet", "show", "go", "litRail", "trace", "clearTrace", "fitWeb", "focusSearch", "tourStop"]
+["openStation", "closeSheet", "show", "depth", "go", "litRail", "trace", "clearTrace", "fitWeb", "focusSearch", "tourStop"]
   .forEach(k => {
     const src = String(app[k] ?? "");
     const stillDefault = /^\(\s*\)\s*=>\s*\{\s*\}$/.test(src);
@@ -162,6 +181,57 @@ D.getElementById("tNext").dispatchEvent(new window.MouseEvent("click", { bubbles
 is("tour advances", D.getElementById("tN").textContent, "Feedstock");
 app.tourStop();
 is("tour closes", D.getElementById("tour").classList.contains("on"), false);
+
+/* ---- the rail follows the view ----
+   The rail is the one piece of chrome on every page, and it used to move
+   only on the Descent — so a reader who opened Model on the Moat, or a
+   1960s capability on the Lag, was left looking at a rail still lit
+   wherever they had last scrolled the homepage. Each view now reports
+   the stratum its selection sits in and the rail follows whichever view
+   is on, keeping a depth per view so switching tabs restores that tab's
+   answer rather than inheriting the last one. */
+{
+  const lit = () => [...D.querySelectorAll(".stratum.on")].map(e => +e.dataset.s);
+  const TL = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/timeline.json"), "utf8"));
+  const CF = JSON.parse(fs.readFileSync(path.join(ROOT, "data/static/counterfactuals.json"), "utf8"));
+
+  app.show("moat");
+  is("the rail lights one stratum, never several", lit().length, 1);
+  is("moat opens on its own row", lit()[0], 5);
+  app.moatGoTo(19);
+  is("picking a moat row moves the rail", lit()[0], 19);
+
+  app.show("tml");
+  app.lagGoTo("hbm");
+  is("a lag bar reports its capability's stratum",
+     lit()[0], TL.events.find(e => e.id === "hbm").stratum);
+
+  app.show("flt");
+  app.faultsGoTo("quartz");
+  /* where the cut is, not how far it travels: a blast radius spans most
+     of the stack by construction, so lighting all of it would say
+     nothing the reader did not already know */
+  is("a faults scenario reports where the cut is",
+     lit()[0], app.byId[CF.faults.find(f => f.id === "quartz").removes[0]].L);
+
+  app.show("moat");
+  is("switching back restores that view's own depth", lit()[0], 19);
+
+  /* The Atlas reports a depth too, asserted in its own section — it
+     carries a camera, and flying it here would leave the atlas checks
+     starting from somewhere other than the world view.
+
+     The Ruler is the one chart deliberately left out. Its panel is
+     driven by whichever object is nearest the centre line rather than by
+     a click, so the sweep from lattice to Earth would strobe the rail
+     through all twenty-seven strata in half a minute. Asserted against
+     the source, because the property is that it never asks. */
+  checks.push({ label: "the ruler never reports a depth",
+                ok: !/app\.depth\s*\(/.test(fs.readFileSync(path.join(ROOT, "src/views/ruler.js"), "utf8")),
+                actual: "leaves the rail alone", expected: "leaves the rail alone" });
+
+  app.show("strata");
+}
 
 /* ---------- cascade ---------- */
 app.show("cas");
@@ -606,6 +676,65 @@ app.closeSheet();
     checks.push({ label: `${id} stays on the stage`, ok: inside && Math.abs(c.lon) <= 180,
                   actual: `camera at ${c.lon.toFixed(1)}°, site at ${p.x.toFixed(0)},${p.y.toFixed(0)} px`,
                   expected: "on stage, camera within ±180°" });
+  }
+
+  /* ---- tapping the map ----
+     Every site on this map was unopenable, and only the seven stop
+     buttons ever changed the panel — which is why the page read as
+     having a description for its buttons and none for its points.
+
+     Two causes, both asserted here. The stage sets pointer capture on
+     pointerdown so a drag keeps panning once the cursor leaves it, and
+     capture retargets the synthesised click to the element holding it,
+     so a click listener on a marker could not fire however precisely
+     you hit it. And the clickable part of a site was its three-pixel
+     dot: the halo is fill:none and an SVG only hit-tests where it has
+     painted, so even the fix would have been a three-pixel target on a
+     map you are also dragging. */
+  {
+    const hits = [...D.querySelectorAll(".atl__m")].map(g => ({
+      hit: +(g.querySelector(".atl__hit")?.getAttribute("r") ?? 0),
+      dot: +(g.querySelector(".atl__dot")?.getAttribute("r") ?? 0)
+    }));
+    is("every site carries a hit target", hits.filter(h => h.hit > 0).length, AT.sites.length);
+    checks.push({ label: "…comfortably bigger than the dot it wraps",
+                  ok: hits.every(h => h.hit >= h.dot * 3),
+                  actual: `smallest is ${Math.min(...hits.map(h => h.hit))} px against a ${
+                    Math.max(...hits.map(h => h.dot))} px dot`,
+                  expected: "at least three times the dot" });
+
+    const svg = D.getElementById("atlSvg");
+    const at = (type, x, y) => svg.dispatchEvent(
+      new window.MouseEvent(type, { bubbles: true, clientX: x, clientY: y }));
+    const shown = () => D.querySelector("#atlPanel .atl__pn")?.textContent;
+
+    app.atlasGoTo("spruce-pine");
+    await new Promise(r => setTimeout(r, 420));
+    const wide = D.getElementById("atlScale").textContent;
+
+    window.__under = D.querySelector('.atl__m[data-site="hsinchu"] .atl__hit');
+    at("pointerdown", 400, 300);
+    at("pointerup", 400, 300);
+    is("tapping a point opens its description", shown(), "Hsinchu Science Park");
+    is("…and marks it on the map", D.querySelectorAll(".atl__m.on").length, 1);
+    /* a site is a place and the rail reads depth, so it takes the
+       stratum of the site's first station — the same rule this view
+       already colours its markers by */
+    is("…and the rail follows it down the stack",
+       [...D.querySelectorAll(".stratum.on")].map(e => +e.dataset.s)[0],
+       app.byId[AT.sites.find(s => s.id === "hsinchu").stations[0]].L);
+    /* a stop button names a place you cannot see and has to fly you
+       there; a marker is one you are already looking at, and flying in
+       throws away the context that made it worth clicking */
+    is("…without moving the camera", D.getElementById("atlScale").textContent, wide);
+
+    /* a drag that happens to end on a marker is a pan, not a tap */
+    window.__under = D.querySelector('.atl__m[data-site="veldhoven"] .atl__hit');
+    at("pointerdown", 400, 300);
+    at("pointermove", 470, 340);
+    at("pointerup", 470, 340);
+    is("dragging onto a point opens nothing", shown(), "Hsinchu Science Park");
+    window.__under = null;
   }
 
   /* …and the corpus must keep clear of the seam that assumption rests on */

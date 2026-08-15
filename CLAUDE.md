@@ -12,7 +12,7 @@ A static, dependency-free site mapping the AI economy as 27 physical strata → 
 
 ```bash
 npm run dev      # http://localhost:5173 — ES modules need HTTP, file:// will not work
-npm test         # check-data + smoke — 264 assertions. Run before every commit
+npm test         # check-data + smoke — 283 assertions. Run before every commit
 npm run peek -- hbm          # one station, without opening stations.json
 npm run peek -- --ids        # all 131 ids
 npm run peek -- --find euv   # search names, taglines and prose
@@ -41,7 +41,7 @@ These are done. They are listed so you can skip them, not so you can read them. 
 
 | File | Why it is settled |
 |---|---|
-| `src/core/app.js` · `data.js` · `router.js` | 49 / 59 / 25 lines. Only ever gain 2–4 lines when a view is added. |
+| `src/core/app.js` · `data.js` · `router.js` | 57 / 72 / 54 lines. Only ever gain 2–4 lines when a view is added. `router.js` also holds the **depth registry** — `app.depth(view, n)`, one line per view, described under Conventions. |
 | `src/views/descent.js` · `sheet.js` · `tour.js` · `table.js` | The homepage and its furniture. Frozen by hard rule 1. |
 | `src/views/web.js` | Stable since Phase 0. Last touched to import `cone()` from `lib/graph.js`. |
 | `src/lib/cascade.js` · `glyphs.js` · `projection.js` · `graph.js` · `metrics.js` · `tickers.js` | Pure, no DOM, fully asserted. Read only for the bug classes named below. |
@@ -63,6 +63,7 @@ These are done. They are listed so you can skip them, not so you can read them. 
 4. `src/main.js` — import and `await init<Thing>()`
 5. `src/core/router.js` — one line, the fit hook
 6. `src/core/app.js` — two lines, the action stubs
+6b. `app.depth("<view>", n)` in the view's `detail()`, if a selection there resolves to a stratum — the rail is on every page and must not report a different one's answer
 7. `src/styles/app.css` — append a banner section, claim a new prefix
 8. `scripts/check-data.mjs` + `scripts/smoke.mjs` — validation is mandatory, not optional
 9. `data/static/method.json` — a provenance entry and, if it has one, a limit
@@ -74,7 +75,7 @@ These are done. They are listed so you can skip them, not so you can read them. 
 
 | Task | Read (in order) | Never open |
 |---|---|---|
-| **Any change at all** | this file, `src/core/app.js` (49 lines) | — |
+| **Any change at all** | this file, `src/core/app.js` (57 lines) | — |
 | **Content is wrong anywhere** | that view's JSON in `data/static/` — the JS almost never holds a fact | the JS |
 | Cascade number looks wrong | `data/static/cascade.json` — every parameter has its derivation | the JS |
 | Bug in the Cascade | `src/views/cascade.js`, `src/lib/cascade.js` | stations.json |
@@ -104,8 +105,9 @@ These are done. They are listed so you can skip them, not so you can read them. 
 | A finding shows in the wrong place | `data/static/notes.json` | — |
 | A finding's cross-view button goes nowhere | `src/core/notes.js` `wireNotes()` — one block per target view | — |
 | Method page missing an entry | `data/static/method.json` — the page is generated, so the data is the bug | the JS |
-| Wrong tab opens / nav broken | `src/core/router.js` (25 lines), nav at `index.html:20-30` | — |
-| Styling | `src/styles/app.css` — grep the banner, never read 1,001 lines | — |
+| Wrong tab opens / nav broken | `src/core/router.js` (54 lines), nav at `index.html:20-30` | — |
+| **The rail is lit for a different page than the one you are on** | the view's `detail()` is not calling `app.depth("<view>", n)`, or is calling it with a stratum it cannot resolve. The registry is at the top of `src/core/router.js` | `descent.js` |
+| Styling | `src/styles/app.css` — grep the banner, never read 1,126 lines | — |
 | A page looks narrow on a wide screen | the block's own `max-width`, not the frame's. Check the **unit** first — see Layout under Conventions | — |
 | A chart view's layout drifts from the other five | the `LAYOUT PARITY` block at the foot of `app.css`; `npm test` names the offender | that view's section |
 | A mark on a chart is unexplained | that view's legend in `index.html` — `.rul__lg` `.atl__lg` `.tml__lg` `.moat__lg`, `#fltLegend`. **Not** the footer | the JS |
@@ -114,7 +116,7 @@ These are done. They are listed so you can skip them, not so you can read them. 
 
 ### Finding things inside the big files
 
-`src/styles/app.css` (1,123 lines). Grep the banner, read ±40 lines:
+`src/styles/app.css` (1,126 lines). Grep the banner, read ±40 lines:
 
 | Section | Grep | ~line | Prefix |
 |---|---|---|---|
@@ -176,6 +178,9 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
   - **One bar, one variable.** If a bar encodes a value by length, its shade must track the same value, not a second one.
   - **A position that means nothing must say so.** The Ruler stacks its objects across five tracks purely so neighbours stop covering each other — three times the size of the one before it, every object would otherwise sit on top of the last. Height there carries no data, and the legend says that in as many words rather than leaving a reader to infer an encoding that is not there.
 - **Pointer events on a chart belong to the stage, not to the SVG.** An SVG only hit-tests where it has painted something, so a wheel listener on `#rulSvg` fires over a glyph and nowhere else — and since zooming moves the glyph out from under the cursor, the next notch falls through to the page and scrolls it. Bind to the containing block, which hit-tests across its whole area, and give it `touch-action:none`.
+- **A pannable chart cannot select with a click listener.** Panning wants `setPointerCapture` on `pointerdown` so the drag survives leaving the stage, and capture retargets every later pointer event *and the click synthesised from them* to the capturing element. A listener on the mark under the cursor therefore never fires — which is how every one of the Atlas's 56 sites came to be unopenable while its seven preset buttons worked. Resolve the tap in `pointerup` by hit-testing the release point with `elementFromPoint`, which is geometry and does not care who holds the pointer, and guard it with a small drag threshold so a pan that ends on a mark stays a pan. **Give the mark a transparent hit disc** while you are there: `fill:none` does not hit-test, so a halo drawn that way contributes nothing and the real target is the dot inside it.
+- **Selecting on a chart and travelling to it are different verbs.** A jump-to control names something you cannot see and has to move the camera; a mark is something you are already looking at, and flying in on it throws away the context that made it worth clicking. `goTo` flies, `tap` does not.
+- **The rail is a promise on every page.** It is the site's one persistent sense of depth, and a page that shows a selection without reporting it leaves the rail answering for a different page. Any view whose selection resolves to a stratum calls `app.depth("<view>", n)`; one that cannot — the Ruler, whose panel follows the camera rather than a click — reports nothing rather than guessing, because a rail strobing through 27 strata during a sweep is worse than a rail that has not moved.
 - **Numbers** use `font-variant-numeric: tabular-nums` and the mono face.
 - **Charts** are hand-drawn SVG. No chart library — the house style is a lab notebook, not a dashboard.
 - **Prose** is British spelling, en-dashes, no exclamation marks.
@@ -204,6 +209,8 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 | Ruler objects pile vertically | `LANES` / `SPREAD` / `SETTLE` — five tracks, tapering to centre as a shape fills the stage. These carry clusters closer than ~0.25 decades, which spacing cannot | the CSS |
 | A Ruler label is missing or written over another | the rung ladder in `paint()` — labels are placed against each other, then clamped inside the stage | `ruler.json` |
 | Zoom only works over a shape, or the page scrolls instead | the wheel is bound to `.rul__stage`, not `#rulSvg`. **An SVG only hit-tests where it has painted** | the CSS |
+| **Clicking a mark on a pannable chart does nothing** | the stage holds pointer capture, which retargets the synthesised click to the capturing element — a listener on the mark can never fire. Resolve the tap in `pointerup` with `elementFromPoint`, guarded by a drag threshold. `atlas.js`, `pointerup` | the marker markup |
+| **…and check the target is bigger than the paint** | `.atl__hit` — a transparent disc, painted for hit-testing and showing nothing. A 3 px dot with a `fill:none` halo is a 3 px target | — |
 | Atlas circles invisible or absurdly fat | strokes are counter-scaled in `paint()`, not by `vector-effect` | `atlas.js` `paint()` |
 | An Atlas circle vanishes after flying somewhere | camera left [-180,180); rings are drawn once, coastline three times | `clampCam()` |
 | A country is missing from the map | small islands below the area floor are dropped by design | `world.mjs` `MIN_AREA` |
@@ -219,7 +226,7 @@ Station record: `i` id · `L` stratum · `n` name · `s` tagline · `w` what it 
 | Style leaks between views | a prefix collision | `src/styles/app.css` |
 | CI red, local green | `npm ci` vs `npm install`, or a file not committed | `.github/workflows/deploy.yml` |
 
-**First move for any bug: `npm test`.** 264 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
+**First move for any bug: `npm test`.** 283 assertions cover every view's structure and behaviour; a failure usually names the broken thing directly.
 
 ---
 

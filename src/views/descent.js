@@ -28,11 +28,14 @@ function litRail(n) {
   document.querySelectorAll(".stratum").forEach(e => e.classList.toggle("on", +e.dataset.s === n));
 }
 
+/* The Descent reports its depth the same way every other view does, so
+   that coming back to this tab restores where you had scrolled to
+   rather than leaving the rail on the last chart you looked at. */
 function go(n) {
   app.show("strata");
   const el = document.getElementById("s" + n);
   if (el) el.scrollIntoView({ behavior: app.RM ? "auto" : "smooth", block: "start" });
-  litRail(n);
+  app.depth("strata", n);
 }
 
 /* ---------- init ---------- */
@@ -105,7 +108,7 @@ export function initDescent() {
   });
 
   const io = new IntersectionObserver(es => {
-    es.forEach(e => { if (e.isIntersecting) litRail(+e.target.id.slice(1)); });
+    es.forEach(e => { if (e.isIntersecting) app.depth("strata", +e.target.id.slice(1)); });
   }, { rootMargin: "-15% 0px -70% 0px" });
   document.querySelectorAll(".sec").forEach(e => io.observe(e));
 

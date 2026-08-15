@@ -149,6 +149,9 @@ function paint() {
     m.g.setAttribute("display", m.on ? "inline" : "none");
     m.g.setAttribute("opacity", layers.risk && !m.s.risk ? "0.28" : "1");
     m.t.setAttribute("display", m.label ? "inline" : "none");
+    /* the open site is marked on the map as well as in the panel, so the
+       description below has something visible to belong to */
+    m.g.classList.toggle("on", m.s.id === focused);
   }
 
   /* the rings sit inside the template the three wrapped copies reference,
@@ -182,6 +185,13 @@ const PRECISION = {
 
 function detail(s) {
   focused = s.id;
+  /* A site is a place, and the rail reads depth — so it takes the
+     stratum of the site's first station, which is the same rule this
+     view already colours its markers by. Sites that reach across the
+     stack are the reason it is the first and not a summary: one bar
+     saying "this is where it starts" beats a guess at the middle. */
+  const first = app.byId[s.stations[0]];
+  if (first) app.depth("atl", first.L);
   const reg = (D.meta.regimes || []).find(r => r.id === s.regime);
   const risk = s.risk ? (D.meta.risks || []).find(r => r.id === s.risk.k) : null;
   const chips = s.stations.filter(id => app.byId[id]).map(id => {
@@ -220,6 +230,24 @@ function goTo(id) {
   const f = frame(s);
   glide({ lon: s.lon, lat: f.lat, k: f.k });
   detail(s);
+}
+
+/** Open a site the reader has just tapped on the map.
+ *
+ *  Deliberately not goTo. A stop button names a place you cannot see and
+ *  has to fly you there; a marker is one you are already looking at, and
+ *  flying in on it throws away the context that made it worth clicking.
+ *  So the camera stays put and only the description changes — and the
+ *  description is brought into view, because the stage is 620 px tall
+ *  and the panel below it opens off the bottom of most screens, which is
+ *  most of why clicking the map looked like it did nothing even when it
+ *  worked. */
+function tap(id) {
+  const s = sites.find(x => x.id === id);
+  if (!s) return;
+  detail(s);
+  document.getElementById("atlPanel")
+    .scrollIntoView({ behavior: app.RM ? "auto" : "smooth", block: "nearest" });
 }
 
 /* ---------- the concentration claim ---------- */
@@ -366,9 +394,16 @@ export async function initAtlas() {
     [gRings, 1.4]
   ];
 
-  /* --- markers, built once and moved thereafter --- */
+  /* --- markers, built once and moved thereafter ---
+     The first circle is the hit target and nothing else. An SVG only
+     hit-tests where it has painted, and the halo is fill:none while the
+     dot is three pixels across — so before this the clickable part of a
+     site was a three-pixel disc, on a map you are also dragging. A
+     transparent disc is painted for hit-testing purposes even though it
+     shows nothing, which is exactly what is wanted here. */
   gMarks.innerHTML = sites.map(s => `
     <g class="atl__m atl__m--${s.kind}" data-site="${s.id}">
+      <circle class="atl__hit" r="${s.kind === "chokepoint" ? 16 : 13}" fill="transparent"/>
       <circle class="atl__halo" r="${s.kind === "chokepoint" ? 11 : 8}" fill="none" stroke-opacity=".35" stroke-width="1"/>
       <circle class="atl__dot" r="${s.leading || s.kind === "chokepoint" ? 4 : 3}"/>
       <text class="atl__t" x="0" y="-13" text-anchor="middle">${esc(s.label)}</text>
@@ -377,7 +412,6 @@ export async function initAtlas() {
     g, s: sites.find(x => x.id === g.dataset.site),
     dot: g.querySelector(".atl__dot"), halo: g.querySelector(".atl__halo"), t: g.querySelector(".atl__t")
   }));
-  marks.forEach(m => m.g.addEventListener("click", e => { e.stopPropagation(); goTo(m.s.id); }));
 
   /* --- controls --- */
   document.getElementById("atlLayers").innerHTML = LAYERS
@@ -413,8 +447,31 @@ export async function initAtlas() {
     set({ k: dragging.cam.k, lon: dragging.cam.lon - dx / dragging.cam.k, lat: dragging.cam.lat + dy / dragging.cam.k });
   });
   const stop = () => { dragging = null; svg.classList.remove("drag"); };
-  svg.addEventListener("pointerup", stop);
   svg.addEventListener("pointercancel", stop);
+
+  /* Taps are resolved here rather than by a click listener on each
+     marker, and this is the whole reason clicking a site on this map did
+     nothing at all.
+
+     Pointer capture is set on pointerdown so a drag keeps panning after
+     the cursor leaves the stage — and capture retargets every later
+     pointer event, and the click synthesised from them, to the element
+     holding it. The click therefore always arrived at the <svg>, never
+     at the marker under the cursor, so the marker's own handler could
+     not fire however precisely you hit it. The stops worked because they
+     are ordinary buttons outside the map, which is why the panel only
+     ever described one of those seven places.
+
+     Capture is worth keeping, so the tap is resolved by hit-testing the
+     release point instead. elementFromPoint is plain geometry and does
+     not care who holds the pointer. */
+  svg.addEventListener("pointerup", e => {
+    const tapped = dragging && moved < 5;
+    stop();
+    if (!tapped) return;
+    const g = document.elementFromPoint(e.clientX, e.clientY)?.closest?.(".atl__m");
+    if (g) tap(g.dataset.site);
+  });
 
   addEventListener("keydown", e => {
     if (!document.getElementById("v-atl").classList.contains("on")) return;

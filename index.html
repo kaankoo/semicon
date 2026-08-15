@@ -28,10 +28,11 @@
     <button role="tab" aria-selected="false" data-view="cas">Cascade</button>
     <button role="tab" aria-selected="false" data-view="idx">Index</button>
   </div>
+  <!-- the guided descent is started from the hero and nowhere else. An
+       unlabelled arrow past the Method link read as "next page" rather
+       than as a tour, and the one thing it must not be mistaken for is
+       navigation -->
   <button class="mthlink" data-view="mth" title="Sources, assumptions and limits">Method</button>
-  <button class="iconb" id="btnTour" title="Guided descent">
-    <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-  </button>
 </header>
 
 <nav class="rail" id="rail" aria-label="Stack cross-section">
@@ -54,10 +55,11 @@
           <button class="btn" data-view="web">See it as a web</button>
         </div>
       </div>
-      <div class="core" id="core">
-        <span class="core__cap core__cap--b">01 · lithosphere</span>
-        <span class="core__cap core__cap--t">27 · return &amp; residue</span>
-      </div>
+      <!-- no end caps. Every bar in the core sample already carries its
+           own label, so a "01 · lithosphere" under the stack and a
+           "27 · return & residue" over it just repeated the first and
+           last of the twenty-seven in a second, louder voice -->
+      <div class="core" id="core"></div>
     </div>
     <div class="strata" id="strata"></div>
     <footer class="foot">

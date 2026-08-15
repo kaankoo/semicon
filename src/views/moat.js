@@ -130,6 +130,9 @@ function paint() {
 
 function detail(n) {
   const l = app.L[n - 1];
+  /* the rail is the site's depth gauge; a row here is a whole stratum,
+     so it says exactly where in the column this page is standing */
+  app.depth("moat", n);
   const c = cov[n] || { curated: 0, corpus: 0, share: 0 };
   const j = J[n];
   const chk = chokepointsAt(app.S, n);

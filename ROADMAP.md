@@ -373,6 +373,71 @@ Reading the finished page turned up a bug older than any of this work, and two p
 
 ---
 
+---
+
+## Phase 11 — Reading the chrome *(shipped, 15 Aug 2026)*
+
+Four faults, all reported by looking at the finished site rather than at the code, and three of them are the same fault: a piece of chrome that is on every page but only ever tells the truth about one of them.
+
+### The core sample was captioned twice
+
+Every bar in the hero's core sample already writes its own stratum beside it. Over the stack sat "27 · return & residue" and under it "01 · lithosphere" — the first and last of the twenty-seven repeated in a second, larger, differently-coloured voice, at the two positions on the drawing where a reader is most likely to take a label as a *heading* rather than as a repetition. They are gone, along with their CSS. The bars are unchanged.
+
+### The header's tour arrow read as navigation
+
+An unlabelled `→` sat past the Method link and started the guided descent. Next to nine tabs and a Method link, an arrow in the top-right corner reads as *next page*. The hero's "Begin the descent" is the button that says what it does, and it is now the only way in. `initTour` lost the listener; `.iconb` stays, because the sheet's close button uses it.
+
+### The rail was reporting a different page's answer
+
+The coloured stack down the left is the site's one persistent sense of depth, and it moved **only on the Descent**. Open Model on the Moat, or high-bandwidth memory on the Lag, or a scenario on Faults, and the rail carried on showing wherever the homepage had last been scrolled — the single piece of chrome present on every page, quietly answering a question about a page you were not looking at.
+
+Views now report the stratum their selection sits in, through one new action:
+
+```js
+app.depth(view, n)      // "my current selection sits at stratum n"
+```
+
+registered by `core/router.js`, which already owns which view is on. It keeps **a depth per view**, so switching tabs restores that tab's answer instead of inheriting the last one, and a view with nothing to report leaves the rail alone rather than blanking it. The Descent reports through the same call, so coming back to it restores where you had scrolled rather than the last chart you looked at.
+
+Registered at module scope rather than inside `initRouter`, because every chart view opens with something already selected and reports it *while it initialises* — which happens before `initRouter` runs.
+
+Who reports what, and why:
+
+| View | Reports | Reasoning |
+|---|---|---|
+| Descent | the stratum in view | as before, now through the same call |
+| Moat | the selected row | a row *is* a stratum |
+| Lag | the bar's `stratum` | every capability belongs to exactly one |
+| Faults | the stratum of `removes[0]` | **where the cut is, not how far it travels.** A blast radius spans most of the stack by construction, so lighting all of it would say nothing. `removes[0]` is the corpus's own ordering — the headline station of the scenario — not an arithmetic choice between several |
+| Atlas | the first station's stratum | the rule this view already colours its markers by |
+| **Ruler** | **nothing, deliberately** | its panel follows whichever object is nearest the centre line rather than a click, so `Sweep lattice → Earth` would strobe the rail through all twenty-seven strata in half a minute. Asserted against the source, because the property is that it never asks |
+
+### Every site on the Atlas was unopenable
+
+Reported as "the map has a lot of points but no description — the description is only of the option buttons." That reading was exactly right, and the cause was two faults stacked.
+
+**Pointer capture ate the click.** The stage takes `setPointerCapture` on `pointerdown` so a drag keeps panning once the cursor leaves it. Capture retargets every later pointer event, *and the click synthesised from them*, to the element holding it — so the click always arrived at the `<svg>` and never at the marker under the cursor. A marker's own click listener could not fire however precisely you hit it. The seven stop buttons worked because they are ordinary buttons outside the map, which is precisely why the page appeared to have a description for its buttons and none for its points.
+
+**And the target was three pixels wide.** The halo is `fill:none` and an SVG only hit-tests where it has painted, so even with the click routed correctly the clickable part of a site was its dot — 3 px, on a map you are also dragging.
+
+Both fixed. A transparent hit disc (13 px, 16 px on chokepoints) is painted for hit-testing and shows nothing; taps are resolved in `pointerup` by hit-testing the release point with `elementFromPoint`, which is plain geometry and does not care who holds the pointer, guarded by a 5 px drag threshold so a pan that ends on a marker stays a pan.
+
+Two things came with it. **A tapped marker does not fly the camera** — a stop button names a place you cannot see and has to travel there; a marker is one you are already looking at, and flying in throws away the context that made it worth clicking. And **the panel is scrolled into view**, because the stage is 620 px tall and the description opened below the fold on most screens — which is most of why clicking the map looked like it did nothing even in the cases where it had worked. The open site is now marked on the map too, so the description below has something visible to belong to.
+
+### Tests
+
+283 assertions, up from 264. The new ones are worth naming because two of them cover things the suite had no way of reaching before:
+
+- `setPointerCapture` and `elementFromPoint` are now shimmed in `smoke.mjs`. jsdom has neither, and the absence of the first is the whole reason the atlas bug survived a suite this size — nothing in the harness could set capture, so nothing could observe it eating the click. The shim stands for the browser behaviour, and the tap routing is under test either side of it.
+- The hit disc is asserted to exist on all 56 sites and to be at least three times the dot it wraps.
+- The rail is asserted to light exactly one stratum, to follow each view's selection, and to restore the previous depth when you switch back.
+
+### Standing gaps
+
+- The rail lights one stratum. A Faults scenario removing four stations across two strata says only where it starts.
+- Markers in western Taiwan overlap at world zoom, so a tap there resolves to whichever is topmost in document order rather than nearest the cursor.
+- The Atlas still has no keyboard route to an individual site, only the preset stops — unchanged, and still on the standing-debt list.
+
 ## Standing debt
 
 | Item | Where | Note |

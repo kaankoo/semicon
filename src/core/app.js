@@ -35,6 +35,7 @@ export const app = {
   openStation: () => {},   // views/sheet
   closeSheet: () => {},    // views/sheet
   show: () => {},          // core/router
+  depth: () => {},         // core/router — "my selection sits at stratum n"
   go: () => {},            // views/descent
   litRail: () => {},       // views/descent
   trace: () => {},         // views/web

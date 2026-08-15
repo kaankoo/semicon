@@ -197,6 +197,9 @@ function detail(id) {
   const e = events.find(v => v.id === id);
   if (!e) return;
   focused = id;
+  /* every capability belongs to exactly one stratum, so the rail can
+     say how deep the bar you are reading sits */
+  app.depth("tml", e.stratum);
   const st = app.byId[e.station];
   const conf = (D.meta.confidence || []).find(c => c.id === e.confidence);
   const why = (D.meta.waitedFor || []).find(c => c.id === e.waitedFor);
