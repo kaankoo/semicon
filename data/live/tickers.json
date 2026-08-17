@@ -1,8 +1,24 @@
 {
-  "checked": "2026-08-13",
-  "dry": true,
+  "checked": "2026-08-17",
+  "dry": false,
   "tickers": 179,
-  "dead": [],
+  "dead": [
+    {
+      "ticker": "6967.T",
+      "name": "Shinko Electric",
+      "why": "unknown symbol"
+    },
+    {
+      "ticker": "AWE.L",
+      "name": "Alphawave Semi",
+      "why": "unknown symbol"
+    },
+    {
+      "ticker": "PSTG",
+      "name": "Pure Storage",
+      "why": "unknown symbol"
+    }
+  ],
   "inconclusive": [],
   "note": "Link health only. This project commits no prices; the Index links out to Yahoo."
 }
