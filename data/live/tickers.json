@@ -1,5 +1,5 @@
 {
-  "checked": "2026-11-02",
+  "checked": "2026-11-09",
   "dry": false,
   "tickers": 179,
   "dead": [
@@ -11,11 +11,6 @@
     {
       "ticker": "AWE.L",
       "name": "Alphawave Semi",
-      "why": "unknown symbol"
-    },
-    {
-      "ticker": "PSTG",
-      "name": "Pure Storage",
       "why": "unknown symbol"
     }
   ],
